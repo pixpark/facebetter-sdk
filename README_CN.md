@@ -1,5 +1,5 @@
 <h1 align="center">
-  <a href="https://github.com/pixpark/facebetter"><img src="https://img.pixpark.net/logo-light.svg" alt="Facebetter Logo" width="200"></a>
+  <a href="https://github.com/pixpark/facebetter"><img src="./assets/logo-light.svg" alt="Facebetter Logo" width="200"></a>
 </h1>
 
 <p align="center">
