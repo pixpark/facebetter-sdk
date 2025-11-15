@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 外层白色圆环 -->
+    <item>
+        <shape android:shape="oval">
+            <solid android:color="@android:color/white" />
+            <size
+                android:width="72dp"
+                android:height="72dp" />
+        </shape>
+    </item>
+    
+    <!-- 内层绿色圆 -->
+    <item
+        android:top="6dp"
+        android:bottom="6dp"
+        android:left="6dp"
+        android:right="6dp">
+        <shape android:shape="oval">
+            <solid android:color="#00FF00" />
+        </shape>
+    </item>
+</layer-list>
+

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    
+    <!-- 美颜面板颜色 -->
+    <color name="beauty_slider_color">#007AFF</color>
+    <color name="beauty_slider_thumb">#FFFFFF</color>
+    <color name="beauty_text_normal">#B3B3B3</color>
+    <color name="beauty_text_selected">#333333</color>
+</resources>

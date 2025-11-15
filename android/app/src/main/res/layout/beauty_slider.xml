@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/beauty_slider_container"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:minHeight="60dp"
+    android:background="@android:color/transparent"
+    android:paddingStart="16dp"
+    android:paddingEnd="80dp"
+    android:paddingTop="0dp"
+    android:paddingBottom="10dp"
+    android:visibility="gone">
+
+    <!-- 数值显示（在滑块上方，默认隐藏） -->
+    <TextView
+        android:id="@+id/beauty_value_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start|top"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="-5dp"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:paddingTop="2dp"
+        android:paddingBottom="2dp"
+        android:text="50"
+        android:textColor="@android:color/white"
+        android:textSize="13sp"
+        android:visibility="gone"
+        android:elevation="6dp" />
+
+    <!-- 滑块 -->
+    <SeekBar
+        android:id="@+id/beauty_seekbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="2dp"
+        android:max="100"
+        android:progress="50"
+        android:progressTint="@android:color/white"
+        android:thumbTint="@android:color/white" />
+
+</FrameLayout>
+

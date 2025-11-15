@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 顶部头部图片占位符，用户可替换此drawable或直接替换为图片 -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <gradient
+        android:startColor="#00897B"
+        android:endColor="#4DD0E1"
+        android:angle="270" />
+</shape>
+
