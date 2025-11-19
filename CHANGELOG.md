@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.3](https://github.com/pixpark/facebetter-src/compare/sdk/v1.0.2...sdk/v1.0.3) (2025-11-19)
+
+
+### 🐛 Bug Fixes
+
+* **facedetect:** 优化人脸检测准确度，资源文件缩小2.3M ([f4809eb](https://github.com/pixpark/facebetter-src/commit/f4809eb5be208fdc9bdf06005bb1967c19c0b2bb))
+
 ### [1.0.2](https://github.com/pixpark/facebetter-src/compare/sdk/v1.0.1...sdk/v1.0.2) (2025-11-16)
 
 
