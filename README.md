@@ -25,7 +25,7 @@ Before building the demo projects, you need to download the SDK libraries for th
 
 # Download SDK for specific platform(s)
 ./scripts/download_sdk.sh -p android
-./scripts/download_sdk.sh -p android,ios-arm64
+./scripts/download_sdk.sh -p android,ios
 
 # Show help
 ./scripts/download_sdk.sh --help

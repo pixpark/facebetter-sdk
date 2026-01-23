@@ -5,16 +5,16 @@
 #   ./download_sdk.sh                    # Download all platform SDKs with default version
 #   ./download_sdk.sh -v 1.1.3           # Download all platform SDKs with specified version
 #   ./download_sdk.sh -p android         # Download Android SDK with default version
-#   ./download_sdk.sh -v 1.1.3 -p android,ios-arm64  # Download multiple platform SDKs with specified version
+#   ./download_sdk.sh -v 1.1.3 -p android,ios  # Download multiple platform SDKs with specified version
 
 # Default SDK version (can be modified in the script)
-DEFAULT_VERSION="1.1.3"
+DEFAULT_VERSION="1.2.0"
 
 # SDK download base URL
 BASE_URL="https://github.com/pixpark/facebetter-sdk/releases/download"
 
 # Supported platform list
-PLATFORMS=("android" "ios-arm64" "macos-universal")
+PLATFORMS=("android" "ios" "macos")
 
 # Get the extraction directory for the platform
 get_platform_dir() {
@@ -22,10 +22,10 @@ get_platform_dir() {
         android)
             echo "demo/android/app/src/main/libs"
             ;;
-        ios-arm64)
+        ios)
             echo "demo/ios/FBExampleObjc/libs"
             ;;
-        macos-universal)
+        macos)
             echo "demo/macos/FBExampleObjc/libs"
             ;;
         *)
@@ -62,14 +62,14 @@ usage() {
     echo "Options:"
     echo "  -v, --version VERSION    Specify SDK version (default: $DEFAULT_VERSION)"
     echo "  -p, --platform PLATFORM  Specify platform(s), multiple platforms separated by comma"
-    echo "                           Supported platforms: android, ios-arm64, macos-universal"
+    echo "                           Supported platforms: android, ios, macos"
     echo "  -h, --help               Show this help message"
     echo ""
     echo "Examples:"
     echo "  $0                                    # Download all platform SDKs with default version"
     echo "  $0 -v 1.1.3                          # Download all platform SDKs with version 1.1.3"
     echo "  $0 -p android                        # Download Android SDK with default version"
-    echo "  $0 -v 1.1.3 -p android,ios-arm64    # Download multiple platform SDKs with version 1.1.3"
+    echo "  $0 -v 1.1.3 -p android,ios    # Download multiple platform SDKs with version 1.1.3"
 }
 
 # Parse command line arguments
