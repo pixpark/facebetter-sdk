@@ -1,0 +1,274 @@
+.beauty-panel-wrapper {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+}
+
+.beauty-panel {
+  position: relative;
+  width: 100%;
+  background: rgba(0, 0, 0, 0.8);
+}
+
+.tab-scroll-view {
+  width: 100%;
+  height: 50px;
+  padding-top: 8px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.tab-scroll-view::-webkit-scrollbar {
+  display: none;
+}
+
+.tab-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 0 8px;
+  height: 100%;
+}
+
+.tab-btn {
+  min-width: 80px;
+  height: 100%;
+  padding: 0 12px;
+  background: transparent;
+  border: none;
+  color: #AAAAAA;
+  font-size: 16px;
+  cursor: pointer;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+}
+
+.tab-btn.active {
+  color: white;
+  font-weight: bold;
+}
+
+.function-scroll-view {
+  width: 100%;
+  height: 120px;
+  padding: 0 16px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  position: relative;
+}
+
+.function-scroll-view::-webkit-scrollbar {
+  display: none;
+}
+
+.function-button-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  height: 100%;
+}
+
+.function-button {
+  width: 70px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  margin-right: 8px;
+  cursor: pointer;
+  position: relative;
+}
+
+.function-button.disabled {
+  opacity: 0.5;
+}
+
+.function-icon-wrap {
+  width: 50px;
+  height: 50px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.function-icon {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+}
+
+.soon-badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  padding: 1px 3px;
+  background: rgba(255, 0, 0, 0.8);
+  color: white;
+  font-size: 8px;
+  border-radius: 2px;
+}
+
+.function-label {
+  margin-top: 4px;
+  color: white;
+  font-size: 12px;
+  text-align: center;
+}
+
+.function-indicator {
+  width: 14px;
+  height: 3px;
+  margin-top: 3px;
+  background: #00FF00;
+  border-radius: 2px;
+}
+
+.sub-option-scroll-view {
+  position: absolute;
+  top: 50px;
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: 120px;
+  padding: 0 16px;
+  background: rgba(0, 0, 0, 0.8);
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  z-index: 2;
+}
+
+.sub-option-scroll-view::-webkit-scrollbar {
+  display: none;
+}
+
+.sub-option-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  height: 100%;
+}
+
+.sub-option-button {
+  width: 70px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  margin-right: 8px;
+  cursor: pointer;
+}
+
+.sub-option-icon-wrap {
+  width: 50px;
+  height: 50px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.sub-option-icon {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+}
+
+.sub-option-label {
+  margin-top: 4px;
+  color: white;
+  font-size: 12px;
+  text-align: center;
+}
+
+.bottom-button-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 80px;
+  padding: 10px 16px;
+}
+
+.bottom-button {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  cursor: pointer;
+}
+
+.bottom-button-icon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+  margin-right: 8px;
+}
+
+.bottom-button-text {
+  color: white;
+  font-size: 14px;
+}
+
+.bottom-button-center {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.capture-btn-panel {
+  width: 60px;
+  height: 60px;
+  background: white;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+  position: relative;
+  padding: 5px;
+  box-sizing: border-box;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.capture-btn-panel:active {
+  transform: scale(0.85);
+  opacity: 0.8;
+}
+
+.capture-btn-panel:hover {
+  transform: scale(1.05);
+}
+
+.capture-inner-panel {
+  width: 50px;
+  height: 50px;
+  background: #00FF00;
+  border-radius: 50%;
+  flex-shrink: 0;
+}

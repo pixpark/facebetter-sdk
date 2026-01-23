@@ -1,6 +1,6 @@
-# Facebetter Vue Demo
+# Facebetter React Demo
 
-基于 Vue 3 的美颜相机应用，集成了 Facebetter Web SDK。
+基于 React 18 的美颜相机应用，集成了 Facebetter Web SDK。
 
 ## 功能特性
 
@@ -12,18 +12,17 @@
 ## 项目结构
 
 ```
-demo/web/vue/
+demo/web/react/
 ├── public/                  # 静态资源文件
 ├── src/
 │   ├── views/
-│   │   ├── Home.vue         # 主页组件
-│   │   └── BeautyPreview.vue  # 美颜预览页组件（支持相机和图片）
+│   │   ├── Home.jsx         # 主页组件
+│   │   └── BeautyPreview.jsx  # 美颜预览页组件（支持相机和图片）
 │   ├── components/
-│   │   └── BeautyPanel.vue  # 美颜面板组件
-│   ├── router/
-│   │   └── index.js        # 路由配置
-│   ├── App.vue
-│   └── main.js
+│   │   └── BeautyPanel.jsx  # 美颜面板组件
+│   ├── App.jsx              # 主应用组件
+│   ├── main.jsx             # 入口文件
+│   └── index.css            # 全局样式
 ├── package.json
 └── vite.config.js
 ```
@@ -78,9 +77,9 @@ npm run build
 
 ## 技术栈
 
-- Vue 3 (Composition API)
-- Vue Router 4
-- Facebetter Web SDK v1.0.10 (通过 npm 安装，自动包含 facebetter-core)
+- React 18 (Hooks API)
+- React Router 6
+- Facebetter Web SDK v1.1.0 (通过 npm 安装，自动包含 facebetter-core)
 - Vite
 
 ## 注意事项
