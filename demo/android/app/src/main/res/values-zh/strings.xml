@@ -1,0 +1,153 @@
+<resources>
+    <string name="app_name">Facebetter</string>
+    <string name="logo">Logo</string>
+    <string name="settings">设置</string>
+    <string name="slogan">百变特效 一键焕颜</string>
+    <string name="header_title">Facebetter</string>
+    <string name="header_subtitle">更好的美颜特效引擎</string>
+    <string name="beauty_effect">美颜特效</string>
+    <string name="beauty_template">风格整装</string>
+    <string name="beauty">美颜</string>
+    <string name="filter">滤镜</string>
+    <string name="sticker">贴纸</string>
+    <string name="reshape">美型</string>
+    <string name="makeup">美妆</string>
+    <string name="virtual_background">虚拟背景</string>
+    <string name="quality_adjustment">画质调整</string>
+    <string name="body_beautification">美体</string>
+    <string name="style_makeover">风格整装</string>
+    <string name="hair_color">换发色</string>
+    <string name="all_functions">全部功能</string>
+    <string name="atomic_capabilities">更多特效</string>
+    <string name="face_detection">人脸检测</string>
+    <string name="green_screen_keying">绿幕抠图</string>
+    <string name="gesture_detection">手势检测</string>
+    <string name="external_texture">外部纹理</string>
+    <string name="feature_icon">功能图标</string>
+    <string name="header_image">顶部头部图片</string>
+    
+    <!-- Beauty Panel -->
+    <string name="beauty_tab">美颜</string>
+    <string name="reshape_tab">美型</string>
+    <string name="makeup_tab">美妆</string>
+    <string name="filter_tab">滤镜</string>
+    <string name="sticker_tab">贴纸</string>
+    <string name="body_tab">美体</string>
+    <string name="virtual_bg_tab">虚拟背景</string>
+    <string name="quality_tab">画质调整</string>
+    
+    <!-- Beauty Functions -->
+    <string name="beauty_off">关闭</string>
+    <string name="beauty_whitening">美白</string>
+    <string name="beauty_dark">美黑</string>
+    <string name="beauty_smoothing">磨皮</string>
+    <string name="beauty_rosiness">红润</string>
+    <string name="beauty_bright_white">亮白</string>
+    <string name="beauty_natural">自然</string>
+    <string name="beauty_pink_white">粉白</string>
+    <string name="beauty_cool_white">冷白</string>
+    
+    <!-- Reshape Functions -->
+    <string name="reshape_thin_face">瘦脸</string>
+    <string name="reshape_v_face">V脸</string>
+    <string name="reshape_narrow_face">窄脸</string>
+    <string name="reshape_short_face">短脸</string>
+    <string name="reshape_cheekbone">颧骨</string>
+    <string name="reshape_jawbone">下颌</string>
+    <string name="reshape_chin">下巴</string>
+    <string name="reshape_nose_slim">瘦鼻</string>
+    <string name="reshape_big_eye">大眼</string>
+    <string name="reshape_eye_distance">眼距</string>
+    
+    <!-- Makeup Functions -->
+    <string name="makeup_lipstick">口红</string>
+    <string name="makeup_blush">腮红</string>
+    <string name="makeup_eyebrow">眉毛</string>
+    <string name="makeup_eyeshadow">眼影</string>
+    <string name="makeup_style_1">样式1</string>
+    <string name="makeup_style_2">样式2</string>
+    <string name="makeup_style_3">样式3</string>
+    
+    <!-- Filter Functions -->
+    <string name="filter_natural">自然</string>
+    <string name="filter_fresh">清新</string>
+    <string name="filter_retro">复古</string>
+    <string name="filter_bw">黑白</string>
+    <string name="filter_initial_heart">初见</string>
+    <string name="filter_first_love">悸动</string>
+    <string name="filter_vivid">灵动</string>
+    <string name="filter_confession">告白</string>
+    <string name="filter_milk_tea">温婉</string>
+    <string name="filter_mousse">柔光</string>
+    <string name="filter_japanese">晨间</string>
+    <string name="filter_dawn">曦光</string>
+    <string name="filter_cookie">甜糯</string>
+    <string name="filter_lively">元气</string>
+    <string name="filter_pure">纯真</string>
+    <string name="filter_fair">瓷肌</string>
+    <string name="filter_snow">皑皑</string>
+    <string name="filter_plain">素雅</string>
+    <string name="filter_natural_portrait">裸感</string>
+    <string name="filter_rose">绛唇</string>
+    <string name="filter_extraordinary">高冷</string>
+    <string name="filter_tender">柔嫩</string>
+    <string name="filter_tender_2">水嫩</string>
+    
+    <!-- Sticker Functions -->
+    <string name="sticker_cute">可爱</string>
+    <string name="sticker_funny">搞笑</string>
+    <string name="sticker_rabbit">兔子</string>
+    
+    <!-- Body Functions -->
+    <string name="body_slim">瘦身</string>
+    
+    <!-- Virtual Background Functions -->
+    <string name="virtual_bg_blur">模糊</string>
+    <string name="virtual_bg_preset">预置</string>
+    <string name="virtual_bg_image">图像</string>
+    
+    <!-- Quality Functions -->
+    <string name="quality_sharpen">锐化</string>
+    
+    <!-- Buttons -->
+    <string name="reset_beauty">重置美颜</string>
+    <string name="hide_panel">隐藏面板</string>
+    <string name="capture">拍照</string>
+    <string name="close">关闭</string>
+    <string name="gallery">相册</string>
+    <string name="flip_camera">翻转相机</string>
+    <string name="more">更多</string>
+    <string name="compare_effect">对比效果</string>
+    <string name="beauty_shape">美颜美型</string>
+    <string name="sticker_effect">贴纸特效</string>
+    <string name="filter_adjustment">滤镜调色</string>
+    
+    <!-- External Texture -->
+    <string name="smoothing">磨皮</string>
+    <string name="whitening">美白</string>
+    
+    <!-- Toast Messages -->
+    <string name="filter_under_development">滤镜功能开发中，敬请期待 🎨</string>
+    <string name="sticker_under_development">贴纸功能开发中，敬请期待 😊</string>
+    <string name="body_under_development">美体功能开发中，敬请期待 🏃</string>
+    <string name="quality_under_development">画质调整功能开发中，敬请期待 📸</string>
+    <string name="beauty_template_under_development">美颜模板功能开发中，敬请期待 ✨</string>
+    <string name="green_screen_under_development">绿幕抠图功能开发中，敬请期待 🎬</string>
+    <string name="gesture_under_development">手势识别功能开发中，敬请期待 👋</string>
+    <string name="style_under_development">风格化功能开发中，敬请期待 🎭</string>
+    <string name="hair_color_under_development">染发功能开发中，敬请期待 💇</string>
+    <string name="settings_under_development">设置功能开发中，敬请期待 ⚙️</string>
+    <string name="open_gallery">打开相册</string>
+    <string name="camera_switched">已切换摄像头</string>
+    <string name="more_options">更多选项</string>
+    <string name="image_selected">图片已选择: %1$dx%2$d</string>
+    <string name="failed_to_load_image">无法加载图片</string>
+    <string name="failed_to_load_preset_background">预置背景加载失败</string>
+    <string name="failed_to_load_preset_background_image">预置背景图片加载失败</string>
+    
+    <!-- Language Settings -->
+    <string name="language_settings">语言设置</string>
+    <string name="language_auto">自动（跟随系统）</string>
+    <string name="language_english">English</string>
+    <string name="language_chinese">中文</string>
+</resources>

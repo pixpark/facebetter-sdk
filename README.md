@@ -1,51 +1,46 @@
 <h1 align="center">
-  <a href="https://github.com/pixpark/facebetter-demo"><img src="./assets/logo-light.svg" alt="Facebetter Logo" width="200"></a>
+  <a href="https://www.facebetter.net"><img src="./assets/logo-light.svg" alt="Facebetter Logo" width="200"></a>
 </h1>
-
+ 
 <p align="center">
-  <a href="./README.md">English</a> |
-  <a href="./README_CN.md">简体中文</a>
-</p>
-
-<p align="center">
-  <a href="https://facebetter.net/" target="_blank">Doc</a>
+  <a href="https://www.facebetter.net" target="_blank">Website</a>
   <span> · </span>
-  <a href="https://facebetter.net/zh" target="_blank">文档</a>
+  <a href="https://facebetter.net/docs" target="_blank">Document</a>
 </p>
 
 ## Introduction
 
 This repository contains **Facebetter SDK** demo source code for all supported platforms.
+ 
+## Download SDK
 
-**Important Notes:**
-- **This repository only contains demo source code** - Complete example projects for each platform, demonstrating how to use Facebetter SDK
-- **Pre-compiled SDK libraries are NOT included in this repository** - Download SDK library files from the [Releases](https://github.com/pixpark/facebetter-sdk/releases) section as downloadable zip packages
+Before building the demo projects, you need to download the SDK libraries for the target platform(s). We provide a convenient script to automate this process:
 
-## Directory Structure
+```bash
+# Download all platform SDKs with default version
+./scripts/download_sdk.sh
 
+# Download SDKs with specific version
+./scripts/download_sdk.sh -v 1.1.3
+
+# Download SDK for specific platform(s)
+./scripts/download_sdk.sh -p android
+./scripts/download_sdk.sh -p android,ios-arm64
+
+# Show help
+./scripts/download_sdk.sh --help
 ```
-├── android/          # Android Platform Demo Project
-│   └── (Android project files)
-│
-├── ios/             # iOS Platform Demo Project
-│   └── (iOS project files)
-│
-├── macos/           # macOS Platform Demo Project
-│   └── (macOS project files)
-│
-├── windows/         # Windows Platform Demo Project
-│   └── (Windows project files)
-│
-└── web/             # Web Platform
-    ├── react/       # React Demo Project
-    └── vue/         # Vue Demo Project
-```
+
+The script will automatically download and extract the SDK files to the correct directories:
+- **Android**: `demo/android/app/src/main/libs`
+- **iOS**: `demo/ios/FBExampleObjc/libs`
+- **macOS**: `demo/macos/FBExampleObjc/libs`
 
 ## Documentation
 
 For complete development documentation, API reference, and best practices, please visit:
 
-**🌐 [Facebetter Official Documentation](https://facebetter.net)**
+**🌐 [Facebetter Official Documentation](https://facebetter.net/docs)**
 
 ### Platform-Specific Documentation
 
@@ -66,11 +61,9 @@ The documentation includes:
 ## Related Links
 
 - **Official Website**: [https://facebetter.net](https://facebetter.net)
-- **GitHub Repository**: [https://github.com/pixpark/facebetter](https://github.com/pixpark/facebetter)
 - **Documentation**: [https://facebetter.net/docs](https://facebetter.net/docs)
-
-## License
-
-Please refer to the LICENSE file in the main repository for license information.
+- **SDK and Resource Download**: [https://facebetter.net/download](https://facebetter.net/download)
+ 
+---
 
 **Facebetter** - Making beauty effects simpler and more powerful ✨

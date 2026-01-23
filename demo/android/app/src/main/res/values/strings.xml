@@ -1,0 +1,153 @@
+<resources>
+    <string name="app_name">Facebetter Effect Engine</string>
+    <string name="logo">Logo</string>
+    <string name="settings">Settings</string>
+    <string name="slogan">Transform Your Look with One Tap</string>
+    <string name="header_title">Facebetter</string>
+    <string name="header_subtitle">Better Beauty Effect Engine</string>
+    <string name="beauty_effect">Effect</string>
+    <string name="beauty_template">Template</string>
+    <string name="beauty">Beauty</string>
+    <string name="filter">Filter</string>
+    <string name="sticker">Sticker</string>
+    <string name="reshape">Reshape</string>
+    <string name="makeup">Makeup</string>
+    <string name="virtual_background">Virtual Background</string>
+    <string name="quality_adjustment">Quality Adjustment</string>
+    <string name="body_beautification">Body</string>
+    <string name="style_makeover">Style Makeover</string>
+    <string name="hair_color">Hair Color</string>
+    <string name="all_functions">All Functions</string>
+    <string name="atomic_capabilities">Atomic Capabilities</string>
+    <string name="face_detection">Face Detection</string>
+    <string name="green_screen_keying">Green Screen</string>
+    <string name="gesture_detection">Gesture Detection</string>
+    <string name="external_texture">External Texture</string>
+    <string name="feature_icon">Feature Icon</string>
+    <string name="header_image">Header Image</string>
+    
+    <!-- Beauty Panel -->
+    <string name="beauty_tab">Beauty</string>
+    <string name="reshape_tab">Reshape</string>
+    <string name="makeup_tab">Makeup</string>
+    <string name="filter_tab">Filter</string>
+    <string name="sticker_tab">Sticker</string>
+    <string name="body_tab">Body</string>
+    <string name="virtual_bg_tab">Virtual BG</string>
+    <string name="quality_tab">Quality</string>
+    
+    <!-- Beauty Functions -->
+    <string name="beauty_off">Off</string>
+    <string name="beauty_whitening">Whitening</string>
+    <string name="beauty_dark">Dark</string>
+    <string name="beauty_smoothing">Smoothing</string>
+    <string name="beauty_rosiness">Rosiness</string>
+    <string name="beauty_bright_white">Bright White</string>
+    <string name="beauty_natural">Natural</string>
+    <string name="beauty_pink_white">Pink White</string>
+    <string name="beauty_cool_white">Cool White</string>
+    
+    <!-- Reshape Functions -->
+    <string name="reshape_thin_face">Thin Face</string>
+    <string name="reshape_v_face">V Face</string>
+    <string name="reshape_narrow_face">Narrow Face</string>
+    <string name="reshape_short_face">Short Face</string>
+    <string name="reshape_cheekbone">Cheekbone</string>
+    <string name="reshape_jawbone">Jawbone</string>
+    <string name="reshape_chin">Chin</string>
+    <string name="reshape_nose_slim">Nose Slim</string>
+    <string name="reshape_big_eye">Big Eye</string>
+    <string name="reshape_eye_distance">Eye Distance</string>
+    
+    <!-- Makeup Functions -->
+    <string name="makeup_lipstick">Lipstick</string>
+    <string name="makeup_blush">Blush</string>
+    <string name="makeup_eyebrow">Eyebrow</string>
+    <string name="makeup_eyeshadow">Eyeshadow</string>
+    <string name="makeup_style_1">Style 1</string>
+    <string name="makeup_style_2">Style 2</string>
+    <string name="makeup_style_3">Style 3</string>
+    
+    <!-- Filter Functions -->
+    <string name="filter_natural">Natural</string>
+    <string name="filter_fresh">Fresh</string>
+    <string name="filter_retro">Retro</string>
+    <string name="filter_bw">B&amp;W</string>
+    <string name="filter_initial_heart">Initial Heart</string>
+    <string name="filter_first_love">First Love</string>
+    <string name="filter_vivid">Vivid</string>
+    <string name="filter_confession">Confession</string>
+    <string name="filter_milk_tea">Milk Tea</string>
+    <string name="filter_mousse">Mousse</string>
+    <string name="filter_japanese">Morning</string>
+    <string name="filter_dawn">Dawn</string>
+    <string name="filter_cookie">Cookie</string>
+    <string name="filter_lively">Lively</string>
+    <string name="filter_pure">Pure</string>
+    <string name="filter_fair">Fair</string>
+    <string name="filter_snow">Snow</string>
+    <string name="filter_plain">Plain</string>
+    <string name="filter_natural_portrait">Natural</string>
+    <string name="filter_rose">Rose</string>
+    <string name="filter_extraordinary">Cool</string>
+    <string name="filter_tender">Tender</string>
+    <string name="filter_tender_2">Tender 2</string>
+    
+    <!-- Sticker Functions -->
+    <string name="sticker_cute">Cute</string>
+    <string name="sticker_funny">Funny</string>
+    <string name="sticker_rabbit">Rabbit</string>
+    
+    <!-- Body Functions -->
+    <string name="body_slim">Slim</string>
+    
+    <!-- Virtual Background Functions -->
+    <string name="virtual_bg_blur">Blur</string>
+    <string name="virtual_bg_preset">Preset</string>
+    <string name="virtual_bg_image">Image</string>
+    
+    <!-- Quality Functions -->
+    <string name="quality_sharpen">Sharpen</string>
+    
+    <!-- Buttons -->
+    <string name="reset_beauty">Reset</string>
+    <string name="hide_panel">Hide Panel</string>
+    <string name="capture">Capture</string>
+    <string name="close">Close</string>
+    <string name="gallery">Gallery</string>
+    <string name="flip_camera">Flip Camera</string>
+    <string name="more">More</string>
+    <string name="compare_effect">Compare Effect</string>
+    <string name="beauty_shape">Beauty</string>
+    <string name="sticker_effect">Sticker</string>
+    <string name="filter_adjustment">Filter</string>
+    
+    <!-- External Texture -->
+    <string name="smoothing">Smoothing</string>
+    <string name="whitening">Whitening</string>
+    
+    <!-- Toast Messages -->
+    <string name="filter_under_development">Filter feature is under development, stay tuned 🎨</string>
+    <string name="sticker_under_development">Sticker feature is under development, stay tuned 😊</string>
+    <string name="body_under_development">Body feature is under development, stay tuned 🏃</string>
+    <string name="quality_under_development">Quality adjustment feature is under development, stay tuned 📸</string>
+    <string name="beauty_template_under_development">Beauty template feature is under development, stay tuned ✨</string>
+    <string name="green_screen_under_development">Green screen feature is under development, stay tuned 🎬</string>
+    <string name="gesture_under_development">Gesture recognition feature is under development, stay tuned 👋</string>
+    <string name="style_under_development">Style feature is under development, stay tuned 🎭</string>
+    <string name="hair_color_under_development">Hair color feature is under development, stay tuned 💇</string>
+    <string name="settings_under_development">Settings feature is under development, stay tuned ⚙️</string>
+    <string name="open_gallery">Open Gallery</string>
+    <string name="camera_switched">Camera switched</string>
+    <string name="more_options">More Options</string>
+    <string name="image_selected">Image selected: %1$dx%2$d</string>
+    <string name="failed_to_load_image">Failed to load image</string>
+    <string name="failed_to_load_preset_background">Failed to load preset background</string>
+    <string name="failed_to_load_preset_background_image">Failed to load preset background image</string>
+    
+    <!-- Language Settings -->
+    <string name="language_settings">Language Settings</string>
+    <string name="language_auto">Auto (System)</string>
+    <string name="language_english">English</string>
+    <string name="language_chinese">中文</string>
+</resources>
