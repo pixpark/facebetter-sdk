@@ -27,11 +27,11 @@
   [super viewDidLoad];
   self.view.backgroundColor = [UIColor whiteColor];
   [self setupUI];
-  // 让视图延伸到安全区域外，实现全屏效果（需要在 setupUI 之后设置）
+  // Extend view beyond safe area to achieve full-screen effect (must be set after setupUI)
   if (@available(iOS 11.0, *)) {
     self.scrollView.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
   } else {
-// iOS 11.0 以下使用已弃用的方法
+// Use deprecated method for iOS 11.0 and below
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
     self.automaticallyAdjustsScrollViewInsets = NO;
@@ -41,12 +41,12 @@
 
 - (void)viewDidLayoutSubviews {
   [super viewDidLayoutSubviews];
-  // 更新渐变图层的大小，使其与按钮大小一致
+  // Update gradient layer size to match button size
   if (self.beautyTemplateGradientLayer && self.beautyTemplateButton) {
     self.beautyTemplateGradientLayer.frame = self.beautyTemplateButton.bounds;
   }
 
-  // 确保按钮始终在视图层级最上层
+  // Ensure buttons are always on top of view hierarchy
   if (self.beautyEffectButton) {
     [self.view bringSubviewToFront:self.beautyEffectButton];
   }
@@ -57,7 +57,7 @@
 
 - (void)viewDidAppear:(BOOL)animated {
   [super viewDidAppear:animated];
-  // 确保按钮在视图层级最上层，可以接收触摸事件
+  // Ensure buttons are on top of view hierarchy and can receive touch events
   if (self.beautyEffectButton) {
     [self.view bringSubviewToFront:self.beautyEffectButton];
     self.beautyEffectButton.userInteractionEnabled = YES;
@@ -71,7 +71,7 @@
 }
 
 - (void)setupUI {
-  // 创建滚动视图
+  // Create scroll view
   self.scrollView = [[UIScrollView alloc] init];
   self.scrollView.translatesAutoresizingMaskIntoConstraints = NO;
   self.scrollView.showsVerticalScrollIndicator = NO;
@@ -81,16 +81,16 @@
   self.contentView.translatesAutoresizingMaskIntoConstraints = NO;
   [self.scrollView addSubview:self.contentView];
 
-  // 顶部图片区域
+  // Top image area
   [self setupHeaderImage];
 
-  // 功能网格（先添加，确保在按钮下方）
+  // Feature grid (add first to ensure it's below buttons)
   [self setupFeatureGrid];
 
-  // 两个大按钮（最后添加，确保显示在上层）
+  // Two large buttons (add last to ensure displayed on top)
   [self setupLargeButtons];
 
-  // 约束
+  // Constraints
   [self setupConstraints];
 }
 
@@ -99,59 +99,27 @@
   self.headerImageView.translatesAutoresizingMaskIntoConstraints = NO;
   self.headerImageView.contentMode = UIViewContentModeScaleAspectFill;
   self.headerImageView.clipsToBounds = YES;
-  // 从 Assets.xcassets 读取 header 图片，对应 Android 的 header
+  // Read header image from Assets.xcassets, corresponding to Android's header
   UIImage *headerImage = [UIImage imageNamed:@"header"];
   if (headerImage) {
     self.headerImageView.image = headerImage;
   } else {
-    // 如果图标不存在，使用背景色作为后备
+    // If icon doesn't exist, use background color as fallback
     self.headerImageView.backgroundColor = [UIColor colorWithRed:0.2 green:0.4 blue:0.6 alpha:1.0];
   }
   [self.contentView addSubview:self.headerImageView];
 
-  // 设置按钮（右上角，最顶部）
-  UIButton *settingsButton = [UIButton buttonWithType:UIButtonTypeCustom];
-  settingsButton.translatesAutoresizingMaskIntoConstraints = NO;
-  // 从 Assets.xcassets 读取图标，对应 Android 的 setting
-  UIImage *settingsIcon = [UIImage imageNamed:@"setting"];
-  if (!settingsIcon) {
-    // 如果图标不存在，使用系统图标作为后备
-    if (@available(iOS 13.0, *)) {
-      settingsIcon = [UIImage systemImageNamed:@"gearshape"];
-    }
-  }
-  // 设置为模板模式，以便 tintColor 生效
-  if (settingsIcon) {
-    settingsIcon = [settingsIcon imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
-  }
-  [settingsButton setImage:settingsIcon forState:UIControlStateNormal];
-  settingsButton.tintColor = [UIColor whiteColor];
-  [settingsButton addTarget:self
-                     action:@selector(settingsButtonTapped:)
-           forControlEvents:UIControlEventTouchUpInside];
-  // 添加到 self.view 而不是 contentView，确保在视图最上层
-  [self.view addSubview:settingsButton];
-
-  [NSLayoutConstraint activateConstraints:@[
-    // 放到状态栏区域内（与状态栏图标对齐）
-    // 使用 topAnchor 加上合适的偏移，让按钮在状态栏区域中间位置
-    [settingsButton.topAnchor constraintEqualToAnchor:self.view.topAnchor constant:50],
-    [settingsButton.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor constant:-16],
-    // 调小尺寸：从 28x28 改为 22x22
-    [settingsButton.widthAnchor constraintEqualToConstant:22],
-    [settingsButton.heightAnchor constraintEqualToConstant:22]
-  ]];
 }
 
 - (void)setupLargeButtons {
-  // 美颜特效按钮 - 对应 Android 的 camera2
+  // Beauty Effect button - corresponding to Android's camera2
   UIImage *beautyEffectIcon = [UIImage imageNamed:@"camera2"];
   if (!beautyEffectIcon) {
     if (@available(iOS 13.0, *)) {
       beautyEffectIcon = [UIImage systemImageNamed:@"camera.fill"];
     }
   }
-  self.beautyEffectButton = [self createLargeButtonWithTitle:@"美颜特效"
+  self.beautyEffectButton = [self createLargeButtonWithTitle:@"Effect"
                                                         icon:beautyEffectIcon
                                                    tintColor:[UIColor colorWithRed:0xA0 / 255.0
                                                                              green:0xF1 / 255.0
@@ -165,18 +133,18 @@
   [self.beautyEffectButton addTarget:self
                               action:@selector(beautyEffectButtonTapped:)
                     forControlEvents:UIControlEventTouchUpInside];
-  // 添加到 self.view 而不是 contentView，确保显示在网格容器之上
+  // Add to self.view instead of contentView to ensure displayed above grid container
   [self.view addSubview:self.beautyEffectButton];
 
-  // 美颜模板按钮 - 对应 Android 的 beautycard3
+  // Beauty Template button - corresponding to Android's beautycard3
   UIImage *beautyTemplateIcon = [UIImage imageNamed:@"beautycard3"];
   if (!beautyTemplateIcon) {
     if (@available(iOS 13.0, *)) {
       beautyTemplateIcon = [UIImage systemImageNamed:@"photo.fill"];
     }
   }
-  // 背景色设为透明，使用渐变图层作为背景
-  self.beautyTemplateButton = [self createLargeButtonWithTitle:@"美颜模板"
+  // Set background color to transparent, use gradient layer as background
+  self.beautyTemplateButton = [self createLargeButtonWithTitle:@"Template"
                                                           icon:beautyTemplateIcon
                                                      tintColor:[UIColor blackColor]
                                                backgroundColor:[UIColor clearColor]
@@ -185,24 +153,24 @@
                                 action:@selector(beautyTemplateButtonTapped:)
                       forControlEvents:UIControlEventTouchUpInside];
 
-  // 创建渐变背景图层
+  // Create gradient background layer
   self.beautyTemplateGradientLayer = [CAGradientLayer layer];
   self.beautyTemplateGradientLayer.colors = @[
     (id)[UIColor colorWithRed:0xCC / 255.0 green:0xFB / 255.0 blue:0x78 / 255.0 alpha:1.0].CGColor,
     (id)[UIColor colorWithRed:0x75 / 255.0 green:0xED / 255.0 blue:0xE0 / 255.0 alpha:1.0].CGColor
   ];
-  // 渐变方向：从左到右
+  // Gradient direction: from left to right
   self.beautyTemplateGradientLayer.startPoint = CGPointMake(0, 0);
   self.beautyTemplateGradientLayer.endPoint = CGPointMake(1, 0);
   self.beautyTemplateGradientLayer.cornerRadius = 12;
-  // 将渐变图层插入到最底层
+  // Insert gradient layer at bottommost
   [self.beautyTemplateButton.layer insertSublayer:self.beautyTemplateGradientLayer atIndex:0];
 
-  // 添加到 self.view 而不是 contentView，确保显示在网格容器之上
+  // Add to self.view instead of contentView to ensure displayed above grid container
   [self.view addSubview:self.beautyTemplateButton];
 
   [NSLayoutConstraint activateConstraints:@[
-    // 美颜特效按钮（向上移动 40 像素）
+    // Beauty Effect button (move up 40 pixels)
     [self.beautyEffectButton.topAnchor constraintEqualToAnchor:self.headerImageView.bottomAnchor
                                                       constant:-75],
     [self.beautyEffectButton.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor
@@ -214,18 +182,18 @@
         constraintEqualToAnchor:self.beautyTemplateButton.widthAnchor],
     [self.beautyEffectButton.heightAnchor constraintEqualToConstant:72],
 
-    // 美颜模板按钮（与美颜特效按钮顶部对齐）
+    // Beauty Template button (top aligned with Beauty Effect button)
     [self.beautyTemplateButton.topAnchor constraintEqualToAnchor:self.beautyEffectButton.topAnchor],
     [self.beautyTemplateButton.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor
                                                              constant:-20],
     [self.beautyTemplateButton.heightAnchor constraintEqualToConstant:72]
   ]];
 
-  // 确保按钮在视图层级最上层，可以接收触摸事件
+  // Ensure buttons are on top of view hierarchy and can receive touch events
   [self.view bringSubviewToFront:self.beautyEffectButton];
   [self.view bringSubviewToFront:self.beautyTemplateButton];
 
-  // 确保按钮可以接收触摸事件
+  // Ensure buttons can receive touch events
   self.beautyEffectButton.userInteractionEnabled = YES;
   self.beautyTemplateButton.userInteractionEnabled = YES;
 }
@@ -240,7 +208,7 @@
   button.backgroundColor = backgroundColor;
   button.layer.cornerRadius = 12;
   button.clipsToBounds = YES;
-  // 确保按钮可以接收触摸事件
+  // Ensure buttons can receive touch events
   button.userInteractionEnabled = YES;
   button.enabled = YES;
 
@@ -249,11 +217,11 @@
   stackView.axis = UILayoutConstraintAxisHorizontal;
   stackView.alignment = UIStackViewAlignmentCenter;
   stackView.spacing = 12;
-  // StackView 不拦截触摸事件，让按钮接收
+  // StackView doesn't intercept touch events, let button receive them
   stackView.userInteractionEnabled = NO;
 
   UIImageView *iconView = [[UIImageView alloc] init];
-  // 将图片设置为模板渲染模式，这样 tintColor 才能生效
+  // Set image to template rendering mode so tintColor takes effect
   UIImage *templatedIcon = [icon imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
   iconView.image = templatedIcon;
   iconView.tintColor = tintColor;
@@ -281,88 +249,88 @@
 }
 
 - (void)setupFeatureGrid {
-  // 第一个网格容器（白色背景，带圆角）
+  // First grid container (white background, rounded corners)
   self.gridContainer = [[UIView alloc] init];
   self.gridContainer.translatesAutoresizingMaskIntoConstraints = NO;
   self.gridContainer.backgroundColor = [UIColor whiteColor];
   self.gridContainer.layer.cornerRadius = 24;
   self.gridContainer.layer.masksToBounds = YES;
-  // 容器需要启用交互，以便子视图（按钮）可以接收触摸事件
+  // Container needs to enable interaction so child views (buttons) can receive touch events
   self.gridContainer.userInteractionEnabled = YES;
-  // 添加到 view 而不是 contentView，确保和屏幕宽度一致
+  // Add to view instead of contentView to ensure consistent with screen width
   [self.view addSubview:self.gridContainer];
 
-  // 第一个区域：前8个功能按钮（美颜到画质调整）
-  // 按钮顺序与 Android 保持一致
+  // First area: first 8 feature buttons (Beauty to Quality Adjustment)
+  // Button order consistent with Android
   NSArray *firstSectionFeatures = @[
     @{
-      @"title" : @"美颜",
+      @"title" : @"Beauty",
       @"selector" : @"beautyButtonTapped:",
       @"enabled" : @YES,
       @"iconName" : @"meiyan"
     },
     @{
-      @"title" : @"美型",
+      @"title" : @"Reshape",
       @"selector" : @"reshapeButtonTapped:",
       @"enabled" : @YES,
       @"iconName" : @"meixing2"
     },
     @{
-      @"title" : @"美妆",
+      @"title" : @"Makeup",
       @"selector" : @"makeupButtonTapped:",
       @"enabled" : @YES,
       @"iconName" : @"meizhuang"
     },
     @{
-      @"title" : @"美体",
+      @"title" : @"Body",
       @"selector" : @"bodyButtonTapped:",
       @"enabled" : @NO,
       @"iconName" : @"meiti"
     },
     @{
-      @"title" : @"滤镜",
+      @"title" : @"Filter",
       @"selector" : @"filterButtonTapped:",
-      @"enabled" : @NO,
+      @"enabled" : @YES,
       @"iconName" : @"lvjing"
     },
     @{
-      @"title" : @"贴纸",
+      @"title" : @"Sticker",
       @"selector" : @"stickerButtonTapped:",
-      @"enabled" : @NO,
+      @"enabled" : @YES,
       @"iconName" : @"tiezhi2"
     },
     @{
-      @"title" : @"虚拟背景",
+      @"title" : @"Virtual BG",
       @"selector" : @"virtualBgButtonTapped:",
       @"enabled" : @YES,
       @"iconName" : @"xunibeijing"
     },
     @{
-      @"title" : @"画质调整",
+      @"title" : @"Quality",
       @"selector" : @"qualityButtonTapped:",
       @"enabled" : @NO,
       @"iconName" : @"huazhitiaozheng2"
     }
   ];
 
-  // 创建第一个区域的网格布局
+  // Create first area grid layout
   UIStackView *firstSectionStack = [[UIStackView alloc] init];
   firstSectionStack.translatesAutoresizingMaskIntoConstraints = NO;
   firstSectionStack.axis = UILayoutConstraintAxisVertical;
   firstSectionStack.spacing = 16;
   firstSectionStack.distribution = UIStackViewDistributionFill;
-  // StackView 需要启用交互，以便子视图（按钮）可以接收触摸事件
-  // 注意：UIStackView 的 userInteractionEnabled 应该为 YES，这样它的子视图才能接收触摸事件
+  // StackView needs to enable interaction so child views (buttons) can receive touch events
+  // Note: UIStackView's userInteractionEnabled should be YES so its child views can receive touch events
   firstSectionStack.userInteractionEnabled = YES;
 
-  // 创建2行，每行4个按钮
+  // Create 2 rows, 4 buttons per row
   for (int row = 0; row < 2; row++) {
     UIStackView *rowStack = [[UIStackView alloc] init];
     rowStack.translatesAutoresizingMaskIntoConstraints = NO;
     rowStack.axis = UILayoutConstraintAxisHorizontal;
     rowStack.spacing = 12;
     rowStack.distribution = UIStackViewDistributionFillEqually;
-    // StackView 需要启用交互，以便子视图（按钮）可以接收触摸事件
+    // StackView needs to enable interaction so child views (buttons) can receive touch events
     rowStack.userInteractionEnabled = YES;
 
     for (int col = 0; col < 4; col++) {
@@ -377,72 +345,72 @@
 
   [self.gridContainer addSubview:firstSectionStack];
 
-  // 原子能力区域容器
+  // Atomic Capabilities area container
   UIView *atomicCapabilitiesContainer = [[UIView alloc] init];
   atomicCapabilitiesContainer.translatesAutoresizingMaskIntoConstraints = NO;
   atomicCapabilitiesContainer.backgroundColor = [UIColor whiteColor];
-  // 容器需要启用交互，以便子视图（按钮）可以接收触摸事件
+  // Container needs to enable interaction so child views (buttons) can receive touch events
   atomicCapabilitiesContainer.userInteractionEnabled = YES;
   [self.contentView addSubview:atomicCapabilitiesContainer];
 
-  // "原子能力"标题
+  // "Atomic Capabilities" title
   UILabel *atomicTitleLabel = [[UILabel alloc] init];
   atomicTitleLabel.translatesAutoresizingMaskIntoConstraints = NO;
-  atomicTitleLabel.text = @"原子能力";
+  atomicTitleLabel.text = @"Atomic Capabilities";
   atomicTitleLabel.font = [UIFont boldSystemFontOfSize:18];
   atomicTitleLabel.textColor = [UIColor colorWithRed:0.26 green:0.26 blue:0.26 alpha:1.0];
   [atomicCapabilitiesContainer addSubview:atomicTitleLabel];
 
-  // 第二个区域：原子能力按钮（换发色、风格整装、人脸检测、手势检测、绿幕抠图）
+  // Second area: Atomic Capabilities buttons (Hair Color, Style Makeover, Face Detection, Gesture Detection, Green Screen Keying)
   NSArray *secondSectionFeatures = @[
     @{
-      @"title" : @"换发色",
+      @"title" : @"Hair Color",
       @"selector" : @"hairColorButtonTapped:",
       @"enabled" : @NO,
       @"iconName" : @"huanfase"
     },
     @{
-      @"title" : @"风格整装",
+      @"title" : @"Style",
       @"selector" : @"styleButtonTapped:",
       @"enabled" : @NO,
       @"iconName" : @"fengge"
     },
     @{
-      @"title" : @"人脸检测",
+      @"title" : @"Face Detect",
       @"selector" : @"faceDetectButtonTapped:",
       @"enabled" : @NO,
       @"iconName" : @"renlianjiance"
     },
     @{
-      @"title" : @"手势检测",
+      @"title" : @"Gesture",
       @"selector" : @"gestureButtonTapped:",
       @"enabled" : @NO,
       @"iconName" : @"shoushi"
     },
     @{
-      @"title" : @"绿幕抠图",
+      @"title" : @"Green Screen",
       @"selector" : @"greenScreenButtonTapped:",
       @"enabled" : @NO,
       @"iconName" : @"lvmukoutu"
     }
   ];
 
-  // 创建第二个区域的网格布局
+  // Create second area grid layout
   UIStackView *secondSectionStack = [[UIStackView alloc] init];
   secondSectionStack.translatesAutoresizingMaskIntoConstraints = NO;
   secondSectionStack.axis = UILayoutConstraintAxisVertical;
   secondSectionStack.spacing = 16;
   secondSectionStack.distribution = UIStackViewDistributionFill;
-  // StackView 需要启用交互，以便子视图（按钮）可以接收触摸事件
+  // StackView needs to enable interaction so child views (buttons) can receive touch events
   secondSectionStack.userInteractionEnabled = YES;
 
-  // 第1行：4个按钮（换发色、风格整装、人脸检测、手势检测）
+  // Row 1: 4 buttons (Hair Color, Style Makeover, Face Detection, Gesture Detection)
   UIStackView *secondRow1 = [[UIStackView alloc] init];
   secondRow1.translatesAutoresizingMaskIntoConstraints = NO;
   secondRow1.axis = UILayoutConstraintAxisHorizontal;
   secondRow1.spacing = 12;
   secondRow1.distribution = UIStackViewDistributionFillEqually;
-  // StackView 需要启用交互，以便子视图（按钮）可以接收触摸事件
+  // StackView needs to enable interaction so child views (buttons) can receive touch events
   secondRow1.userInteractionEnabled = YES;
 
   for (int i = 0; i < 4; i++) {
@@ -452,23 +420,23 @@
   }
   [secondSectionStack addArrangedSubview:secondRow1];
 
-  // 第2行：2个按钮（绿幕抠图、外部纹理）+ 2个占位
+  // Row 2: 2 buttons (Green Screen Keying, External Texture) + 2 placeholders
   UIStackView *secondRow2 = [[UIStackView alloc] init];
   secondRow2.translatesAutoresizingMaskIntoConstraints = NO;
   secondRow2.axis = UILayoutConstraintAxisHorizontal;
   secondRow2.spacing = 12;
   secondRow2.distribution = UIStackViewDistributionFillEqually;
-  // StackView 需要启用交互，以便子视图（按钮）可以接收触摸事件
+  // StackView needs to enable interaction so child views (buttons) can receive touch events
   secondRow2.userInteractionEnabled = YES;
 
-  // 绿幕抠图按钮
+  // Green Screen Keying button
   NSDictionary *greenScreenFeature = secondSectionFeatures[4];
   UIButton *greenScreenButton = [self createFeatureButton:greenScreenFeature];
   [secondRow2 addArrangedSubview:greenScreenButton];
 
-  // 外部纹理按钮
+  // External Texture button
   NSDictionary *externalTextureFeature = @{
-    @"title" : @"外部纹理",
+    @"title" : @"External Texture",
     @"selector" : @"externalTextureGridButtonTapped:",
     @"enabled" : @YES,
     @"iconName" : @"texture"
@@ -476,7 +444,7 @@
   UIButton *externalTextureGridButton = [self createFeatureButton:externalTextureFeature];
   [secondRow2 addArrangedSubview:externalTextureGridButton];
 
-  // 添加2个占位视图
+  // Add 2 placeholder views
   for (int i = 0; i < 2; i++) {
     UIView *placeholder = [[UIView alloc] init];
     placeholder.translatesAutoresizingMaskIntoConstraints = NO;
@@ -487,15 +455,15 @@
 
   [atomicCapabilitiesContainer addSubview:secondSectionStack];
 
-  // 设置约束
+  // Setup constraints
   [NSLayoutConstraint activateConstraints:@[
-    // 第一个网格容器（宽度和屏幕宽度一样）
+    // First grid container (width same as screen width)
     [self.gridContainer.topAnchor constraintEqualToAnchor:self.headerImageView.bottomAnchor
                                                  constant:-35],
     [self.gridContainer.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor],
     [self.gridContainer.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor],
 
-    // 第一个区域的网格（调整内部内容的位置，因为容器向上移动了，按钮向上移动 45 像素）
+    // First area grid (adjust internal content position, because container moved up, buttons move up 45 pixels)
     [firstSectionStack.topAnchor constraintEqualToAnchor:self.gridContainer.topAnchor constant:59],
     [firstSectionStack.leadingAnchor constraintEqualToAnchor:self.gridContainer.leadingAnchor
                                                     constant:12],
@@ -504,7 +472,7 @@
     [firstSectionStack.bottomAnchor constraintEqualToAnchor:self.gridContainer.bottomAnchor
                                                    constant:-12],
 
-    // 原子能力容器
+    // Atomic Capabilities container
     [atomicCapabilitiesContainer.topAnchor constraintEqualToAnchor:self.gridContainer.bottomAnchor],
     [atomicCapabilitiesContainer.leadingAnchor
         constraintEqualToAnchor:self.contentView.leadingAnchor],
@@ -513,7 +481,7 @@
     [atomicCapabilitiesContainer.bottomAnchor constraintEqualToAnchor:self.contentView.bottomAnchor
                                                              constant:-20],
 
-    // 原子能力标题
+    // Atomic Capabilities title
     [atomicTitleLabel.topAnchor constraintEqualToAnchor:atomicCapabilitiesContainer.topAnchor
                                                constant:8],
     [atomicTitleLabel.leadingAnchor
@@ -523,7 +491,7 @@
         constraintEqualToAnchor:atomicCapabilitiesContainer.trailingAnchor
                        constant:-16],
 
-    // 第二个区域的网格
+    // Second area grid
     [secondSectionStack.topAnchor constraintEqualToAnchor:atomicTitleLabel.bottomAnchor
                                                  constant:16],
     [secondSectionStack.leadingAnchor
@@ -543,11 +511,11 @@
   button.translatesAutoresizingMaskIntoConstraints = NO;
   button.backgroundColor = [UIColor colorWithRed:0.95 green:0.95 blue:0.95 alpha:1.0];
   button.layer.cornerRadius = 12;
-  // 确保按钮可以接收触摸事件
+  // Ensure buttons can receive touch events
   button.userInteractionEnabled = YES;
-  // enabled 状态会根据 feature 配置在后面设置
+  // enabled state will be set later based on feature configuration
 
-  // 确保按钮是正方形（宽高比 1:1）
+  // Ensure button is square (aspect ratio 1:1)
   [button.widthAnchor constraintEqualToAnchor:button.heightAnchor].active = YES;
 
   UIStackView *stackView = [[UIStackView alloc] init];
@@ -555,19 +523,19 @@
   stackView.axis = UILayoutConstraintAxisVertical;
   stackView.alignment = UIStackViewAlignmentCenter;
   stackView.spacing = 4;
-  // StackView 不拦截触摸事件，让按钮接收
+  // StackView doesn't intercept touch events, let button receive them
   stackView.userInteractionEnabled = NO;
 
   UIImageView *iconView = [[UIImageView alloc] init];
-  // 从 Assets.xcassets 读取图标
+  // Read icon from Assets.xcassets
   NSString *iconName = feature[@"iconName"];
   UIImage *iconImage = [UIImage imageNamed:iconName];
   if (!iconImage) {
-    // 如果图标不存在，使用系统图标作为后备
+    // If icon doesn't exist, use system icon as fallback
     if (@available(iOS 13.0, *)) {
-      // 根据图标名称选择不同的系统图标
+      // Select different system icons based on icon name
       if ([iconName isEqualToString:@"texture"]) {
-        // 外部纹理使用立方体图标
+        // External texture uses cube icon
         iconImage = [UIImage systemImageNamed:@"cube"];
       } else {
         iconImage = [UIImage systemImageNamed:@"circle.fill"];
@@ -577,7 +545,7 @@
   iconView.image = iconImage;
   iconView.tintColor = [UIColor colorWithRed:0.26 green:0.26 blue:0.26 alpha:1.0];
   iconView.contentMode = UIViewContentModeScaleAspectFit;
-  // 图标不拦截触摸事件
+  // Icon doesn't intercept touch events
   iconView.userInteractionEnabled = NO;
   [NSLayoutConstraint activateConstraints:@[
     [iconView.widthAnchor constraintEqualToConstant:22],
@@ -589,7 +557,7 @@
   titleLabel.font = [UIFont systemFontOfSize:12];
   titleLabel.textColor = [UIColor colorWithRed:0.46 green:0.46 blue:0.46 alpha:1.0];
   titleLabel.textAlignment = NSTextAlignmentCenter;
-  // 标签不拦截触摸事件
+  // Label doesn't intercept touch events
   titleLabel.userInteractionEnabled = NO;
 
   [stackView addArrangedSubview:iconView];
@@ -602,20 +570,20 @@
     [stackView.centerYAnchor constraintEqualToAnchor:button.centerYAnchor]
   ]];
 
-  // 设置点击事件
+  // Setup click event
   SEL selector = NSSelectorFromString(feature[@"selector"]);
   if (selector && [self respondsToSelector:selector]) {
     [button addTarget:self action:selector forControlEvents:UIControlEventTouchUpInside];
   }
 
-  // 根据 enabled 状态设置按钮状态
+  // Set button state based on enabled state
   BOOL enabled = [feature[@"enabled"] boolValue];
   button.enabled = enabled;
 
-  // 不可用状态
+  // Unavailable state
   if (!enabled) {
     button.alpha = 0.5;
-    // 添加 Soon 标签
+    // Add Soon badge
     UILabel *soonLabel = [[UILabel alloc] init];
     soonLabel.text = @"Soon";
     soonLabel.font = [UIFont systemFontOfSize:8];
@@ -625,7 +593,7 @@
     soonLabel.layer.masksToBounds = YES;
     soonLabel.textAlignment = NSTextAlignmentCenter;
     soonLabel.translatesAutoresizingMaskIntoConstraints = NO;
-    // Soon 标签不拦截触摸事件
+    // Soon badge doesn't intercept touch events
     soonLabel.userInteractionEnabled = NO;
     [button addSubview:soonLabel];
     [NSLayoutConstraint activateConstraints:@[
@@ -652,7 +620,7 @@
     [self.contentView.bottomAnchor constraintEqualToAnchor:self.scrollView.bottomAnchor],
     [self.contentView.widthAnchor constraintEqualToAnchor:self.scrollView.widthAnchor],
 
-    // 直接约束到 view 顶部，实现全屏效果
+    // Directly constrain to view top to achieve full-screen effect
     [self.headerImageView.topAnchor constraintEqualToAnchor:self.view.topAnchor],
     [self.headerImageView.leadingAnchor constraintEqualToAnchor:self.contentView.leadingAnchor],
     [self.headerImageView.trailingAnchor constraintEqualToAnchor:self.contentView.trailingAnchor],
@@ -668,7 +636,7 @@
   if (self.navigationController) {
     [self.navigationController pushViewController:cameraVC animated:YES];
   } else {
-    // 如果没有导航控制器，使用 present 方式
+    // If no navigation controller, use present method
     UINavigationController *navVC =
         [[UINavigationController alloc] initWithRootViewController:cameraVC];
     navVC.modalPresentationStyle = UIModalPresentationFullScreen;
@@ -677,7 +645,7 @@
 }
 
 - (void)beautyTemplateButtonTapped:(UIButton *)sender {
-  [self showToast:@"美颜模板功能开发中，敬请期待 ✨"];
+  [self showToast:@"Beauty template feature is under development, stay tuned ✨"];
 }
 
 - (void)beautyButtonTapped:(UIButton *)sender {
@@ -693,17 +661,15 @@
 }
 
 - (void)bodyButtonTapped:(UIButton *)sender {
-  [self showToast:@"美体功能开发中，敬请期待 🏃"];
+  [self showToast:@"Body feature is under development, stay tuned 🏃"];
 }
 
 - (void)filterButtonTapped:(UIButton *)sender {
-  // 滤镜功能暂时不可用，显示提示
-  [self showToast:@"滤镜功能开发中，敬请期待 🎨"];
+  [self navigateToCamera:@"filter"];
 }
 
 - (void)stickerButtonTapped:(UIButton *)sender {
-  // 贴纸功能暂时不可用，显示提示
-  [self showToast:@"贴纸功能开发中，敬请期待 ✨"];
+  [self navigateToCamera:@"sticker"];
 }
 
 - (void)virtualBgButtonTapped:(UIButton *)sender {
@@ -711,28 +677,28 @@
 }
 
 - (void)qualityButtonTapped:(UIButton *)sender {
-  [self showToast:@"画质调整功能开发中，敬请期待 📸"];
+  [self showToast:@"Quality adjustment feature is under development, stay tuned 📸"];
 }
 
 - (void)faceDetectButtonTapped:(UIButton *)sender {
-  // 人脸检测功能暂时不可用，显示提示
-  [self showToast:@"人脸检测功能开发中，敬请期待 👤"];
+  // Face detection feature temporarily unavailable, show message
+  [self showToast:@"Face detection feature is under development, stay tuned 👤"];
 }
 
 - (void)hairColorButtonTapped:(UIButton *)sender {
-  [self showToast:@"染发功能开发中，敬请期待 💇"];
+  [self showToast:@"Hair color feature is under development, stay tuned 💇"];
 }
 
 - (void)styleButtonTapped:(UIButton *)sender {
-  [self showToast:@"风格化功能开发中，敬请期待 🎭"];
+  [self showToast:@"Style feature is under development, stay tuned 🎭"];
 }
 
 - (void)gestureButtonTapped:(UIButton *)sender {
-  [self showToast:@"手势识别功能开发中，敬请期待 👋"];
+  [self showToast:@"Gesture recognition feature is under development, stay tuned 👋"];
 }
 
 - (void)greenScreenButtonTapped:(UIButton *)sender {
-  [self showToast:@"绿幕抠图功能开发中，敬请期待 🎬"];
+  [self showToast:@"Green screen feature is under development, stay tuned 🎬"];
 }
 
 - (void)externalTextureGridButtonTapped:(UIButton *)sender {
@@ -740,16 +706,12 @@
   if (self.navigationController) {
     [self.navigationController pushViewController:vc animated:YES];
   } else {
-    // 如果没有导航控制器，使用 present 方式
+    // If there's no navigation controller, use present method
     UINavigationController *navVC =
         [[UINavigationController alloc] initWithRootViewController:vc];
     navVC.modalPresentationStyle = UIModalPresentationFullScreen;
     [self presentViewController:navVC animated:YES completion:nil];
   }
-}
-
-- (void)settingsButtonTapped:(UIButton *)sender {
-  [self showToast:@"设置功能开发中，敬请期待 ⚙️"];
 }
 
 - (void)navigateToCamera:(NSString *)tab {

@@ -10,7 +10,7 @@
 
 @interface BeautyPanelViewController ()
 
-// 顶部按钮栏
+// Top button bar
 @property(nonatomic, strong) UIView *topBar;
 @property(nonatomic, strong) UIButton *closeButton;
 @property(nonatomic, strong) UIButton *galleryButton;
@@ -20,45 +20,48 @@
 @property(nonatomic, strong) UIView *panelRootView;
 @property(nonatomic, strong) UIView *bottomControlPanel;
 
-// Tab 切换区域
+// Tab switching area
 @property(nonatomic, strong) UIScrollView *tabScrollView;
 @property(nonatomic, strong) UIStackView *tabContainer;
 @property(nonatomic, strong) NSArray<UIButton *> *tabButtons;
 @property(nonatomic, strong) NSString *currentTab;
 
-// 功能按钮区域
+// Function button area
 @property(nonatomic, strong) UIScrollView *functionScrollView;
 @property(nonatomic, strong) UIStackView *functionButtonContainer;
 @property(nonatomic, strong) NSMutableArray<UIButton *> *functionButtons;
 
-// 子选项区域
+// Sub-option area
 @property(nonatomic, strong) UIScrollView *subOptionScrollView;
 @property(nonatomic, strong) UIStackView *subOptionContainer;
 @property(nonatomic, strong) NSMutableArray<UIButton *> *subOptionButtons;
 
-// 底部按钮区域
+// Filter mapping data
+@property(nonatomic, strong) NSDictionary *filterMapping;
+
+// Bottom button area
 @property(nonatomic, strong) UIView *bottomButtonContainer;
 @property(nonatomic, strong) UIButton *resetButton;
 @property(nonatomic, strong) UIButton *captureButton;
 @property(nonatomic, strong) UIButton *hidePanelButton;
 
-// 滑块
+// Slider
 @property(nonatomic, strong) UIView *sliderContainer;
 @property(nonatomic, strong) UISlider *valueSlider;
 @property(nonatomic, strong) UILabel *valueLabel;
 @property(nonatomic, assign) BOOL isSliderVisible;
 @property(nonatomic, strong) NSLayoutConstraint *sliderContainerHeightConstraint;
-// Before/After 对比按钮
+// Before/After compare button
 @property(nonatomic, strong) UIButton *beforeAfterButton;
 @property(nonatomic, strong) NSLayoutConstraint *beforeAfterButtonBottomConstraint;
 
-// 状态
+// State
 @property(nonatomic, assign) BOOL isPanelVisible;
 @property(nonatomic, assign) BOOL isSubOptionVisible;
 @property(nonatomic, strong) NSString *currentFunction;
 @property(nonatomic, strong) NSMutableDictionary<NSString *, NSNumber *> *functionProgress;
 @property(nonatomic, strong) NSMutableDictionary<NSString *, NSNumber *> *toggleStates;
-// 功能按钮选中指示器（key: "tab:function", value: UIView）
+// Function button selection indicator (key: "tab:function", value: UIView)
 @property(nonatomic, strong) NSMutableDictionary<NSString *, UIView *> *functionIndicatorViews;
 
 @end
@@ -68,9 +71,9 @@
 #pragma mark - UIScrollViewDelegate
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView {
-  // 如果是 tabScrollView，阻止垂直滚动
+  // If it's tabScrollView, prevent vertical scrolling
   if (scrollView == self.tabScrollView) {
-    // 如果 contentOffset.y 不为 0，强制设为 0（阻止垂直滚动）
+    // If contentOffset.y is not 0, force it to 0 (prevent vertical scrolling)
     if (scrollView.contentOffset.y != 0) {
       scrollView.contentOffset = CGPointMake(scrollView.contentOffset.x, 0);
     }
@@ -86,30 +89,44 @@
     _functionIndicatorViews = [[NSMutableDictionary alloc] init];
     _functionButtons = [[NSMutableArray alloc] init];
     _subOptionButtons = [[NSMutableArray alloc] init];
+    [self loadFilterMapping];
   }
   return self;
+}
+
+- (void)loadFilterMapping {
+  NSString *mappingPath =
+      [[[NSBundle mainBundle] bundlePath] stringByAppendingPathComponent:@"assets/filters/filter_mapping.json"];
+  NSData *data = [NSData dataWithContentsOfFile:mappingPath];
+  if (data) {
+    NSError *error = nil;
+    NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data options:0 error:&error];
+    if (!error) {
+      self.filterMapping = json[@"filters"];
+    }
+  }
 }
 
 - (void)viewDidLoad {
   [super viewDidLoad];
   self.view.backgroundColor = [UIColor clearColor];
-  self.view.userInteractionEnabled = YES;  // 启用交互，以便底部控制面板可以接收点击事件
+  self.view.userInteractionEnabled = YES;  // Enable interaction so bottom control panel can receive click events
 
   [self setupTopBar];
   [self setupPanel];
   [self setupBottomControlPanel];
-  [self hidePanel];  // 默认隐藏
+  [self hidePanel];  // Hidden by default
 }
 
 - (void)setupTopBar {
-  // 顶部栏容器（参考 Android：padding 16dp，透明背景）
+  // Top bar container (reference Android: padding 16dp, transparent background)
   self.topBar = [[UIView alloc] init];
   self.topBar.translatesAutoresizingMaskIntoConstraints = NO;
   self.topBar.backgroundColor = [UIColor clearColor];
-  self.topBar.userInteractionEnabled = YES;  // 确保可以接收触摸事件
+  self.topBar.userInteractionEnabled = YES;  // Ensure can receive touch events
   [self.view addSubview:self.topBar];
 
-  // 关闭按钮（48x48，图标 18pt）
+  // Close button (48x48, icon 18pt)
   self.closeButton = [UIButton buttonWithType:UIButtonTypeCustom];
   self.closeButton.translatesAutoresizingMaskIntoConstraints = NO;
   self.closeButton.userInteractionEnabled = YES;
@@ -130,7 +147,7 @@
                        action:@selector(closeButtonTapped:)
              forControlEvents:UIControlEventTouchUpInside];
 
-  // 相册按钮（48x48，图标 22pt）
+  // Gallery button (48x48, icon 22pt)
   self.galleryButton = [UIButton buttonWithType:UIButtonTypeCustom];
   self.galleryButton.translatesAutoresizingMaskIntoConstraints = NO;
   self.galleryButton.userInteractionEnabled = YES;
@@ -151,7 +168,7 @@
                          action:@selector(galleryButtonTapped:)
                forControlEvents:UIControlEventTouchUpInside];
 
-  // 切换相机按钮（48x48，图标 24pt）
+  // Flip camera button (48x48, icon 24pt)
   self.flipCameraButton = [UIButton buttonWithType:UIButtonTypeCustom];
   self.flipCameraButton.translatesAutoresizingMaskIntoConstraints = NO;
   self.flipCameraButton.userInteractionEnabled = YES;
@@ -172,7 +189,7 @@
                             action:@selector(flipCameraButtonTapped:)
                   forControlEvents:UIControlEventTouchUpInside];
 
-  // 更多选项按钮（48x48，图标 22pt）
+  // More options button (48x48, icon 22pt)
   self.moreButton = [UIButton buttonWithType:UIButtonTypeCustom];
   self.moreButton.translatesAutoresizingMaskIntoConstraints = NO;
   self.moreButton.userInteractionEnabled = YES;
@@ -193,51 +210,51 @@
                       action:@selector(moreButtonTapped:)
             forControlEvents:UIControlEventTouchUpInside];
 
-  // 使用 StackView 均匀分布按钮（参考 Android：按钮之间有 Space，使用 FillEqually 分布）
+  // Use StackView to evenly distribute buttons (reference Android: Space between buttons, use FillEqually distribution)
   UIStackView *buttonStack = [[UIStackView alloc] init];
   buttonStack.translatesAutoresizingMaskIntoConstraints = NO;
   buttonStack.axis = UILayoutConstraintAxisHorizontal;
   buttonStack.distribution = UIStackViewDistributionFillEqually;
   buttonStack.alignment = UIStackViewAlignmentCenter;
   buttonStack.spacing = 0;
-  // StackView 需要启用交互，但触摸事件会传递给子视图（按钮）
+  // StackView needs to enable interaction, but touch events will be passed to child views (buttons)
   buttonStack.userInteractionEnabled = YES;
 
-  // 添加按钮和间隔视图
+  // Add buttons and spacer views
   [buttonStack addArrangedSubview:self.closeButton];
 
   UIView *spacer1 = [[UIView alloc] init];
   spacer1.translatesAutoresizingMaskIntoConstraints = NO;
-  spacer1.userInteractionEnabled = NO;  // 间隔视图不拦截触摸事件
+  spacer1.userInteractionEnabled = NO;  // Spacer view doesn't intercept touch events
   [buttonStack addArrangedSubview:spacer1];
 
   [buttonStack addArrangedSubview:self.galleryButton];
 
   UIView *spacer2 = [[UIView alloc] init];
   spacer2.translatesAutoresizingMaskIntoConstraints = NO;
-  spacer2.userInteractionEnabled = NO;  // 间隔视图不拦截触摸事件
+  spacer2.userInteractionEnabled = NO;  // Spacer view doesn't intercept touch events
   [buttonStack addArrangedSubview:spacer2];
 
   [buttonStack addArrangedSubview:self.flipCameraButton];
 
   UIView *spacer3 = [[UIView alloc] init];
   spacer3.translatesAutoresizingMaskIntoConstraints = NO;
-  spacer3.userInteractionEnabled = NO;  // 间隔视图不拦截触摸事件
+  spacer3.userInteractionEnabled = NO;  // Spacer view doesn't intercept touch events
   [buttonStack addArrangedSubview:spacer3];
 
   [buttonStack addArrangedSubview:self.moreButton];
 
   [self.topBar addSubview:buttonStack];
 
-  // 布局约束
+  // Layout constraints
   [NSLayoutConstraint activateConstraints:@[
-    // 按钮高度固定为 48pt，宽度由 StackView 的 FillEqually 自动分配（移除固定宽度约束避免冲突）
+    // Button height fixed at 48pt, width automatically allocated by StackView's FillEqually (remove fixed width constraint to avoid conflicts)
     [self.closeButton.heightAnchor constraintEqualToConstant:48],
     [self.galleryButton.heightAnchor constraintEqualToConstant:48],
     [self.flipCameraButton.heightAnchor constraintEqualToConstant:48],
     [self.moreButton.heightAnchor constraintEqualToConstant:48],
 
-    // StackView 布局（左右 padding 16pt，垂直居中）
+    // StackView layout (left/right padding 16pt, vertically centered)
     [buttonStack.leadingAnchor constraintEqualToAnchor:self.topBar.leadingAnchor constant:16],
     [buttonStack.trailingAnchor constraintEqualToAnchor:self.topBar.trailingAnchor constant:-16],
     [buttonStack.topAnchor constraintEqualToAnchor:self.topBar.topAnchor constant:16],
@@ -245,17 +262,17 @@
     [buttonStack.heightAnchor constraintEqualToConstant:48]
   ]];
 
-  // 设置图标大小（通过 contentEdgeInsets 和 imageEdgeInsets 调整）
-  // 关闭按钮图标：18pt
+  // Set icon size (adjusted through contentEdgeInsets and imageEdgeInsets)
+  // Close button icon: 18pt
   self.closeButton.imageEdgeInsets = UIEdgeInsetsMake(15, 15, 15, 15);  // (48-18)/2 = 15
-  // 相册按钮图标：22pt
+  // Gallery button icon: 22pt
   self.galleryButton.imageEdgeInsets = UIEdgeInsetsMake(13, 13, 13, 13);  // (48-22)/2 = 13
-  // 切换相机按钮图标：24pt
+  // Flip camera button icon: 24pt
   self.flipCameraButton.imageEdgeInsets = UIEdgeInsetsMake(12, 12, 12, 12);  // (48-24)/2 = 12
-  // 更多按钮图标：22pt
+  // More button icon: 22pt
   self.moreButton.imageEdgeInsets = UIEdgeInsetsMake(13, 13, 13, 13);  // (48-22)/2 = 13
 
-  // 顶部栏约束（位于视图顶部，高度自适应）
+  // Top bar constraints (located at view top, height adaptive)
   NSLayoutYAxisAnchor *topAnchor;
   if (@available(iOS 11.0, *)) {
     topAnchor = self.view.safeAreaLayoutGuide.topAnchor;
@@ -270,41 +287,41 @@
     [self.topBar.topAnchor constraintEqualToAnchor:topAnchor],
     [self.topBar.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor],
     [self.topBar.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor],
-    // 高度由内容决定（按钮 48pt + 上下 padding 16pt × 2 = 80pt）
+    // Height determined by content (button 48pt + top/bottom padding 16pt × 2 = 80pt)
   ]];
 
-  // 确保顶部栏在最上层
+  // Ensure top bar is on topmost layer
   [self.view bringSubviewToFront:self.topBar];
 }
 
 - (void)setupPanel {
-  // 面板根视图 - 半透明背景，覆盖整个面板区域
+  // Panel root view - semi-transparent background, covers entire panel area
   self.panelRootView = [[UIView alloc] init];
   self.panelRootView.translatesAutoresizingMaskIntoConstraints = NO;
   self.panelRootView.backgroundColor = [UIColor colorWithRed:0
                                                        green:0
                                                         blue:0
-                                                       alpha:0.8];  // 半透明黑色背景
+                                                       alpha:0.8];  // Semi-transparent black background
   self.panelRootView.hidden = YES;
-  self.panelRootView.userInteractionEnabled = YES;  // 确保可以接收触摸事件
+  self.panelRootView.userInteractionEnabled = YES;  // Ensure can receive touch events
   [self.view addSubview:self.panelRootView];
 
-  // Tab 切换区域
+  // Tab switching area
   [self setupTabScrollView];
 
-  // 功能按钮区域
+  // Function button area
   [self setupFunctionScrollView];
 
-  // 子选项区域（默认隐藏）
+  // Sub-option area (hidden by default)
   [self setupSubOptionScrollView];
 
-  // 滑块区域（必须在设置约束前创建）
+  // Slider area (must be created before setting constraints)
   [self setupSliderContainer];
 
-  // 底部按钮区域
+  // Bottom button area
   [self setupBottomButtonContainer];
 
-  // 约束
+  // Constraints
   [self setupPanelConstraints];
 }
 
@@ -312,14 +329,14 @@
   self.tabScrollView = [[UIScrollView alloc] init];
   self.tabScrollView.translatesAutoresizingMaskIntoConstraints = NO;
   self.tabScrollView.showsHorizontalScrollIndicator = NO;
-  self.tabScrollView.showsVerticalScrollIndicator = NO;  // 禁用垂直滚动指示器
-  self.tabScrollView.alwaysBounceVertical = NO;          // 禁用垂直弹性滚动
-  self.tabScrollView.alwaysBounceHorizontal = YES;       // 允许水平弹性滚动
-  self.tabScrollView.directionalLockEnabled = YES;       // 启用方向锁定，优先水平滚动
-  self.tabScrollView.scrollEnabled = YES;                // 确保滚动启用
-  // 设置代理以阻止垂直滚动（BeautyPanelViewController 已经实现了 UIScrollViewDelegate）
+  self.tabScrollView.showsVerticalScrollIndicator = NO;  // Disable vertical scroll indicator
+  self.tabScrollView.alwaysBounceVertical = NO;          // Disable vertical bounce
+  self.tabScrollView.alwaysBounceHorizontal = YES;       // Allow horizontal bounce
+  self.tabScrollView.directionalLockEnabled = YES;       // Enable direction lock, prioritize horizontal scrolling
+  self.tabScrollView.scrollEnabled = YES;                // Ensure scrolling is enabled
+  // Set delegate to prevent vertical scrolling (BeautyPanelViewController already implements UIScrollViewDelegate)
   self.tabScrollView.delegate = self;
-  self.tabScrollView.backgroundColor = [UIColor clearColor];  // 透明，因为父视图已有背景
+  self.tabScrollView.backgroundColor = [UIColor clearColor];  // Transparent, because parent view already has background
   [self.panelRootView addSubview:self.tabScrollView];
 
   self.tabContainer = [[UIStackView alloc] init];
@@ -329,9 +346,9 @@
   self.tabContainer.alignment = UIStackViewAlignmentCenter;
   [self.tabScrollView addSubview:self.tabContainer];
 
-  // Tab 按钮
+  // Tab buttons
   NSArray *tabs =
-      @[ @"美颜", @"美型", @"美妆", @"滤镜", @"贴纸", @"美体", @"虚拟背景", @"画质调整" ];
+      @[ @"Beauty", @"Reshape", @"Makeup", @"Filter", @"Sticker", @"Body", @"Virtual BG", @"Quality" ];
   NSMutableArray *buttons = [[NSMutableArray alloc] init];
 
   for (NSInteger i = 0; i < tabs.count; i++) {
@@ -350,21 +367,21 @@
   }
 
   self.tabButtons = buttons;
-  [self selectTabButton:0];  // 默认选中第一个
+  [self selectTabButton:0];  // Select first by default
 }
 
 - (void)viewDidLayoutSubviews {
   [super viewDidLayoutSubviews];
-  // 在布局完成后更新 contentSize，确保垂直方向不可滚动
+  // Update contentSize after layout is complete to ensure vertical scrolling is disabled
   [self updateTabScrollViewContentSize];
 }
 
 - (void)updateTabScrollViewContentSize {
-  // 确保 contentSize 的垂直高度等于 ScrollView 的高度，这样垂直方向就不可滚动
+  // Ensure contentSize's vertical height equals ScrollView's height so vertical scrolling is disabled
   CGFloat scrollViewHeight = self.tabScrollView.bounds.size.height;
   if (scrollViewHeight > 0) {
     CGSize contentSize = self.tabScrollView.contentSize;
-    // 如果 contentSize 宽度为 0，说明还没有布局完成，等待下次更新
+    // If contentSize width is 0, layout is not complete yet, wait for next update
     if (contentSize.width > 0) {
       self.tabScrollView.contentSize = CGSizeMake(contentSize.width, scrollViewHeight);
     }
@@ -375,7 +392,7 @@
   self.functionScrollView = [[UIScrollView alloc] init];
   self.functionScrollView.translatesAutoresizingMaskIntoConstraints = NO;
   self.functionScrollView.showsHorizontalScrollIndicator = NO;
-  self.functionScrollView.backgroundColor = [UIColor clearColor];  // 透明，因为父视图已有背景
+  self.functionScrollView.backgroundColor = [UIColor clearColor];  // Transparent, because parent view already has background
   [self.panelRootView addSubview:self.functionScrollView];
 
   self.functionButtonContainer = [[UIStackView alloc] init];
@@ -393,9 +410,9 @@
   self.subOptionScrollView.translatesAutoresizingMaskIntoConstraints = NO;
   self.subOptionScrollView.showsHorizontalScrollIndicator = NO;
   self.subOptionScrollView.showsVerticalScrollIndicator = NO;
-  self.subOptionScrollView.backgroundColor = [UIColor clearColor];  // 透明，因为父视图已有背景
+  self.subOptionScrollView.backgroundColor = [UIColor clearColor];  // Transparent, because parent view already has background
   self.subOptionScrollView.hidden = YES;
-  self.subOptionScrollView.alwaysBounceHorizontal = YES;  // 允许水平弹性滚动
+  self.subOptionScrollView.alwaysBounceHorizontal = YES;  // Allow horizontal bounce
   [self.panelRootView addSubview:self.subOptionScrollView];
 
   self.subOptionContainer = [[UIStackView alloc] init];
@@ -412,7 +429,7 @@
   self.bottomButtonContainer.backgroundColor = [UIColor clearColor];
   [self.panelRootView addSubview:self.bottomButtonContainer];
 
-  // 使用 StackView 均匀分布三个按钮
+  // Use StackView to evenly distribute three buttons
   UIStackView *buttonStack = [[UIStackView alloc] init];
   buttonStack.translatesAutoresizingMaskIntoConstraints = NO;
   buttonStack.axis = UILayoutConstraintAxisHorizontal;
@@ -420,7 +437,7 @@
   buttonStack.alignment = UIStackViewAlignmentCenter;
   [self.bottomButtonContainer addSubview:buttonStack];
 
-  // 重置按钮
+  // Reset button
   self.resetButton = [UIButton buttonWithType:UIButtonTypeCustom];
   UIStackView *resetStack = [[UIStackView alloc] init];
   resetStack.axis = UILayoutConstraintAxisHorizontal;
@@ -434,7 +451,7 @@
       resetIcon = [resetIcon imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
     }
   } else {
-    // 设置为模板模式以便着色
+    // Set to template mode for tinting
     resetIcon = [resetIcon imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
   }
   UIImageView *resetIconView = [[UIImageView alloc] initWithImage:resetIcon];
@@ -446,13 +463,13 @@
   ]];
 
   UILabel *resetLabel = [[UILabel alloc] init];
-  resetLabel.text = @"重置美颜";
+  resetLabel.text = @"Reset";
   resetLabel.textColor = [UIColor whiteColor];
   resetLabel.font = [UIFont systemFontOfSize:14];
 
   [resetStack addArrangedSubview:resetIconView];
   [resetStack addArrangedSubview:resetLabel];
-  resetStack.userInteractionEnabled = NO;  // 禁用 StackView 交互，避免拦截按钮的触摸事件
+  resetStack.userInteractionEnabled = NO;  // Disable StackView interaction to avoid intercepting button touch events
   [self.resetButton addSubview:resetStack];
   resetStack.translatesAutoresizingMaskIntoConstraints = NO;
   [NSLayoutConstraint activateConstraints:@[
@@ -464,13 +481,13 @@
              forControlEvents:UIControlEventTouchUpInside];
   [buttonStack addArrangedSubview:self.resetButton];
 
-  // 拍照按钮（中间）- 仿照安卓实现：白色外圆 + 绿色内圆
-  // 创建容器视图
+  // Capture button (middle) - Following Android implementation: white outer circle + green inner circle
+  // Create container view
   UIView *captureButtonContainer = [[UIView alloc] init];
   captureButtonContainer.translatesAutoresizingMaskIntoConstraints = NO;
   captureButtonContainer.backgroundColor = [UIColor clearColor];
 
-  // 外层白色圆
+  // Outer white circle
   UIView *outerCircle = [[UIView alloc] init];
   outerCircle.translatesAutoresizingMaskIntoConstraints = NO;
   outerCircle.backgroundColor = [UIColor whiteColor];
@@ -478,7 +495,7 @@
   outerCircle.layer.masksToBounds = YES;
   [captureButtonContainer addSubview:outerCircle];
 
-  // 内层绿色圆（拍照按钮）
+  // Inner green circle (capture button)
   self.captureButton = [UIButton buttonWithType:UIButtonTypeCustom];
   self.captureButton.translatesAutoresizingMaskIntoConstraints = NO;
   self.captureButton.backgroundColor = [UIColor colorWithRed:0.0
@@ -492,14 +509,14 @@
                forControlEvents:UIControlEventTouchUpInside];
   [captureButtonContainer addSubview:self.captureButton];
 
-  // 约束：外层白色圆 60x60，居中
+  // Constraints: outer white circle 60x60, centered
   [NSLayoutConstraint activateConstraints:@[
     [outerCircle.centerXAnchor constraintEqualToAnchor:captureButtonContainer.centerXAnchor],
     [outerCircle.centerYAnchor constraintEqualToAnchor:captureButtonContainer.centerYAnchor],
     [outerCircle.widthAnchor constraintEqualToConstant:60],
     [outerCircle.heightAnchor constraintEqualToConstant:60],
 
-    // 内层绿色圆 50x50，居中在外层圆内
+    // Inner green circle 50x50, centered inside outer circle
     [self.captureButton.centerXAnchor constraintEqualToAnchor:outerCircle.centerXAnchor],
     [self.captureButton.centerYAnchor constraintEqualToAnchor:outerCircle.centerYAnchor],
     [self.captureButton.widthAnchor constraintEqualToConstant:50],
@@ -508,7 +525,7 @@
 
   [buttonStack addArrangedSubview:captureButtonContainer];
 
-  // 隐藏面板按钮
+  // Hide panel button
   self.hidePanelButton = [UIButton buttonWithType:UIButtonTypeCustom];
   UIStackView *hideStack = [[UIStackView alloc] init];
   hideStack.axis = UILayoutConstraintAxisHorizontal;
@@ -522,7 +539,7 @@
       hideIcon = [hideIcon imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
     }
   } else {
-    // 设置为模板模式以便着色
+    // Set to template mode for tinting
     hideIcon = [hideIcon imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
   }
   UIImageView *hideIconView = [[UIImageView alloc] initWithImage:hideIcon];
@@ -534,13 +551,13 @@
   ]];
 
   UILabel *hideLabel = [[UILabel alloc] init];
-  hideLabel.text = @"隐藏面板";
+  hideLabel.text = @"Hide Panel";
   hideLabel.textColor = [UIColor whiteColor];
   hideLabel.font = [UIFont systemFontOfSize:14];
 
   [hideStack addArrangedSubview:hideIconView];
   [hideStack addArrangedSubview:hideLabel];
-  hideStack.userInteractionEnabled = NO;  // 禁用 StackView 交互，避免拦截按钮的触摸事件
+  hideStack.userInteractionEnabled = NO;  // Disable StackView interaction to avoid intercepting button touch events
   [self.hidePanelButton addSubview:hideStack];
   hideStack.translatesAutoresizingMaskIntoConstraints = NO;
   [NSLayoutConstraint activateConstraints:@[
@@ -552,7 +569,7 @@
                  forControlEvents:UIControlEventTouchUpInside];
   [buttonStack addArrangedSubview:self.hidePanelButton];
 
-  // 约束
+  // Constraints
   [NSLayoutConstraint activateConstraints:@[
     [buttonStack.topAnchor constraintEqualToAnchor:self.bottomButtonContainer.topAnchor
                                           constant:10],
@@ -566,14 +583,14 @@
 }
 
 - (void)setupPanelConstraints {
-  // 确保所有视图都已初始化
-  NSAssert(self.panelRootView != nil, @"panelRootView 不能为 nil");
-  NSAssert(self.bottomButtonContainer != nil, @"bottomButtonContainer 不能为 nil");
-  NSAssert(self.sliderContainer != nil, @"sliderContainer 不能为 nil");
-  NSAssert(self.functionScrollView != nil, @"functionScrollView 不能为 nil");
-  NSAssert(self.tabScrollView != nil, @"tabScrollView 不能为 nil");
+  // Ensure all views are initialized
+  NSAssert(self.panelRootView != nil, @"panelRootView cannot be nil");
+  NSAssert(self.bottomButtonContainer != nil, @"bottomButtonContainer cannot be nil");
+  NSAssert(self.sliderContainer != nil, @"sliderContainer cannot be nil");
+  NSAssert(self.functionScrollView != nil, @"functionScrollView cannot be nil");
+  NSAssert(self.tabScrollView != nil, @"tabScrollView cannot be nil");
 
-  // 获取 safeAreaLayoutGuide（iOS 11+），如果不可用则使用 bottomAnchor
+  // Get safeAreaLayoutGuide (iOS 11+), use bottomAnchor if unavailable
   NSLayoutYAxisAnchor *bottomAnchor;
   if (@available(iOS 11.0, *)) {
     bottomAnchor = self.view.safeAreaLayoutGuide.bottomAnchor;
@@ -585,12 +602,12 @@
   }
 
   [NSLayoutConstraint activateConstraints:@[
-    // 面板根视图（从 Tab 区域开始到底部，只覆盖底部面板区域）
+    // Panel root view (from Tab area to bottom, only covers bottom panel area)
     [self.panelRootView.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor],
     [self.panelRootView.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor],
     [self.panelRootView.bottomAnchor constraintEqualToAnchor:self.view.bottomAnchor],
 
-    // 底部按钮容器（最底部，与 bottomControlPanel 位置一致）
+    // Bottom button container (bottommost, same position as bottomControlPanel)
     [self.bottomButtonContainer.leadingAnchor
         constraintEqualToAnchor:self.panelRootView.leadingAnchor],
     [self.bottomButtonContainer.trailingAnchor
@@ -598,7 +615,7 @@
     [self.bottomButtonContainer.bottomAnchor constraintEqualToAnchor:bottomAnchor],
     [self.bottomButtonContainer.heightAnchor constraintEqualToConstant:80],
 
-    // 功能按钮滚动视图（在 Tab 下方，在底部按钮上方）
+    // Function button scroll view (below Tab, above bottom buttons)
     [self.functionScrollView.leadingAnchor constraintEqualToAnchor:self.panelRootView.leadingAnchor
                                                           constant:16],
     [self.functionScrollView.trailingAnchor
@@ -608,7 +625,7 @@
         constraintEqualToAnchor:self.bottomButtonContainer.topAnchor],
     [self.functionScrollView.heightAnchor constraintEqualToConstant:120],
 
-    // 功能按钮容器
+    // Function button container
     [self.functionButtonContainer.topAnchor
         constraintEqualToAnchor:self.functionScrollView.topAnchor],
     [self.functionButtonContainer.leadingAnchor
@@ -620,24 +637,24 @@
     [self.functionButtonContainer.heightAnchor
         constraintEqualToAnchor:self.functionScrollView.heightAnchor],
 
-    // Tab 滚动视图（在功能按钮上方）
+    // Tab scroll view (above function buttons)
     [self.tabScrollView.leadingAnchor constraintEqualToAnchor:self.panelRootView.leadingAnchor],
     [self.tabScrollView.trailingAnchor constraintEqualToAnchor:self.panelRootView.trailingAnchor],
     [self.tabScrollView.topAnchor
-        constraintEqualToAnchor:self.panelRootView.topAnchor],  // 面板从 Tab 区域开始
+        constraintEqualToAnchor:self.panelRootView.topAnchor],  // Panel starts from Tab area
     [self.tabScrollView.bottomAnchor constraintEqualToAnchor:self.functionScrollView.topAnchor],
     [self.tabScrollView.heightAnchor constraintEqualToConstant:50],
 
-    // Tab 容器（严格限制高度，确保垂直方向不可滚动）
+    // Tab container (strictly limit height to ensure vertical scrolling is disabled)
     [self.tabContainer.topAnchor constraintEqualToAnchor:self.tabScrollView.topAnchor constant:8],
     [self.tabContainer.leadingAnchor constraintEqualToAnchor:self.tabScrollView.leadingAnchor
                                                     constant:8],
     [self.tabContainer.trailingAnchor constraintEqualToAnchor:self.tabScrollView.trailingAnchor
                                                      constant:-8],
     [self.tabContainer.heightAnchor
-        constraintEqualToConstant:34],  // 50 - 8*2 = 34 (Tab ScrollView 高度 50 - 上下 padding 8*2)
+        constraintEqualToConstant:34],  // 50 - 8*2 = 34 (Tab ScrollView height 50 - top/bottom padding 8*2)
 
-    // 子选项滚动视图（与功能按钮重叠，显示时替换功能按钮）
+    // Sub-option scroll view (overlaps function buttons, replaces them when shown)
     [self.subOptionScrollView.leadingAnchor
         constraintEqualToAnchor:self.panelRootView.leadingAnchor],
     [self.subOptionScrollView.trailingAnchor
@@ -646,7 +663,7 @@
         constraintEqualToAnchor:self.bottomButtonContainer.topAnchor],
     [self.subOptionScrollView.heightAnchor constraintEqualToConstant:120],
 
-    // 子选项容器（允许水平滚动）
+    // Sub-option container (allows horizontal scrolling)
     [self.subOptionContainer.topAnchor constraintEqualToAnchor:self.subOptionScrollView.topAnchor],
     [self.subOptionContainer.leadingAnchor
         constraintEqualToAnchor:self.subOptionScrollView.leadingAnchor
@@ -657,26 +674,26 @@
         constraintEqualToAnchor:self.subOptionScrollView.heightAnchor]
   ]];
 
-  // 设置子选项容器宽度约束：使用 >= 关系，允许内容超出 ScrollView 宽度
-  // 这样 StackView 可以根据内容自动扩展，ScrollView 才能滚动
+  // Set sub-option container width constraint: use >= relation to allow content to exceed ScrollView width
+  // This way StackView can automatically expand based on content, and ScrollView can scroll
   NSLayoutConstraint *subOptionWidthConstraint = [self.subOptionContainer.widthAnchor
       constraintGreaterThanOrEqualToAnchor:self.subOptionScrollView.widthAnchor
                                   constant:-32];
   subOptionWidthConstraint.priority = UILayoutPriorityDefaultLow;
   subOptionWidthConstraint.active = YES;
 
-  // 滑动条容器约束（位于面板上方，在面板顶部）
+  // Slider container constraints (located above panel, at panel top)
   [NSLayoutConstraint activateConstraints:@[
     [self.sliderContainer.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor],
     [self.sliderContainer.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor],
     [self.sliderContainer.bottomAnchor constraintEqualToAnchor:self.panelRootView.topAnchor]
   ]];
-  // 存储高度约束，以便动态调整（初始为 0，因为滑块默认隐藏）
+  // Store height constraint for dynamic adjustment (initial 0, because slider is hidden by default)
   self.sliderContainerHeightConstraint =
       [self.sliderContainer.heightAnchor constraintEqualToConstant:0];
   self.sliderContainerHeightConstraint.active = YES;
 
-  // Before/After 按钮约束（动态位置：面板展开时贴近面板顶部，面板折叠时贴近底部控制面板）
+  // Before/After button constraints (dynamic position: close to panel top when expanded, close to bottom control panel when collapsed)
   [NSLayoutConstraint activateConstraints:@[
     [self.beforeAfterButton.widthAnchor constraintEqualToConstant:50],
     [self.beforeAfterButton.heightAnchor constraintEqualToConstant:50],
@@ -684,17 +701,17 @@
                                                           constant:-16]
   ]];
 
-  // 创建两个约束：一个绑定到面板顶部（展开时），一个绑定到底部控制面板（折叠时）
-  // 注意：bottomControlPanel 此时可能还未创建，所以初始约束在 hidePanel 中设置
-  // 这里先创建一个临时约束，实际会在 showPanel/hidePanel 中动态切换
+  // Create two constraints: one bound to panel top (when expanded), one bound to bottom control panel (when collapsed)
+  // Note: bottomControlPanel may not be created yet, so initial constraint is set in hidePanel
+  // Create a temporary constraint here, will be dynamically switched in showPanel/hidePanel
 }
 
 - (void)setupBottomControlPanel {
-  // 底部控制面板（美颜美型、美妆、拍照、贴纸特效、滤镜调色）
+  // Bottom control panel (Beauty/Reshape, Makeup, Capture, Sticker Effect, Filter Adjustment)
   self.bottomControlPanel = [[UIView alloc] init];
   self.bottomControlPanel.translatesAutoresizingMaskIntoConstraints = NO;
   self.bottomControlPanel.backgroundColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:0.8];
-  self.bottomControlPanel.userInteractionEnabled = YES;  // 确保底部控制面板可以接收点击事件
+  self.bottomControlPanel.userInteractionEnabled = YES;  // Ensure bottom control panel can receive click events
   [self.view addSubview:self.bottomControlPanel];
 
   UIStackView *buttonStack = [[UIStackView alloc] init];
@@ -703,13 +720,13 @@
   buttonStack.distribution = UIStackViewDistributionFillEqually;
   buttonStack.spacing = 0;
 
-  // 按钮配置：图标名称和标题
+  // Button configuration: icon name and title
   NSArray *buttonConfigs = @[
-    @{@"icon" : @"meiyan", @"title" : @"美颜美型"},
-    @{@"icon" : @"meizhuang", @"title" : @"美妆"},
-    @{@"icon" : @"camera2", @"title" : @"拍照"},
-    @{@"icon" : @"tiezhi2", @"title" : @"贴纸特效"},
-    @{@"icon" : @"lvjing", @"title" : @"滤镜调色"}
+    @{@"icon" : @"meiyan", @"title" : @"Beauty"},
+    @{@"icon" : @"meizhuang", @"title" : @"Makeup"},
+    @{@"icon" : @"camera2", @"title" : @"Capture"},
+    @{@"icon" : @"tiezhi2", @"title" : @"Sticker"},
+    @{@"icon" : @"lvjing", @"title" : @"Filter"}
   ];
 
   for (NSDictionary *config in buttonConfigs) {
@@ -724,7 +741,7 @@
         iconImage = [UIImage systemImageNamed:@"circle.fill"];
       }
     } else {
-      // 设置为模板模式以便着色
+      // Set to template mode for tinting
       iconImage = [iconImage imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
     }
     UIImageView *iconView = [[UIImageView alloc] initWithImage:iconImage];
@@ -747,21 +764,21 @@
     UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
     [button addSubview:buttonStackItem];
     buttonStackItem.translatesAutoresizingMaskIntoConstraints = NO;
-    buttonStackItem.userInteractionEnabled = NO;  // 禁用 StackView 交互，避免拦截按钮的触摸事件
+    buttonStackItem.userInteractionEnabled = NO;  // Disable StackView interaction to avoid intercepting button touch events
     [NSLayoutConstraint activateConstraints:@[
       [buttonStackItem.centerXAnchor constraintEqualToAnchor:button.centerXAnchor],
       [buttonStackItem.centerYAnchor constraintEqualToAnchor:button.centerYAnchor]
     ]];
 
-    // 如果是拍照按钮（中间），使用白色外圆 + 绿色内圆
-    if ([config[@"title"] isEqualToString:@"拍照"]) {
-      // 移除图标和文字
+    // If it's capture button (middle), use white outer circle + green inner circle
+      if ([config[@"title"] isEqualToString:@"Capture"]) {
+      // Remove icon and text
       [buttonStackItem removeArrangedSubview:iconView];
       [buttonStackItem removeArrangedSubview:titleLabel];
       [iconView removeFromSuperview];
       [titleLabel removeFromSuperview];
 
-      // 创建白色外圆容器
+      // Create white outer circle container
       UIView *outerCircleView = [[UIView alloc] init];
       outerCircleView.translatesAutoresizingMaskIntoConstraints = NO;
       outerCircleView.backgroundColor = [UIColor whiteColor];
@@ -769,7 +786,7 @@
       outerCircleView.layer.masksToBounds = YES;
       [button addSubview:outerCircleView];
 
-      // 创建绿色内圆
+      // Create green inner circle
       UIView *innerCircleView = [[UIView alloc] init];
       innerCircleView.translatesAutoresizingMaskIntoConstraints = NO;
       innerCircleView.backgroundColor = [UIColor colorWithRed:0.0
@@ -781,35 +798,35 @@
       [button addSubview:innerCircleView];
 
       [NSLayoutConstraint activateConstraints:@[
-        // 外层白色圆 60x60，居中
+        // Outer white circle 60x60, centered
         [outerCircleView.centerXAnchor constraintEqualToAnchor:button.centerXAnchor],
         [outerCircleView.centerYAnchor constraintEqualToAnchor:button.centerYAnchor],
         [outerCircleView.widthAnchor constraintEqualToConstant:60],
         [outerCircleView.heightAnchor constraintEqualToConstant:60],
 
-        // 内层绿色圆 50x50，居中在外层圆内
+        // Inner green circle 50x50, centered inside outer circle
         [innerCircleView.centerXAnchor constraintEqualToAnchor:outerCircleView.centerXAnchor],
         [innerCircleView.centerYAnchor constraintEqualToAnchor:outerCircleView.centerYAnchor],
         [innerCircleView.widthAnchor constraintEqualToConstant:50],
         [innerCircleView.heightAnchor constraintEqualToConstant:50]
       ]];
 
-      // 拍照按钮点击事件
+      // Capture button click event
       [button addTarget:self
                     action:@selector(captureButtonTapped:)
           forControlEvents:UIControlEventTouchUpInside];
     } else {
-      // 其他按钮：根据标题映射到对应的 Tab
+      // Other buttons: map to corresponding Tab based on title
       NSString *title = config[@"title"];
       SEL selector = nil;
 
-      if ([title isEqualToString:@"美颜美型"]) {
+      if ([title isEqualToString:@"Beauty"]) {
         selector = @selector(beautyButtonTapped:);
-      } else if ([title isEqualToString:@"美妆"]) {
+      } else if ([title isEqualToString:@"Makeup"]) {
         selector = @selector(makeupButtonTapped:);
-      } else if ([title isEqualToString:@"贴纸特效"]) {
+      } else if ([title isEqualToString:@"Sticker"]) {
         selector = @selector(stickerButtonTapped:);
-      } else if ([title isEqualToString:@"滤镜调色"]) {
+      } else if ([title isEqualToString:@"Filter"]) {
         selector = @selector(filterButtonTapped:);
       }
 
@@ -843,13 +860,13 @@
 - (void)showPanel {
   self.isPanelVisible = YES;
   self.panelRootView.hidden = NO;
-  self.panelRootView.userInteractionEnabled = YES;  // 面板显示时可以接收触摸事件
+  self.panelRootView.userInteractionEnabled = YES;  // Panel can receive touch events when shown
   self.view.userInteractionEnabled = YES;
   self.bottomControlPanel.hidden = YES;
-  // 显示对比按钮（与滑块独立控制）
+  // Show compare button (independently controlled from slider)
   self.beforeAfterButton.hidden = NO;
 
-  // 切换约束：面板展开时，按钮贴近面板顶部
+  // Switch constraint: when panel is expanded, button is close to panel top
   if (self.beforeAfterButtonBottomConstraint) {
     self.beforeAfterButtonBottomConstraint.active = NO;
   }
@@ -858,12 +875,12 @@
                                                           constant:-10];
   self.beforeAfterButtonBottomConstraint.active = YES;
 
-  // 确保顶部栏始终在最上层
+  // Ensure top bar is always on topmost layer
   [self.view bringSubviewToFront:self.topBar];
-  // 确保对比按钮在最上层，不被底部控件遮挡
+  // Ensure compare button is on topmost layer, not blocked by bottom controls
   [self.view bringSubviewToFront:self.beforeAfterButton];
 
-  // 更新布局
+  // Update layout
   [UIView animateWithDuration:0.2
                    animations:^{
                      [self.view layoutIfNeeded];
@@ -873,13 +890,13 @@
 - (void)hidePanel {
   self.isPanelVisible = NO;
   self.panelRootView.hidden = YES;
-  self.panelRootView.userInteractionEnabled = NO;  // 面板隐藏时禁用交互，避免拦截顶部按钮的触摸事件
-  self.view.userInteractionEnabled = YES;  // 保持可交互，以便 bottomControlPanel 可以接收点击事件
+  self.panelRootView.userInteractionEnabled = NO;  // Disable interaction when panel is hidden to avoid intercepting top button touch events
+  self.view.userInteractionEnabled = YES;  // Keep interactive so bottomControlPanel can receive click events
   self.bottomControlPanel.hidden = NO;
   [self hideSubOptions];
   [self hideSlider];
 
-  // 切换约束：面板折叠时，按钮贴近底部控制面板
+  // Switch constraint: when panel is collapsed, button is close to bottom control panel
   if (self.beforeAfterButtonBottomConstraint) {
     self.beforeAfterButtonBottomConstraint.active = NO;
   }
@@ -888,13 +905,13 @@
                                                           constant:-10];
   self.beforeAfterButtonBottomConstraint.active = YES;
 
-  // 确保顶部栏始终在最上层
+  // Ensure top bar is always on topmost layer
   [self.view bringSubviewToFront:self.topBar];
-  // 面板隐藏时仍显示对比按钮，并置顶
+  // Still show compare button when panel is hidden, and bring to front
   self.beforeAfterButton.hidden = NO;
   [self.view bringSubviewToFront:self.beforeAfterButton];
 
-  // 更新布局
+  // Update layout
   [UIView animateWithDuration:0.2
                    animations:^{
                      [self.view layoutIfNeeded];
@@ -912,25 +929,25 @@
 #pragma mark - Private Methods
 
 - (void)updateFunctionButtons {
-  // 清空现有按钮和指示器
+  // Clear existing buttons and indicators
   for (UIButton *button in self.functionButtons) {
     [self.functionButtonContainer removeArrangedSubview:button];
     [button removeFromSuperview];
   }
   [self.functionButtons removeAllObjects];
-  [self.functionIndicatorViews removeAllObjects];  // 清空指示器引用
+  [self.functionIndicatorViews removeAllObjects];  // Clear indicator references
 
-  // 根据当前 Tab 创建按钮
+  // Create buttons based on current Tab
   NSArray *functions = [self functionsForCurrentTab];
 
   for (NSDictionary *function in functions) {
     UIButton *button = [self createFunctionButton:function];
 
-    // 处理禁用状态：只有当明确设置为 @NO 时才禁用，默认是可用状态
+    // Handle disabled state: only disable when explicitly set to @NO, default is enabled
     NSNumber *enabled = function[@"enabled"];
     if (enabled != nil && [enabled boolValue] == NO) {
       button.alpha = 0.5;
-      // 添加 Soon 标签
+      // Add Soon badge
       UILabel *soonLabel = [[UILabel alloc] init];
       soonLabel.text = @"Soon";
       soonLabel.font = [UIFont systemFontOfSize:8];
@@ -953,88 +970,109 @@
     [self.functionButtons addObject:button];
   }
 
-  // 更新选中指示器状态
+  // Update selected indicator state
   [self updateSelectionIndicators];
 }
 
 - (NSArray *)functionsForCurrentTab {
   if ([self.currentTab isEqualToString:@"beauty"]) {
-    // 美颜：关闭、美白(可用)、美黑(禁用)、磨皮(可用)、红润(可用)
-    // 参考 Android: white, smooth, rosiness 可用；dark 禁用
+    // Beauty: Off, Whitening (enabled), Dark (disabled), Smoothing (enabled), Rosiness (enabled)
+    // Reference Android: white, smooth, rosiness enabled; dark disabled
     return @[
-      @{@"key" : @"off", @"title" : @"关闭", @"icon" : @"disable"},
-      @{@"key" : @"white", @"title" : @"美白", @"icon" : @"meiyan"},
-      @{@"key" : @"dark", @"title" : @"美黑", @"icon" : @"huanfase", @"enabled" : @NO},
-      @{@"key" : @"smooth", @"title" : @"磨皮", @"icon" : @"meiyan2"},
-      @{@"key" : @"ai", @"title" : @"红润", @"icon" : @"meiyan"}
+      @{@"key" : @"off", @"title" : @"Off", @"icon" : @"disable"},
+      @{@"key" : @"white", @"title" : @"Whitening", @"icon" : @"meiyan"},
+      @{@"key" : @"dark", @"title" : @"Dark", @"icon" : @"huanfase", @"enabled" : @NO},
+      @{@"key" : @"smooth", @"title" : @"Smoothing", @"icon" : @"meiyan2"},
+      @{@"key" : @"ai", @"title" : @"Rosiness", @"icon" : @"meiyan"}
     ];
   } else if ([self.currentTab isEqualToString:@"reshape"]) {
-    // 美型：关闭、瘦脸、V脸、窄脸、短脸、颧骨、下颌、下巴、瘦鼻、大眼、眼距
-    // 参考 Android: 10个 reshape 参数全部可用
+    // Reshape: Off, Thin Face, V Face, Narrow Face, Short Face, Cheekbone, Jawbone, Chin, Nose Slim, Big Eye, Eye Distance
+    // Reference Android: All 10 reshape parameters are enabled
     return @[
-      @{@"key" : @"off", @"title" : @"关闭", @"icon" : @"disable"},
-      @{@"key" : @"thin_face", @"title" : @"瘦脸", @"icon" : @"meixing2"},
-      @{@"key" : @"v_face", @"title" : @"V脸", @"icon" : @"meixing2"},
-      @{@"key" : @"narrow_face", @"title" : @"窄脸", @"icon" : @"meixing2"},
-      @{@"key" : @"short_face", @"title" : @"短脸", @"icon" : @"meixing2"},
-      @{@"key" : @"cheekbone", @"title" : @"颧骨", @"icon" : @"meixing2"},
-      @{@"key" : @"jawbone", @"title" : @"下颌", @"icon" : @"meixing2"},
-      @{@"key" : @"chin", @"title" : @"下巴", @"icon" : @"meixing2"},
-      @{@"key" : @"nose_slim", @"title" : @"瘦鼻", @"icon" : @"meixing2"},
-      @{@"key" : @"big_eye", @"title" : @"大眼", @"icon" : @"meixing2"},
-      @{@"key" : @"eye_distance", @"title" : @"眼距", @"icon" : @"meixing2"}
+      @{@"key" : @"off", @"title" : @"Off", @"icon" : @"disable"},
+      @{@"key" : @"thin_face", @"title" : @"Thin Face", @"icon" : @"meixing2"},
+      @{@"key" : @"v_face", @"title" : @"V Face", @"icon" : @"meixing2"},
+      @{@"key" : @"narrow_face", @"title" : @"Narrow Face", @"icon" : @"meixing2"},
+      @{@"key" : @"short_face", @"title" : @"Short Face", @"icon" : @"meixing2"},
+      @{@"key" : @"cheekbone", @"title" : @"Cheekbone", @"icon" : @"meixing2"},
+      @{@"key" : @"jawbone", @"title" : @"Jawbone", @"icon" : @"meixing2"},
+      @{@"key" : @"chin", @"title" : @"Chin", @"icon" : @"meixing2"},
+      @{@"key" : @"nose_slim", @"title" : @"Nose Slim", @"icon" : @"meixing2"},
+      @{@"key" : @"big_eye", @"title" : @"Big Eye", @"icon" : @"meixing2"},
+      @{@"key" : @"eye_distance", @"title" : @"Eye Distance", @"icon" : @"meixing2"}
     ];
   } else if ([self.currentTab isEqualToString:@"makeup"]) {
-    // 美妆：关闭、口红、腮红、眉毛、眼影（全部可用，有子选项）
-    // 参考 Android: 4个功能全部可用，都有子选项
+    // Makeup: Off, Lipstick, Blush, Eyebrow, Eyeshadow (all enabled, with sub-options)
+    // Reference Android: All 4 functions enabled, all have sub-options
     return @[
-      @{@"key" : @"off", @"title" : @"关闭", @"icon" : @"disable"},
-      @{@"key" : @"lipstick", @"title" : @"口红", @"icon" : @"meizhuang"},
-      @{@"key" : @"blush", @"title" : @"腮红", @"icon" : @"meizhuang"},
-      @{@"key" : @"eyebrow", @"title" : @"眉毛", @"icon" : @"meizhuang"},
-      @{@"key" : @"eyeshadow", @"title" : @"眼影", @"icon" : @"meizhuang"}
+      @{@"key" : @"off", @"title" : @"Off", @"icon" : @"disable"},
+      @{@"key" : @"lipstick", @"title" : @"Lipstick", @"icon" : @"meizhuang"},
+      @{@"key" : @"blush", @"title" : @"Blush", @"icon" : @"meizhuang"},
+      @{@"key" : @"eyebrow", @"title" : @"Eyebrow", @"icon" : @"meizhuang"},
+      @{@"key" : @"eyeshadow", @"title" : @"Eyeshadow", @"icon" : @"meizhuang"}
     ];
   } else if ([self.currentTab isEqualToString:@"filter"]) {
-    // 滤镜：关闭、自然、清新、复古、黑白（全部可用）
-    // 参考 Android: 4个滤镜全部可用
-    return @[
-      @{@"key" : @"off", @"title" : @"关闭", @"icon" : @"disable"},
-      @{@"key" : @"natural", @"title" : @"自然", @"icon" : @"lvjing"},
-      @{@"key" : @"fresh", @"title" : @"清新", @"icon" : @"lvjing"},
-      @{@"key" : @"retro", @"title" : @"复古", @"icon" : @"lvjing"},
-      @{@"key" : @"bw", @"title" : @"黑白", @"icon" : @"lvjing"}
+    // Filter: Off, then all portrait filters from mapping
+    NSMutableArray *filters = [NSMutableArray array];
+    
+    // 1. Off button
+    [filters addObject:@{@"key" : @"off", @"title" : @"Off", @"icon" : @"disable"}];
+    
+    // 2. Portrait filters
+    // Hardcoded order to match Android's filter_mapping.json traversal order or specific preference
+    // Or iterate through the directory structure as done in registration
+    // Here we use a predefined list of keys matching the files we saw in `assets/filters/portrait`
+    NSArray *filterKeys = @[
+      @"initial_heart", @"first_love", @"vivid", @"confession", @"milk_tea", @"mousse", 
+      @"japanese", @"dawn", @"cookie", @"lively", @"pure", @"fair", @"snow", @"plain", 
+      @"natural", @"rose", @"tender", @"tender_2", @"extraordinary"
     ];
+    
+    for (NSString *key in filterKeys) {
+      NSString *title = key;
+      if (self.filterMapping && self.filterMapping[key]) {
+        title = self.filterMapping[key][@"en"];
+      }
+      
+      // Use 'toggle' type so it doesn't show slider
+      [filters addObject:@{
+        @"key" : key, 
+        @"title" : title, 
+        @"icon" : @"lvjing",
+        @"type" : @"toggle"
+      }];
+    }
+    
+    return filters;
   } else if ([self.currentTab isEqualToString:@"sticker"]) {
-    // 贴纸：关闭、可爱、搞笑（全部禁用）
-    // 参考 Android: 只有2个，都禁用
+    // Sticker: Off, Rabbit (toggle type)
     return @[
-      @{@"key" : @"off", @"title" : @"关闭", @"icon" : @"disable"},
-      @{@"key" : @"cute", @"title" : @"可爱", @"icon" : @"tiezhi2", @"enabled" : @NO},
-      @{@"key" : @"funny", @"title" : @"搞笑", @"icon" : @"tiezhi2", @"enabled" : @NO}
+      @{@"key" : @"off", @"title" : @"Off", @"icon" : @"disable"},
+      @{@"key" : @"rabbit", @"title" : @"Rabbit", @"icon" : @"tiezhi2", @"type" : @"toggle"}
     ];
   } else if ([self.currentTab isEqualToString:@"body"]) {
-    // 美体：关闭、瘦身（禁用）
-    // 参考 Android: 只有1个，禁用
+    // Body: Off, Slim (disabled)
+    // Reference Android: Only 1, disabled
     return @[
-      @{@"key" : @"off", @"title" : @"关闭", @"icon" : @"disable"},
-      @{@"key" : @"slim", @"title" : @"瘦身", @"icon" : @"meiti", @"enabled" : @NO}
+      @{@"key" : @"off", @"title" : @"Off", @"icon" : @"disable"},
+      @{@"key" : @"slim", @"title" : @"Slim", @"icon" : @"meiti", @"enabled" : @NO}
     ];
   } else if ([self.currentTab isEqualToString:@"virtual_bg"]) {
-    // 虚拟背景：关闭、模糊、预置、图像（全部可用，开关类型）
-    // 参考 Android: blur, preset, image 全部可用（开关类型，不是滑块）
-    // 添加关闭按钮以保持与其他 tab 的一致性
+    // Virtual Background: Off, Blur, Preset, Image (all enabled, toggle type)
+    // Reference Android: blur, preset, image all enabled (toggle type, not slider)
+    // Add off button to maintain consistency with other tabs
     return @[
-      @{@"key" : @"off", @"title" : @"关闭", @"icon" : @"disable"},
-      @{@"key" : @"blur", @"title" : @"模糊", @"icon" : @"xunibeijing", @"type" : @"toggle"},
-      @{@"key" : @"preset", @"title" : @"预置", @"icon" : @"back_preset", @"type" : @"toggle"},
-      @{@"key" : @"image", @"title" : @"图像", @"icon" : @"photo", @"type" : @"toggle"}
+      @{@"key" : @"off", @"title" : @"Off", @"icon" : @"disable"},
+      @{@"key" : @"blur", @"title" : @"Blur", @"icon" : @"xunibeijing", @"type" : @"toggle"},
+      @{@"key" : @"preset", @"title" : @"Preset", @"icon" : @"back_preset", @"type" : @"toggle"},
+      @{@"key" : @"image", @"title" : @"Image", @"icon" : @"photo", @"type" : @"toggle"}
     ];
   } else if ([self.currentTab isEqualToString:@"quality"]) {
-    // 画质调整：关闭、锐化（禁用）
-    // 参考 Android: 只有1个，禁用
+    // Quality: Off, Sharpen (disabled)
+    // Reference Android: Only 1, disabled
     return @[
-      @{@"key" : @"off", @"title" : @"关闭", @"icon" : @"disable"},
-      @{@"key" : @"sharpen", @"title" : @"锐化", @"icon" : @"huazhitiaozheng2", @"enabled" : @NO}
+      @{@"key" : @"off", @"title" : @"Off", @"icon" : @"disable"},
+      @{@"key" : @"sharpen", @"title" : @"Sharpen", @"icon" : @"huazhitiaozheng2", @"enabled" : @NO}
     ];
   }
 
@@ -1050,17 +1088,17 @@
   stackView.alignment = UIStackViewAlignmentCenter;
   stackView.spacing = 4;
 
-  // 图标容器（深灰色背景，圆形）
+  // Icon container (dark gray background, circular)
   UIView *iconContainer = [[UIView alloc] init];
   iconContainer.backgroundColor = [UIColor colorWithRed:0.3 green:0.3 blue:0.3 alpha:1.0];
   iconContainer.layer.cornerRadius = 25;
 
-  // 图标（从 Assets 读取或使用系统图标）
+  // Icon (read from Assets or use system icon)
   UIImageView *iconView = [[UIImageView alloc] init];
   NSString *iconName = function[@"icon"];
   UIImage *iconImage = [UIImage imageNamed:iconName];
   if (!iconImage) {
-    // 如果是系统图标名称，使用系统图标
+    // If it's a system icon name, use system icon
     if (@available(iOS 13.0, *)) {
       iconImage = [UIImage systemImageNamed:iconName];
       if (iconImage) {
@@ -1068,7 +1106,7 @@
       }
     }
   } else {
-    // 普通图片设置为模板模式以便着色
+    // Set regular image to template mode for tinting
     iconImage = [iconImage imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
   }
   iconView.image = iconImage;
@@ -1094,28 +1132,28 @@
   titleLabel.font = [UIFont systemFontOfSize:12];
   titleLabel.textAlignment = NSTextAlignmentCenter;
 
-  // 选中指示器：绿色短横线，位于文字下方
+  // Selected indicator: green short line, below text
   UIView *indicator = [[UIView alloc] init];
   indicator.backgroundColor = [UIColor colorWithRed:0.0
                                               green:1.0
                                                blue:0.0
-                                              alpha:1.0];  // #00FF00 绿色
-  indicator.layer.cornerRadius = 1.5;                      // 约 3pt / 2 = 1.5pt
-  indicator.hidden = YES;                                  // 默认隐藏
+                                              alpha:1.0];  // #00FF00 green
+  indicator.layer.cornerRadius = 1.5;                      // Approximately 3pt / 2 = 1.5pt
+  indicator.hidden = YES;                                  // Hidden by default
   indicator.translatesAutoresizingMaskIntoConstraints = NO;
 
   [stackView addArrangedSubview:iconContainer];
   [stackView addArrangedSubview:titleLabel];
   [stackView addArrangedSubview:indicator];
-  stackView.userInteractionEnabled = NO;  // 禁用 StackView 交互，避免拦截按钮的触摸事件
+  stackView.userInteractionEnabled = NO;  // Disable StackView interaction to avoid intercepting button touch events
 
-  // 设置指示器大小约束（14pt x 3pt，参考 Android 的 14dp x 3dp）
+  // Set indicator size constraints (14pt x 3pt, reference Android's 14dp x 3dp)
   [NSLayoutConstraint activateConstraints:@[
     [indicator.widthAnchor constraintEqualToConstant:14],
     [indicator.heightAnchor constraintEqualToConstant:3]
   ]];
 
-  // 保存该功能的指示器引用（带 tab 前缀）
+  // Save indicator reference for this function (with tab prefix)
   NSString *functionKey = function[@"key"];
   NSString *fullKey =
       [NSString stringWithFormat:@"%@:%@", self.currentTab ?: @"", functionKey ?: @""];
@@ -1171,7 +1209,7 @@
 - (void)showSubOptions {
   self.isSubOptionVisible = YES;
   self.subOptionScrollView.hidden = NO;
-  // 强制更新布局，确保 ScrollView 的 contentSize 正确计算
+  // Force layout update to ensure ScrollView's contentSize is correctly calculated
   dispatch_async(dispatch_get_main_queue(), ^{
     [self.subOptionScrollView layoutIfNeeded];
   });
@@ -1183,15 +1221,15 @@
 }
 
 - (void)setupSliderContainer {
-  // 滑动条容器应该在面板上方，而不是在面板内部
+  // Slider container should be above the panel, not inside the panel
   self.sliderContainer = [[UIView alloc] init];
   self.sliderContainer.translatesAutoresizingMaskIntoConstraints = NO;
   self.sliderContainer.backgroundColor = [UIColor clearColor];
   self.sliderContainer.hidden = YES;
   self.isSliderVisible = NO;
-  [self.view addSubview:self.sliderContainer];  // 添加到 view 而不是 panelRootView
+  [self.view addSubview:self.sliderContainer];  // Add to view instead of panelRootView
 
-  // 数值标签
+  // Value label
   self.valueLabel = [[UILabel alloc] init];
   self.valueLabel.translatesAutoresizingMaskIntoConstraints = NO;
   self.valueLabel.text = @"50";
@@ -1203,7 +1241,7 @@
   self.valueLabel.hidden = YES;
   [self.sliderContainer addSubview:self.valueLabel];
 
-  // 滑块
+  // Slider
   self.valueSlider = [[UISlider alloc] init];
   self.valueSlider.translatesAutoresizingMaskIntoConstraints = NO;
   self.valueSlider.minimumValue = 0;
@@ -1227,12 +1265,12 @@
     [self.valueSlider.leadingAnchor constraintEqualToAnchor:self.sliderContainer.leadingAnchor
                                                    constant:16],
     [self.valueSlider.trailingAnchor constraintEqualToAnchor:self.sliderContainer.trailingAnchor
-                                                    constant:-80],  // 为 Before/After 按钮留出空间
+                                                    constant:-80],  // Reserve space for Before/After button
     [self.valueSlider.centerYAnchor constraintEqualToAnchor:self.sliderContainer.centerYAnchor],
     [self.valueSlider.heightAnchor constraintEqualToConstant:30]
   ]];
 
-  // Before/After 对比按钮
+  // Before/After compare button
   self.beforeAfterButton = [UIButton buttonWithType:UIButtonTypeCustom];
   self.beforeAfterButton.translatesAutoresizingMaskIntoConstraints = NO;
   self.beforeAfterButton.backgroundColor = [UIColor colorWithRed:0.3 green:0.3 blue:0.3 alpha:1.0];
@@ -1255,7 +1293,7 @@
   iconView.translatesAutoresizingMaskIntoConstraints = NO;
   [self.beforeAfterButton addSubview:iconView];
 
-  // 只设置按钮内部的图标约束，按钮本身的约束在 setupPanelConstraints 中设置
+  // Only set icon constraints inside the button, button's own constraints are set in setupPanelConstraints
   [NSLayoutConstraint activateConstraints:@[
     [iconView.widthAnchor constraintEqualToConstant:22],
     [iconView.heightAnchor constraintEqualToConstant:22],
@@ -1266,7 +1304,7 @@
   [self.beforeAfterButton addTarget:self
                              action:@selector(beforeAfterButtonTapped:)
                    forControlEvents:UIControlEventTouchUpInside];
-  // 按住预览原图：按下关闭所有参数，松开恢复用户已设置参数
+  // Hold to preview original: press to disable all parameters, release to restore user-set parameters
   [self.beforeAfterButton addTarget:self
                              action:@selector(beforeAfterTouchDown:)
                    forControlEvents:UIControlEventTouchDown];
@@ -1274,7 +1312,7 @@
                              action:@selector(beforeAfterTouchUp:)
                    forControlEvents:(UIControlEventTouchUpInside | UIControlEventTouchUpOutside |
                                      UIControlEventTouchCancel)];
-  self.beforeAfterButton.hidden = YES;  // 默认隐藏，与滑动条一起显示/隐藏
+  self.beforeAfterButton.hidden = YES;  // Hidden by default, shown/hidden together with slider
   [self.view addSubview:self.beforeAfterButton];
 }
 
@@ -1282,7 +1320,7 @@
   self.isSliderVisible = YES;
   self.sliderContainer.hidden = NO;
   self.valueLabel.hidden = NO;
-  // 更新高度约束，显示滑块
+  // Update height constraint to show slider
   if (self.sliderContainerHeightConstraint) {
     self.sliderContainerHeightConstraint.constant = 60;
     [UIView animateWithDuration:0.2
@@ -1296,7 +1334,7 @@
   self.isSliderVisible = NO;
   self.sliderContainer.hidden = YES;
   self.valueLabel.hidden = YES;
-  // 更新高度约束，隐藏滑块（高度为 0）
+  // Update height constraint to hide slider (height is 0)
   if (self.sliderContainerHeightConstraint) {
     self.sliderContainerHeightConstraint.constant = 0;
     [UIView animateWithDuration:0.2
@@ -1310,14 +1348,14 @@
   NSInteger value = (NSInteger)sender.value;
   self.valueLabel.text = [NSString stringWithFormat:@"%ld", (long)value];
 
-  // 保存当前功能的进度（0-100）
+  // Save current function's progress (0-100)
   if (self.currentTab && self.currentFunction) {
     NSString *progressKey =
         [NSString stringWithFormat:@"%@:%@", self.currentTab, self.currentFunction];
     self.functionProgress[progressKey] = @(value);
   }
 
-  // 通知代理参数变化（将进度值 0-100 转换为参数值 0.0-1.0）
+  // Notify delegate of parameter change (convert progress value 0-100 to parameter value 0.0-1.0)
   if (self.currentTab && self.currentFunction &&
       [self.delegate respondsToSelector:@selector(beautyPanelDidChangeParam:function:value:)]) {
     float paramValue = sender.value / 100.0f;
@@ -1345,10 +1383,10 @@
   ];
   if (index < tabNames.count) {
     self.currentTab = tabNames[index];
-    self.currentFunction = nil;  // 切换 tab 时清空当前功能
+    self.currentFunction = nil;  // Clear current function when switching tabs
     [self updateFunctionButtons];
     [self hideSubOptions];
-    [self updateSelectionIndicators];  // 更新指示器（隐藏所有，因为切换 tab 后没有选中功能）
+    [self updateSelectionIndicators];  // Update indicators (hide all, since no function is selected after switching tabs)
   }
 }
 
@@ -1359,49 +1397,49 @@
     if (index < functions.count) {
       NSDictionary *function = functions[index];
 
-      // 检查是否禁用：只有当明确设置为 @NO 时才禁用
+      // Check if disabled: only disable when explicitly set to @NO
       NSNumber *enabled = function[@"enabled"];
       if (enabled != nil && [enabled boolValue] == NO) {
-        return;  // 禁用功能不响应点击
+        return;  // Disabled function does not respond to clicks
       }
 
       NSString *functionKey = function[@"key"];
 
-      // 处理关闭按钮
+      // Handle off button
       if ([functionKey isEqualToString:@"off"]) {
         [self handleOffButtonClicked];
         return;
       }
 
-      // 检查按钮类型：如果是开关类型（toggle），不显示滑动条
+      // Check button type: if it's toggle type, don't show slider
       NSString *buttonType = function[@"type"];
       if ([buttonType isEqualToString:@"toggle"]) {
-        // 开关类型：切换状态，不显示滑动条
+        // Toggle type: switch state, don't show slider
         [self handleToggleFunction:functionKey];
         return;
       }
 
       self.currentFunction = functionKey;
 
-      // 更新选中指示器
+      // Update selected indicator
       [self updateSelectionIndicators];
 
-      // 显示滑块用于调节参数（滑动条类型）
+      // Show slider for adjusting parameters (slider type)
       [self showSlider];
       [self hideSubOptions];
 
-      // 更新滑块初始值（根据当前功能的状态）
+      // Update slider initial value (based on current function's state)
       NSString *progressKey =
           [NSString stringWithFormat:@"%@:%@", self.currentTab, self.currentFunction];
       NSNumber *progress = self.functionProgress[progressKey];
       if (progress) {
         self.valueSlider.value = [progress floatValue];
       } else {
-        self.valueSlider.value = 0;  // 默认值 0（参考 Android）
+        self.valueSlider.value = 0;  // Default value 0 (reference Android)
       }
       self.valueLabel.text = [NSString stringWithFormat:@"%ld", (long)self.valueSlider.value];
 
-      // 使用当前值立即应用一次参数，保证切换功能后立即生效（参考 Android）
+      // Immediately apply parameter once with current value to ensure it takes effect immediately after switching functions (reference Android)
       if ([self.delegate respondsToSelector:@selector(beautyPanelDidChangeParam:function:value:)]) {
         float paramValue = self.valueSlider.value / 100.0f;
         [self.delegate beautyPanelDidChangeParam:self.currentTab
@@ -1413,10 +1451,10 @@
 }
 
 - (void)handleOffButtonClicked {
-  // 清空当前功能选择
+  // Clear current function selection
   self.currentFunction = nil;
 
-  // 隐藏子选项和滑块
+  // Hide sub-options and slider
   [self hideSubOptions];
   [self hideSlider];
 
@@ -1424,7 +1462,7 @@
     return;
   }
 
-  // 清除当前 Tab 下所有已保存的滑动条进度
+  // Clear all saved slider progress under current Tab
   NSString *prefix = [NSString stringWithFormat:@"%@:", self.currentTab];
   NSMutableArray *keysToRemove = [NSMutableArray array];
   for (NSString *key in self.functionProgress.allKeys) {
@@ -1434,99 +1472,99 @@
   }
   [self.functionProgress removeObjectsForKeys:keysToRemove];
 
-  // 根据 Tab 类型决定关闭逻辑
+  // Determine close logic based on Tab type
   if ([self.currentTab isEqualToString:@"virtual_bg"]) {
-    // 虚拟背景 Tab：关闭所有开关型功能的状态
+    // Virtual background Tab: close all toggle-type function states
     NSString *togglePrefix = [NSString stringWithFormat:@"%@:", self.currentTab];
     NSMutableArray *toggleKeysToUpdate = [NSMutableArray array];
     for (NSString *key in self.toggleStates.allKeys) {
       if ([key hasPrefix:togglePrefix] && [self.toggleStates[key] boolValue]) {
         NSString *functionKey = [key substringFromIndex:togglePrefix.length];
         [toggleKeysToUpdate addObject:key];
-        // TODO: 更新视觉状态（如果有开关按钮的视觉反馈）
+        // TODO: Update visual state (if there's visual feedback for toggle button)
       }
     }
     for (NSString *key in toggleKeysToUpdate) {
       self.toggleStates[key] = @NO;
     }
-    // 调用回调，传递 "none" 表示关闭虚拟背景
+    // Call callback, passing "none" to indicate closing virtual background
     if ([self.delegate respondsToSelector:@selector(beautyPanelDidChangeParam:function:value:)]) {
       [self.delegate beautyPanelDidChangeParam:self.currentTab function:@"none" value:0.0f];
     }
   } else {
-    // 其他 Tab：逐个关闭所有开启的开关型功能
+    // Other Tabs: close all enabled toggle-type functions one by one
     NSString *togglePrefix = [NSString stringWithFormat:@"%@:", self.currentTab];
     NSMutableArray *toggleKeysToUpdate = [NSMutableArray array];
     for (NSString *key in self.toggleStates.allKeys) {
       if ([key hasPrefix:togglePrefix] && [self.toggleStates[key] boolValue]) {
         NSString *functionKey = [key substringFromIndex:togglePrefix.length];
         [toggleKeysToUpdate addObject:key];
-        // 调用回调关闭功能
+        // Call callback to close function
         if ([self.delegate respondsToSelector:@selector(beautyPanelDidChangeParam:
                                                                          function:value:)]) {
           [self.delegate beautyPanelDidChangeParam:self.currentTab function:functionKey value:0.0f];
         }
-        // TODO: 更新视觉状态（如果有开关按钮的视觉反馈）
+        // TODO: Update visual state (if there's visual feedback for toggle button)
       }
     }
     for (NSString *key in toggleKeysToUpdate) {
       self.toggleStates[key] = @NO;
     }
-    // 通知宿主重置当前Tab（滑动条型功能）
+    // Notify host to reset current Tab (slider-type functions)
     if ([self.delegate respondsToSelector:@selector(beautyPanelDidResetTab:)]) {
       [self.delegate beautyPanelDidResetTab:self.currentTab];
     }
   }
 
-  // 更新选中指示器（隐藏所有指示器）
+  // Update selected indicator (hide all indicators)
   [self updateSelectionIndicators];
 }
 
 - (void)handleToggleFunction:(NSString *)functionKey {
-  // 特殊处理：图像按钮需要打开图片选择器
+  // Special handling: image button needs to open image picker
   if ([functionKey isEqualToString:@"image"] && [self.currentTab isEqualToString:@"virtual_bg"]) {
-    // 图像按钮：打开图片选择器
+    // Image button: open image picker
     if ([self.delegate respondsToSelector:@selector(beautyPanelDidRequestImageSelection:
                                                                                function:)]) {
       [self.delegate beautyPanelDidRequestImageSelection:self.currentTab function:functionKey];
     }
-    // 不更新状态，等待图片选择完成后再更新
+    // Don't update state, wait for image selection to complete before updating
     return;
   }
 
-  // 普通开关型功能：切换状态（包括模糊和预置背景）
+  // Regular toggle-type function: switch state (including blur and preset background)
   NSString *toggleKey = [NSString stringWithFormat:@"%@:%@", self.currentTab, functionKey];
   BOOL currentState = [self.toggleStates[toggleKey] boolValue];
   BOOL newState = !currentState;
 
-  // 更新状态
+  // Update state
   self.toggleStates[toggleKey] = @(newState);
 
-  // 立即调用回调（1.0 = 开启, 0.0 = 关闭）
+  // Immediately call callback (1.0 = enabled, 0.0 = disabled)
   if ([self.delegate respondsToSelector:@selector(beautyPanelDidChangeParam:function:value:)]) {
     [self.delegate beautyPanelDidChangeParam:self.currentTab
                                     function:functionKey
                                        value:newState ? 1.0f : 0.0f];
   }
 
-  // 更新视觉状态（如果有开关按钮的视觉反馈）
-  // TODO: 更新按钮的视觉状态（例如背景色、边框等）
+  // Update visual state (if there's visual feedback for toggle button)
+  // TODO: Update button's visual state (e.g., background color, border, etc.)
 
-  // 更新选中指示器（开关类型也显示选中指示器）
+  // Update selected indicator (toggle type also shows selected indicator)
   self.currentFunction = functionKey;
   [self updateSelectionIndicators];
 
-  // 开关类型不显示滑动条，只切换状态
+  // Toggle type doesn't show slider, only switches state
   [self hideSlider];
   [self hideSubOptions];
 }
 
 - (void)updateSelectionIndicators {
-  // 构建当前选中功能的完整键（tab:function）
+  // Build full key for currently selected function (tab:function)
   NSString *selectedKey =
       [NSString stringWithFormat:@"%@:%@", self.currentTab ?: @"", self.currentFunction ?: @""];
 
-  // 遍历所有指示器，显示选中的，隐藏其他的
+  // Iterate through all indicators, show selected one, hide others
   for (NSString *key in self.functionIndicatorViews.allKeys) {
     UIView *indicator = self.functionIndicatorViews[key];
     if (indicator) {
@@ -1536,59 +1574,59 @@
 }
 
 - (void)resetButtonTapped:(UIButton *)sender {
-  // 重置滑块进度到默认值（0）
+  // Reset slider progress to default value (0)
   self.valueSlider.value = 0;
   self.valueLabel.text = @"0";
 
-  // 清空当前功能选择
+  // Clear current function selection
   self.currentFunction = nil;
 
-  // 更新选中指示器（隐藏所有指示器）
+  // Update selected indicator (hide all indicators)
   [self updateSelectionIndicators];
 
-  // 隐藏子选项和滑块
+  // Hide sub-options and slider
   [self hideSubOptions];
   [self hideSlider];
 
-  // 清空所有功能进度
+  // Clear all function progress
   [self.functionProgress removeAllObjects];
 
-  // 清空所有切换状态
+  // Clear all toggle states
   [self.toggleStates removeAllObjects];
 
-  // 通知代理重置所有美颜参数
+  // Notify delegate to reset all beauty parameters
   if ([self.delegate respondsToSelector:@selector(beautyPanelDidReset)]) {
     [self.delegate beautyPanelDidReset];
   }
 }
 
 - (void)captureButtonTapped:(UIButton *)sender {
-  // TODO: 拍照功能
+  // TODO: Capture photo function
 }
 
 - (void)hidePanelButtonTapped:(UIButton *)sender {
-  // 隐藏子选项和滑块
+  // Hide sub-options and slider
   [self hideSubOptions];
   [self hideSlider];
 
-  // 隐藏面板
+  // Hide panel
   [self hidePanel];
 }
 
 - (void)beforeAfterButtonTapped:(UIButton *)sender {
-  // 单击不处理，由按下/松开事件控制预览开关
+  // Single click not handled, preview switch controlled by press/release events
 }
 
 - (void)beforeAfterTouchDown:(UIButton *)sender {
-  // 按下：关闭所有美颜参数预览原图（不修改已保存的 UI 数值状态）
+  // Press: disable all beauty parameters to preview original (doesn't modify saved UI numeric state)
   if ([self.delegate respondsToSelector:@selector(beautyPanelDidReset)]) {
     [self.delegate beautyPanelDidReset];
   }
 }
 
 - (void)beforeAfterTouchUp:(UIButton *)sender {
-  // 松开：恢复用户已设置参数（依据本地缓存的 functionProgress/toggleStates）
-  // 1) 恢复滑动条类参数（beauty/reshape/makeup）
+  // Release: restore user-set parameters (based on locally cached functionProgress/toggleStates)
+  // 1) Restore slider-type parameters (beauty/reshape/makeup)
   for (NSString *key in self.functionProgress.allKeys) {
     NSArray<NSString *> *parts = [key componentsSeparatedByString:@":"];
     if (parts.count != 2) {
@@ -1605,7 +1643,7 @@
       [self.delegate beautyPanelDidChangeParam:tab function:function value:paramValue];
     }
   }
-  // 2) 恢复开关类（如虚拟背景 blur/preset），true 表示开启
+  // 2) Restore toggle-type (e.g., virtual background blur/preset), true means enabled
   for (NSString *key in self.toggleStates.allKeys) {
     BOOL on = [self.toggleStates[key] boolValue];
     if (!on) {
@@ -1617,7 +1655,7 @@
     }
     NSString *tab = parts[0];
     NSString *function = parts[1];
-    // 跳过 image（需要外部保留图像资源，无法简单恢复）
+    // Skip image (requires external image resource retention, cannot be simply restored)
     if ([tab isEqualToString:@"virtual_bg"] && [function hasPrefix:@"image"]) {
       continue;
     }
@@ -1630,25 +1668,25 @@
 #pragma mark - Bottom Control Panel Actions
 
 - (void)beautyButtonTapped:(UIButton *)sender {
-  // 显示美颜面板并切换到美颜 Tab
+  // Show beauty panel and switch to beauty Tab
   [self showPanel];
   [self switchToTab:@"beauty"];
 }
 
 - (void)makeupButtonTapped:(UIButton *)sender {
-  // 显示美颜面板并切换到美妆 Tab
+  // Show beauty panel and switch to makeup Tab
   [self showPanel];
   [self switchToTab:@"makeup"];
 }
 
 - (void)stickerButtonTapped:(UIButton *)sender {
-  // 显示美颜面板并切换到贴纸 Tab
+  // Show beauty panel and switch to sticker Tab
   [self showPanel];
   [self switchToTab:@"sticker"];
 }
 
 - (void)filterButtonTapped:(UIButton *)sender {
-  // 显示美颜面板并切换到滤镜 Tab
+  // Show beauty panel and switch to filter Tab
   [self showPanel];
   [self switchToTab:@"filter"];
 }

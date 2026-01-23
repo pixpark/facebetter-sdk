@@ -33,7 +33,7 @@
 - (void)viewDidLoad {
   [super viewDidLoad];
   self.view.backgroundColor = [UIColor blackColor];
-  self.title = @"External Texture Demo";
+  self.title = @"External Texture";
 
   _initialSmoothingValue = 0.2f;
   _initialWhiteningValue = 0.0f;
@@ -58,7 +58,7 @@
   // 磨皮滑动条
   self.smoothingLabel = [[UILabel alloc] init];
   self.smoothingLabel.translatesAutoresizingMaskIntoConstraints = NO;
-  self.smoothingLabel.text = @"磨皮";
+  self.smoothingLabel.text = @"Smoothing";
   self.smoothingLabel.textColor = [UIColor whiteColor];
   self.smoothingLabel.font = [UIFont systemFontOfSize:16];
   [sliderContainer addSubview:self.smoothingLabel];
@@ -84,7 +84,7 @@
   // 美白滑动条
   self.whiteningLabel = [[UILabel alloc] init];
   self.whiteningLabel.translatesAutoresizingMaskIntoConstraints = NO;
-  self.whiteningLabel.text = @"美白";
+  self.whiteningLabel.text = @"Whitening";
   self.whiteningLabel.textColor = [UIColor whiteColor];
   self.whiteningLabel.font = [UIFont systemFontOfSize:16];
   [sliderContainer addSubview:self.whiteningLabel];
