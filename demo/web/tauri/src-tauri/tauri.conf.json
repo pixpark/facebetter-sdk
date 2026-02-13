@@ -1,0 +1,33 @@
+{
+  "productName": "Facebetter Demo",
+  "version": "1.0.0",
+  "identifier": "com.facebetter.demo",
+  "build": {
+    "frontendDist": "../../react/dist",
+    "devUrl": "http://localhost:5173",
+    "beforeDevCommand": {
+      "cwd": "../../react",
+      "script": "npm run dev",
+      "wait": false
+    },
+    "beforeBuildCommand": {
+      "cwd": "../../react",
+      "script": "npm run build"
+    }
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "Facebetter Demo",
+        "width": 960,
+        "height": 670,
+        "minWidth": 640,
+        "minHeight": 427,
+        "resizable": true
+      }
+    ]
+  },
+  "bundle": {
+    "active": true
+  }
+}

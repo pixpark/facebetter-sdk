@@ -67,6 +67,18 @@
     <string name="makeup_style_1">Style 1</string>
     <string name="makeup_style_2">Style 2</string>
     <string name="makeup_style_3">Style 3</string>
+    <string name="makeup_lipstick_style_moist">Moist</string>
+    <string name="makeup_lipstick_style_vitality">Vitality</string>
+    <string name="makeup_lipstick_style_retro">Retro</string>
+    <string name="makeup_blush_style_japanese">Japanese</string>
+    <string name="makeup_blush_style_sector">Sector</string>
+    <string name="makeup_blush_style_tipsy">Tipsy</string>
+    <string name="makeup_eyebrow_style_standard">Standard</string>
+    <string name="makeup_eyebrow_style_willow">Willow</string>
+    <string name="makeup_eyebrow_style_classical">Classical</string>
+    <string name="makeup_eyeshadow_style_1">Eyeshadow I</string>
+    <string name="makeup_eyeshadow_style_2">Eyeshadow II</string>
+    <string name="makeup_eyeshadow_style_3">Eyeshadow III</string>
     
     <!-- Filter Functions -->
     <string name="filter_natural">Natural</string>
@@ -144,7 +156,9 @@
     <string name="failed_to_load_image">Failed to load image</string>
     <string name="failed_to_load_preset_background">Failed to load preset background</string>
     <string name="failed_to_load_preset_background_image">Failed to load preset background image</string>
-    
+    <string name="failed_to_save_image">Failed to save image</string>
+    <string name="image_saved_to_gallery">Image saved to gallery</string>
+
     <!-- Language Settings -->
     <string name="language_settings">Language Settings</string>
     <string name="language_auto">Auto (System)</string>

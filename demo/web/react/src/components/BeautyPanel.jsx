@@ -1,10 +1,11 @@
-import React, { useState, useMemo, useImperativeHandle, forwardRef } from 'react'
+import React, { useState, useMemo, useImperativeHandle, forwardRef, useEffect } from 'react'
 import './BeautyPanel.css'
 
 // Function types
 const TYPE_SLIDER = 0  // Slider-based parameter (0-100)
 const TYPE_TOGGLE = 1  // Toggle-based parameter (on/off)
 
+// Tabs aligned with Mac demo (beauty, reshape, makeup, filter, sticker, body, virtual_bg, quality)
 const tabs = [
   { id: 'beauty', label: 'Beauty' },
   { id: 'reshape', label: 'Reshape' },
@@ -13,66 +14,66 @@ const tabs = [
   { id: 'sticker', label: 'Sticker' },
   { id: 'body', label: 'Body' },
   { id: 'virtual_bg', label: 'Virtual BG' },
-  { id: 'chroma_key', label: 'Chroma Key' },
-  { id: 'quality', label: 'Quality' },
-  { id: 'face_detection', label: 'Face Detection' }
+  { id: 'quality', label: 'Quality' }
 ]
+
+// Filter keys order and labels (en) aligned with Mac demo filter_mapping
+const FILTER_KEYS = [
+  'initial_heart', 'first_love', 'vivid', 'confession', 'milk_tea', 'mousse',
+  'japanese', 'dawn', 'cookie', 'lively', 'pure', 'fair', 'snow', 'plain',
+  'natural', 'rose', 'tender', 'tender_2', 'extraordinary'
+]
+const FILTER_LABELS_EN = {
+  initial_heart: 'initial_heart', first_love: 'first_love', vivid: 'vivid',
+  confession: 'confession', milk_tea: 'milk_tea', mousse: 'mousse',
+  japanese: 'japanese', dawn: 'dawn', cookie: 'cookie', lively: 'lively',
+  pure: 'pure', fair: 'fair', snow: 'snow', plain: 'plain', natural: 'natural',
+  rose: 'rose', tender: 'tender', tender_2: 'tender_2', extraordinary: 'extraordinary'
+}
 
 const functionConfigs = {
   beauty: [
     { key: 'white', label: 'Whitening', icon: 'meiyan', enabled: true, type: TYPE_SLIDER },
-    { key: 'dark', label: 'Tanning', icon: 'huanfase', enabled: false, type: TYPE_SLIDER },
-    { key: 'smooth', label: 'Smoothing', icon: 'meiyan', enabled: true, type: TYPE_SLIDER },
+    { key: 'smooth', label: 'Smoothing', icon: 'meiyan2', enabled: true, type: TYPE_SLIDER },
     { key: 'rosiness', label: 'Rosiness', icon: 'meiyan', enabled: true, type: TYPE_SLIDER }
   ],
   reshape: [
-    { key: 'thin_face', label: 'Face Thin', icon: 'meixing2', enabled: true, type: TYPE_SLIDER },
-    { key: 'v_face', label: 'V-Shape', icon: 'meixing2', enabled: true, type: TYPE_SLIDER },
+    { key: 'thin_face', label: 'Thin Face', icon: 'meixing2', enabled: true, type: TYPE_SLIDER },
+    { key: 'v_face', label: 'V-Face', icon: 'meixing2', enabled: true, type: TYPE_SLIDER },
     { key: 'narrow_face', label: 'Narrow Face', icon: 'meixing2', enabled: true, type: TYPE_SLIDER },
     { key: 'short_face', label: 'Short Face', icon: 'meixing2', enabled: true, type: TYPE_SLIDER },
     { key: 'cheekbone', label: 'Cheekbone', icon: 'meixing2', enabled: true, type: TYPE_SLIDER },
-    { key: 'jawbone', label: 'Jawbone', icon: 'meixing2', enabled: true, type: TYPE_SLIDER },
-    { key: 'chin', label: 'Chin', icon: 'meixing2', enabled: true, type: TYPE_SLIDER },
-    { key: 'nose_slim', label: 'Nose Slim', icon: 'meixing2', enabled: true, type: TYPE_SLIDER },
-    { key: 'big_eye', label: 'Big Eye', icon: 'meixing2', enabled: true, type: TYPE_SLIDER },
-    { key: 'eye_distance', label: 'Eye Distance', icon: 'meixing2', enabled: true, type: TYPE_SLIDER }
+    { key: 'jawbone', label: 'Jawbone', icon: 'jawbone', enabled: true, type: TYPE_SLIDER },
+    { key: 'chin', label: 'Chin', icon: 'chin', enabled: true, type: TYPE_SLIDER },
+    { key: 'nose_slim', label: 'Nose', icon: 'nose', enabled: true, type: TYPE_SLIDER },
+    { key: 'big_eye', label: 'Big Eye', icon: 'eyes', enabled: true, type: TYPE_SLIDER },
+    { key: 'eye_distance', label: 'Eye Distance', icon: 'eyes', enabled: true, type: TYPE_SLIDER }
   ],
   makeup: [
-    { key: 'lipstick', label: 'Lipstick', icon: 'meizhuang', enabled: true, type: TYPE_SLIDER, subOptions: ['Style 1', 'Style 2', 'Style 3'] },
-    { key: 'blush', label: 'Blush', icon: 'meizhuang', enabled: true, type: TYPE_SLIDER, subOptions: ['Style 1', 'Style 2', 'Style 3'] },
-    { key: 'eyebrow', label: 'Eyebrow', icon: 'meizhuang', enabled: true, type: TYPE_SLIDER, subOptions: ['Style 1', 'Style 2', 'Style 3'] },
-    { key: 'eyeshadow', label: 'Eyeshadow', icon: 'meizhuang', enabled: true, type: TYPE_SLIDER, subOptions: ['Style 1', 'Style 2', 'Style 3'] }
+    { key: 'lipstick', label: 'Lipstick', icon: 'lipstick', enabled: true, type: TYPE_SLIDER, subOptions: ['Moist', 'Vitality', 'Retro'] },
+    { key: 'blush', label: 'Blush', icon: 'meizhuang', enabled: true, type: TYPE_SLIDER, subOptions: ['Japanese', 'Sector', 'Tipsy'] },
+    { key: 'eyebrow', label: 'Eyebrow', icon: 'eyebrow', enabled: true, type: TYPE_SLIDER },
+    { key: 'eyeshadow', label: 'Eyeshadow', icon: 'eyeshadow', enabled: true, type: TYPE_SLIDER }
   ],
-  filter: [
-    { key: 'natural', label: 'Natural', icon: 'lvjing', enabled: true, type: TYPE_SLIDER },
-    { key: 'fresh', label: 'Fresh', icon: 'lvjing', enabled: true, type: TYPE_SLIDER },
-    { key: 'retro', label: 'Retro', icon: 'lvjing', enabled: true, type: TYPE_SLIDER },
-    { key: 'bw', label: 'B&W', icon: 'lvjing', enabled: true, type: TYPE_SLIDER }
-  ],
+  filter: FILTER_KEYS.map(key => ({
+    key,
+    label: FILTER_LABELS_EN[key] || key,
+    icon: 'lvjing',
+    enabled: true,
+    type: TYPE_SLIDER
+  })),
   sticker: [
-    { key: 'cute', label: 'Cute', icon: 'tiezhi2', enabled: false, type: TYPE_SLIDER },
-    { key: 'funny', label: 'Funny', icon: 'tiezhi2', enabled: false, type: TYPE_SLIDER }
+    { key: 'rabbit', label: 'Rabbit', icon: 'rabbit', enabled: true, type: TYPE_SLIDER }
   ],
   body: [
-    { key: 'slim', label: 'Slim', icon: 'meiti', enabled: false, type: TYPE_SLIDER }
+    { key: 'slim', label: 'Slim', icon: 'meiti', enabled: true, type: TYPE_SLIDER }
   ],
   virtual_bg: [
-    { key: 'blur', label: 'Blur', icon: 'lvmukoutu', enabled: true, type: TYPE_TOGGLE },
-    { key: 'preset', label: 'Preset', icon: 'xunibeijing', enabled: true, type: TYPE_TOGGLE },
-    { key: 'image', label: 'Image', icon: 'gallery', enabled: true, type: TYPE_TOGGLE }
-  ],
-  chroma_key: [
-    { key: 'key_color', label: 'Key Color', icon: 'color', enabled: true, type: TYPE_SLIDER, subOptions: ['Green', 'Blue', 'Red'] },
-    { key: 'similarity', label: 'Similarity', icon: 'opacity', enabled: true, type: TYPE_SLIDER },
-    { key: 'smoothness', label: 'Smoothness', icon: 'smooth', enabled: true, type: TYPE_SLIDER },
-    { key: 'desaturation', label: 'Desaturation', icon: 'tuise', enabled: true, type: TYPE_SLIDER }
+    { key: 'blur', label: 'Blur', icon: 'blur', enabled: true, type: TYPE_TOGGLE },
+    { key: 'preset', label: 'Virtual BG Image', icon: 'back_preset', enabled: true, type: TYPE_TOGGLE }
   ],
   quality: [
-    { key: 'sharpen', label: 'Sharpen', icon: 'huazhitiaozheng2', enabled: false, type: TYPE_SLIDER }
-  ],
-  face_detection: [
-    { key: 'enable', label: 'On/Off', icon: 'face-scan', enabled: true, type: TYPE_TOGGLE },
-    { key: 'show_numbers', label: 'Show Numbers', icon: 'number', enabled: true, type: TYPE_TOGGLE }
+    { key: 'sharpen', label: 'Sharpen', icon: 'huazhitiaozheng2', enabled: true, type: TYPE_SLIDER }
   ]
 }
 
@@ -84,24 +85,48 @@ const functionConfigs = {
  * @param {string} currentTab - Current active tab (beauty, reshape, makeup, etc.)
  * @param {Function} onTabChanged - Callback when tab changes
  * @param {Function} onBeautyParamChanged - Callback when beauty parameter changes (calls Facebetter engine)
- * @param {Function} onResetBeauty - Callback to reset all beauty parameters
- * @param {Function} onHidePanel - Callback to hide the panel
- * @param {Function} onCapture - Callback to capture photo
  * @param {Function} onShowSlider - Callback to show parameter slider
  * @param {Function} onHideSlider - Callback to hide parameter slider
  * @param {Function} onResetTab - Callback to reset current tab parameters
  */
-const BeautyPanel = forwardRef(({ currentTab, onTabChanged, onBeautyParamChanged, onResetBeauty, onHidePanel, onCapture, onShowSlider, onHideSlider, onResetTab }, ref) => {
+const BeautyPanel = forwardRef(({ currentTab, onTabChanged, onBeautyParamChanged, onShowSlider, onHideSlider, onResetTab }, ref) => {
   const [showSubOptions, setShowSubOptions] = useState(false)
   const [currentFunction, setCurrentFunction] = useState(null)
   const [currentSubOption, setCurrentSubOption] = useState(null)
+  const [currentSubOptionIcon, setCurrentSubOptionIcon] = useState('meizhuang')
   const [functionProgress, setFunctionProgress] = useState(new Map())
   const [toggleStates, setToggleStates] = useState(new Map())
   const [currentSubOptionsList, setCurrentSubOptionsList] = useState([])
+  const [filterLabels, setFilterLabels] = useState(null)
 
   const currentFunctions = useMemo(() => {
+    if (currentTab === 'filter') {
+      return FILTER_KEYS.map(key => ({
+        key,
+        label: (filterLabels && filterLabels[key]) || FILTER_LABELS_EN[key] || key,
+        icon: 'lvjing',
+        enabled: true,
+        type: TYPE_SLIDER
+      }))
+    }
     return functionConfigs[currentTab] || []
-  }, [currentTab])
+  }, [currentTab, filterLabels])
+
+  useEffect(() => {
+    fetch('/filter_mapping.json')
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        if (data?.filters) {
+          const lang = (navigator.language || '').startsWith('zh') ? 'zh' : 'en'
+          const labels = {}
+          for (const [key, val] of Object.entries(data.filters)) {
+            labels[key] = (val && val[lang]) ? val[lang] : (val?.en || key)
+          }
+          setFilterLabels(labels)
+        }
+      })
+      .catch(() => {})
+  }, [])
 
   // Expose methods to parent component via ref
   // Used for syncing slider values and toggle states with Facebetter engine state
@@ -170,8 +195,8 @@ const BeautyPanel = forwardRef(({ currentTab, onTabChanged, onBeautyParamChanged
       handleToggleFunction(func)
     } else if (func.type === TYPE_SLIDER) {
       if (func.subOptions && func.subOptions.length > 0) {
-        // Show sub-options (e.g., color selection for chroma key)
         setCurrentSubOptionsList(func.subOptions)
+        setCurrentSubOptionIcon(func.icon || 'meizhuang')
         showSubOptionsPanel()
         onHideSlider()
       } else {
@@ -180,7 +205,7 @@ const BeautyPanel = forwardRef(({ currentTab, onTabChanged, onBeautyParamChanged
         onShowSlider({
           tab: currentTab,
           function: func.key,
-          value: functionProgress.get(`${currentTab}:${func.key}`) || 0
+          value: functionProgress.get(`${currentTab}:${func.key}`) ?? (currentTab === 'filter' ? 80 : currentTab === 'sticker' ? 100 : 0)
         })
       }
     }
@@ -218,40 +243,17 @@ const BeautyPanel = forwardRef(({ currentTab, onTabChanged, onBeautyParamChanged
   }
 
   /**
-   * Handle sub-option click (e.g., color selection for chroma key)
-   * For chroma key color: directly applies to Facebetter engine
-   * For other options: shows slider for further adjustment
+   * Handle sub-option click (e.g., makeup style)
+   * Shows slider for further adjustment
    */
   const onSubOptionClick = (index, option) => {
     setCurrentSubOption(`style${index + 1}`)
     hideSubOptionsPanel()
-    
-    if (currentTab === 'chroma_key' && currentFunction === 'key_color') {
-      // Chroma key color: green=0, blue=1, red=2
-      // Map index to 0.0-1.0 range for Facebetter engine
-      const colorValue = index
-      const sliderValue = (colorValue / 2) * 100
-      setFunctionProgress(prev => {
-        const newMap = new Map(prev)
-        newMap.set(`${currentTab}:${currentFunction}`, sliderValue)
-        return newMap
-      })
-      
-      // Apply directly to Facebetter engine
-      onBeautyParamChanged({
-        tab: currentTab,
-        function: currentFunction,
-        value: colorValue / 2.0
-      })
-      onHideSlider()
-    } else {
-      // Show slider for other sub-options
-      onShowSlider({
-        tab: currentTab,
-        function: currentFunction,
-        value: functionProgress.get(`${currentTab}:${currentFunction}`) || 0
-      })
-    }
+    onShowSlider({
+      tab: currentTab,
+      function: currentFunction,
+      value: functionProgress.get(`${currentTab}:${currentFunction}`) ?? (currentTab === 'filter' ? 80 : currentTab === 'sticker' ? 100 : 0)
+    })
   }
 
   const onBeautyOffClicked = () => {
@@ -289,23 +291,6 @@ const BeautyPanel = forwardRef(({ currentTab, onTabChanged, onBeautyParamChanged
     onResetTab(currentTab)
   }
 
-  const onResetBeautyClicked = () => {
-    setCurrentFunction(null)
-    hideSubOptionsPanel()
-    onHideSlider()
-
-    setFunctionProgress(new Map())
-    setToggleStates(new Map())
-
-    onResetBeauty()
-  }
-
-  const onHidePanelClicked = () => {
-    hideSubOptionsPanel()
-    onHideSlider()
-    onHidePanel()
-  }
-
   const showSubOptionsPanel = () => {
     setShowSubOptions(true)
   }
@@ -328,18 +313,7 @@ const BeautyPanel = forwardRef(({ currentTab, onTabChanged, onBeautyParamChanged
   }
 
   const getSubOptionIcon = (option) => {
-    return `/icons/${option}.png`
-  }
-
-  const isChromaKeyColorOption = (option) => {
-    return currentTab === 'chroma_key' && currentFunction === 'key_color'
-  }
-
-  const getColorOptionBackground = (option) => {
-    if (option === 'Green') return '#00FF00'
-    if (option === 'Blue') return '#0000FF'
-    if (option === 'Red') return '#FF0000'
-    return '#CCCCCC'
+    return `/icons/${currentSubOptionIcon}.png`
   }
 
   return (
@@ -401,16 +375,9 @@ const BeautyPanel = forwardRef(({ currentTab, onTabChanged, onBeautyParamChanged
                   className="sub-option-button"
                   onClick={() => onSubOptionClick(index, option)}
                 >
-                  {isChromaKeyColorOption(option) ? (
-                    <div 
-                      className="sub-option-icon-wrap"
-                      style={{ background: getColorOptionBackground(option) }}
-                    ></div>
-                  ) : (
-                    <div className="sub-option-icon-wrap">
-                      <img src={getSubOptionIcon(option)} alt="" className="sub-option-icon" />
-                    </div>
-                  )}
+                  <div className="sub-option-icon-wrap">
+                    <img src={getSubOptionIcon(option)} alt="" className="sub-option-icon" />
+                  </div>
                   <div className="sub-option-label">{option}</div>
                 </div>
               ))}
@@ -418,21 +385,6 @@ const BeautyPanel = forwardRef(({ currentTab, onTabChanged, onBeautyParamChanged
           </div>
         )}
 
-        <div className="bottom-button-container">
-          <div className="bottom-button" onClick={onResetBeautyClicked}>
-            <img src="/icons/reset.png" alt="Reset" className="bottom-button-icon" />
-            <span className="bottom-button-text">Reset</span>
-          </div>
-          <div className="bottom-button-center">
-            <button className="capture-btn-panel" onClick={onCapture}>
-              <div className="capture-inner-panel"></div>
-            </button>
-          </div>
-          <div className="bottom-button" onClick={onHidePanelClicked}>
-            <img src="/icons/menu.png" alt="Hide" className="bottom-button-icon" />
-            <span className="bottom-button-text">Hide</span>
-          </div>
-        </div>
       </div>
     </div>
   )

@@ -212,7 +212,6 @@
 - (void)captureOutput:(AVCaptureOutput*)captureOutput
     didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
            fromConnection:(AVCaptureConnection*)connection {
-  // Camera Data Output Hook.
   if (self.delegate &&
       [self.delegate respondsToSelector:@selector(cameraManager:didOutputSampleBuffer:)]) {
     @autoreleasepool {

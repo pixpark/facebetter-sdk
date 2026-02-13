@@ -67,6 +67,18 @@
     <string name="makeup_style_1">样式1</string>
     <string name="makeup_style_2">样式2</string>
     <string name="makeup_style_3">样式3</string>
+    <string name="makeup_lipstick_style_moist">水嫩</string>
+    <string name="makeup_lipstick_style_vitality">元气</string>
+    <string name="makeup_lipstick_style_retro">复古</string>
+    <string name="makeup_blush_style_japanese">日系</string>
+    <string name="makeup_blush_style_sector">扇形</string>
+    <string name="makeup_blush_style_tipsy">微醺</string>
+    <string name="makeup_eyebrow_style_standard">标准</string>
+    <string name="makeup_eyebrow_style_willow">柳叶</string>
+    <string name="makeup_eyebrow_style_classical">古典</string>
+    <string name="makeup_eyeshadow_style_1">眼影 I</string>
+    <string name="makeup_eyeshadow_style_2">眼影 II</string>
+    <string name="makeup_eyeshadow_style_3">眼影 III</string>
     
     <!-- Filter Functions -->
     <string name="filter_natural">自然</string>

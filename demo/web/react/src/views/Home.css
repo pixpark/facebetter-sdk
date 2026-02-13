@@ -163,33 +163,38 @@
 
 .feature-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 6px;
+  grid-template-columns: repeat(5, 1fr);
+  row-gap: 6px;
+  column-gap: 2px;
   margin-top: 40px;
   margin-bottom: 12px;
   padding: 0 12px;
+  place-items: center;
 }
 
 @media (min-width: 640px) {
   .feature-grid {
-    grid-template-columns: repeat(5, 1fr);
-    gap: 8px;
+    grid-template-columns: repeat(6, 1fr);
+    row-gap: 8px;
+    column-gap: 2px;
     padding: 0 16px;
   }
 }
 
 @media (min-width: 768px) {
   .feature-grid {
-    grid-template-columns: repeat(6, 1fr);
-    gap: 10px;
+    grid-template-columns: repeat(7, 1fr);
+    row-gap: 10px;
+    column-gap: 3px;
     padding: 0 20px;
   }
 }
 
 @media (min-width: 1024px) {
   .feature-grid {
-    grid-template-columns: repeat(7, 1fr);
-    gap: 12px;
+    grid-template-columns: repeat(8, 1fr);
+    row-gap: 12px;
+    column-gap: 4px;
     padding: 0 24px;
   }
 }
@@ -197,12 +202,14 @@
 @media (min-width: 1280px) {
   .feature-grid {
     grid-template-columns: repeat(8, 1fr);
-    gap: 16px;
+    row-gap: 16px;
+    column-gap: 4px;
     padding: 0 32px;
   }
 }
 
 .feature-item {
+  width: 66.67%;
   aspect-ratio: 1;
   background: #f5f5f5;
   border-radius: 12px;
@@ -269,34 +276,45 @@
 
 .atomic-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 6px;
+  grid-template-columns: repeat(5, 1fr);
+  row-gap: 6px;
+  column-gap: 2px;
+  padding: 0 12px;
+  place-items: center;
 }
 
 @media (min-width: 640px) {
   .atomic-grid {
-    grid-template-columns: repeat(5, 1fr);
-    gap: 8px;
+    grid-template-columns: repeat(6, 1fr);
+    row-gap: 8px;
+    column-gap: 2px;
+    padding: 0 16px;
   }
 }
 
 @media (min-width: 768px) {
   .atomic-grid {
-    grid-template-columns: repeat(6, 1fr);
-    gap: 10px;
+    grid-template-columns: repeat(7, 1fr);
+    row-gap: 10px;
+    column-gap: 3px;
+    padding: 0 20px;
   }
 }
 
 @media (min-width: 1024px) {
   .atomic-grid {
-    grid-template-columns: repeat(7, 1fr);
-    gap: 12px;
+    grid-template-columns: repeat(8, 1fr);
+    row-gap: 12px;
+    column-gap: 4px;
+    padding: 0 24px;
   }
 }
 
 @media (min-width: 1280px) {
   .atomic-grid {
     grid-template-columns: repeat(8, 1fr);
-    gap: 16px;
+    row-gap: 16px;
+    column-gap: 4px;
+    padding: 0 32px;
   }
 }

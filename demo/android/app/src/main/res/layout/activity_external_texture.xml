@@ -6,7 +6,7 @@
     android:background="@android:color/black"
     tools:context=".ExternalTextureActivity">
 
-    <com.pixpark.fbexample.GLTextureRenderer
+    <net.pixpark.fbexample.GLTextureRenderer
         android:id="@+id/gl_video_renderer"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />

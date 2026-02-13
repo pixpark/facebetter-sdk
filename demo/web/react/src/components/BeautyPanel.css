@@ -14,8 +14,9 @@
 
 .tab-scroll-view {
   width: 100%;
-  height: 50px;
-  padding-top: 8px;
+  height: 34px;
+  padding-top: 4px;
+  padding-bottom: 4px;
   overflow-x: auto;
   overflow-y: hidden;
   scrollbar-width: none;
@@ -30,18 +31,18 @@
   display: flex;
   flex-direction: row;
   align-items: center;
-  padding: 0 8px;
+  padding: 0 6px;
   height: 100%;
 }
 
 .tab-btn {
-  min-width: 80px;
+  min-width: 64px;
   height: 100%;
-  padding: 0 12px;
+  padding: 0 8px;
   background: transparent;
   border: none;
   color: #AAAAAA;
-  font-size: 16px;
+  font-size: 13px;
   cursor: pointer;
   white-space: nowrap;
   display: flex;
@@ -57,8 +58,8 @@
 
 .function-scroll-view {
   width: 100%;
-  height: 120px;
-  padding: 0 16px;
+  height: 78px;
+  padding: 4px 12px 6px;
   overflow-x: auto;
   overflow-y: hidden;
   scrollbar-width: none;
@@ -78,13 +79,14 @@
 }
 
 .function-button {
-  width: 70px;
+  width: 58px;
+  min-width: 58px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 8px;
-  margin-right: 8px;
+  padding: 4px;
+  margin-right: 4px;
   cursor: pointer;
   position: relative;
 }
@@ -94,8 +96,8 @@
 }
 
 .function-icon-wrap {
-  width: 50px;
-  height: 50px;
+  width: 36px;
+  height: 36px;
   background: rgba(255, 255, 255, 0.1);
   border-radius: 50%;
   display: flex;
@@ -105,46 +107,50 @@
 }
 
 .function-icon {
-  width: 28px;
-  height: 28px;
+  width: 20px;
+  height: 20px;
   object-fit: contain;
   filter: brightness(0) invert(1);
 }
 
 .soon-badge {
   position: absolute;
-  top: 2px;
-  right: 2px;
-  padding: 1px 3px;
+  top: 1px;
+  right: 1px;
+  padding: 1px 2px;
   background: rgba(255, 0, 0, 0.8);
   color: white;
-  font-size: 8px;
+  font-size: 7px;
   border-radius: 2px;
 }
 
 .function-label {
-  margin-top: 4px;
+  margin-top: 2px;
   color: white;
-  font-size: 12px;
+  font-size: 11px;
   text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 .function-indicator {
-  width: 14px;
-  height: 3px;
-  margin-top: 3px;
+  width: 10px;
+  height: 2px;
+  margin-top: 2px;
   background: #00FF00;
   border-radius: 2px;
 }
 
 .sub-option-scroll-view {
   position: absolute;
-  top: 50px;
+  top: 34px;
   left: 0;
   right: 0;
   width: 100%;
-  height: 120px;
-  padding: 0 16px;
+  height: 78px;
+  padding: 4px 12px 6px;
   background: rgba(0, 0, 0, 0.8);
   overflow-x: auto;
   overflow-y: hidden;
@@ -165,19 +171,20 @@
 }
 
 .sub-option-button {
-  width: 70px;
+  width: 58px;
+  min-width: 58px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 8px;
-  margin-right: 8px;
+  padding: 4px;
+  margin-right: 4px;
   cursor: pointer;
 }
 
 .sub-option-icon-wrap {
-  width: 50px;
-  height: 50px;
+  width: 36px;
+  height: 36px;
   background: rgba(255, 255, 255, 0.1);
   border-radius: 50%;
   display: flex;
@@ -187,88 +194,19 @@
 }
 
 .sub-option-icon {
-  width: 40px;
-  height: 40px;
+  width: 28px;
+  height: 28px;
   object-fit: cover;
 }
 
 .sub-option-label {
-  margin-top: 4px;
+  margin-top: 2px;
   color: white;
-  font-size: 12px;
+  font-size: 11px;
   text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
-.bottom-button-container {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  min-height: 80px;
-  padding: 10px 16px;
-}
-
-.bottom-button {
-  flex: 1;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  padding: 8px;
-  cursor: pointer;
-}
-
-.bottom-button-icon {
-  width: 20px;
-  height: 20px;
-  object-fit: contain;
-  filter: brightness(0) invert(1);
-  margin-right: 8px;
-}
-
-.bottom-button-text {
-  color: white;
-  font-size: 14px;
-}
-
-.bottom-button-center {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.capture-btn-panel {
-  width: 60px;
-  height: 60px;
-  background: white;
-  border: none;
-  border-radius: 50%;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.15s ease;
-  position: relative;
-  padding: 5px;
-  box-sizing: border-box;
-  user-select: none;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.capture-btn-panel:active {
-  transform: scale(0.85);
-  opacity: 0.8;
-}
-
-.capture-btn-panel:hover {
-  transform: scale(1.05);
-}
-
-.capture-inner-panel {
-  width: 50px;
-  height: 50px;
-  background: #00FF00;
-  border-radius: 50%;
-  flex-shrink: 0;
-}

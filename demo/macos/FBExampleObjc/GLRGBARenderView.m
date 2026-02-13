@@ -4,6 +4,7 @@
 //
 
 #import "GLRGBARenderView.h"
+#import <Facebetter/FBBeautyEffectEngine.h>
 #import <OpenGL/gl3.h>
 
 @interface GLRGBARenderView () {
@@ -18,22 +19,20 @@
   GLint _texCoordLoc;
   GLint _samplerLoc;
 
-  FBImageBuffer *_currentBuffer;
+  FBImageFrame *_currentFrame;
   NSLock *_bufferLock;
 
   int32_t _videoWidth;
   int32_t _videoHeight;
   int32_t _viewWidth;
   int32_t _viewHeight;
-
-  BOOL _mirrored;
 }
 
 - (void)setupGL;
 - (void)tearDownGL;
 - (GLuint)compileShader:(GLenum)type source:(const char *)src;
 - (GLuint)createProgramWithVS:(const char *)vsFS:(const char *)fs;
-- (void)updateTexture:(FBImageBuffer *)buffer;
+- (void)updateTexture:(FBImageFrame *)frame;
 - (void)updateVertices;
 
 @end
@@ -51,11 +50,9 @@
                                           0};
   NSOpenGLPixelFormat *pf = [[NSOpenGLPixelFormat alloc] initWithAttributes:attrs];
   if (self = [super initWithFrame:frameRect pixelFormat:pf]) {
-    // 在 Retina 下使用最佳分辨率表面，避免视口只占用点坐标（导致显示在左下角）
     [self setWantsBestResolutionOpenGLSurface:YES];
     _bufferLock = [[NSLock alloc] init];
     _videoWidth = _videoHeight = 0;
-    _mirrored = NO;
     [self setupGL];
   }
   return self;
@@ -68,7 +65,6 @@
 - (void)prepareOpenGL {
   [super prepareOpenGL];
   [[self openGLContext] makeCurrentContext];
-  // 使用 backing 像素尺寸设置视口，确保填满父视图
   NSRect backing = [self convertRectToBacking:self.bounds];
   _viewWidth = (int32_t)backing.size.width;
   _viewHeight = (int32_t)backing.size.height;
@@ -78,7 +74,6 @@
 - (void)reshape {
   [super reshape];
   [[self openGLContext] makeCurrentContext];
-  // Retina 下用 backing 尺寸，防止视口缩半导致画面居左下
   NSRect backing = [self convertRectToBacking:self.bounds];
   _viewWidth = (int32_t)backing.size.width;
   _viewHeight = (int32_t)backing.size.height;
@@ -166,7 +161,6 @@
 }
 
 - (void)updateVertices {
-  // 默认等比适配（letterbox/pillarbox）
   float vw = (_videoWidth > 0) ? (float)_videoWidth : 1.0f;
   float vh = (_videoHeight > 0) ? (float)_videoHeight : 1.0f;
   float ww = (_viewWidth > 0) ? (float)_viewWidth : (float)self.bounds.size.width;
@@ -192,13 +186,13 @@
       sy,
   };
   float tex[] = {
-      _mirrored ? 1.0f : 0.0f,
-      1.0f,
-      _mirrored ? 0.0f : 1.0f,
-      1.0f,
-      _mirrored ? 1.0f : 0.0f,
       0.0f,
-      _mirrored ? 0.0f : 1.0f,
+      1.0f,
+      1.0f,
+      1.0f,
+      0.0f,
+      0.0f,
+      1.0f,
       0.0f,
   };
 
@@ -214,20 +208,12 @@
   glVertexAttribPointer(_texCoordLoc, 2, GL_FLOAT, GL_FALSE, 0, 0);
 }
 
-- (void)setMirrored:(BOOL)mirrored {
-  _mirrored = mirrored;
-  dispatch_async(dispatch_get_main_queue(), ^{
-    [self updateVertices];
-    [self setNeedsDisplay:YES];
-  });
-}
-
-- (void)updateTexture:(FBImageBuffer *)buffer {
-  if (!buffer) return;
-  int32_t w = buffer.width;
-  int32_t h = buffer.height;
-  int32_t stride = buffer.stride;
-  const uint8_t *data = buffer.data;
+- (void)updateTexture:(FBImageFrame *)frame {
+  if (!frame) return;
+  int32_t w = frame.width;
+  int32_t h = frame.height;
+  int32_t stride = frame.stride;
+  const uint8_t *data = [frame data];
   if (!data) return;
 
   glBindTexture(GL_TEXTURE_2D, _texture);
@@ -235,7 +221,6 @@
   if (stride == w * 4) {
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
   } else {
-    // 逐行上传，处理 stride
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
     for (int y = 0; y < h; ++y) {
       glTexSubImage2D(GL_TEXTURE_2D, 0, 0, y, w, 1, GL_RGBA, GL_UNSIGNED_BYTE, data + y * stride);
@@ -243,12 +228,12 @@
   }
 }
 
-- (void)renderBuffer:(FBImageBuffer *)buffer {
-  if (!buffer) return;
+- (void)renderFrame:(FBImageFrame *)frame {
+  if (!frame) return;
   [_bufferLock lock];
-  _currentBuffer = buffer;
-  _videoWidth = buffer.width;
-  _videoHeight = buffer.height;
+  _currentFrame = frame;
+  _videoWidth = frame.width;
+  _videoHeight = frame.height;
   [_bufferLock unlock];
   dispatch_async(dispatch_get_main_queue(), ^{
     [self setNeedsDisplay:YES];
@@ -258,7 +243,6 @@
 - (void)drawRect:(NSRect)dirtyRect {
   [super drawRect:dirtyRect];
   [[self openGLContext] makeCurrentContext];
-  // 每次绘制前根据 backing 尺寸刷新视口，避免窗口缩放后不更新
   NSRect backing = [self convertRectToBacking:self.bounds];
   int32_t curW = (int32_t)backing.size.width;
   int32_t curH = (int32_t)backing.size.height;
@@ -271,17 +255,17 @@
   glClearColor(0.0, 0.0, 0.0, 1.0);
   glClear(GL_COLOR_BUFFER_BIT);
 
-  FBImageBuffer *buffer = nil;
+  FBImageFrame *frame = nil;
   [_bufferLock lock];
-  buffer = _currentBuffer;
+  frame = _currentFrame;
   [_bufferLock unlock];
-  if (!buffer) {
+  if (!frame) {
     [[self openGLContext] flushBuffer];
     return;
   }
 
   [self updateVertices];
-  [self updateTexture:buffer];
+  [self updateTexture:frame];
 
   glUseProgram(_program);
   glActiveTexture(GL_TEXTURE0);

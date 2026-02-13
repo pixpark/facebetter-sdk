@@ -1,0 +1,67 @@
+/* Home - Large buttons */
+"beauty_effect" = "Beauty Effect";
+"beauty_template" = "Beauty Template";
+
+/* Home - Feature grid (first section) */
+"beauty" = "Beauty";
+"reshape" = "Reshape";
+"makeup" = "Makeup";
+"filter" = "Filter";
+"sticker" = "Sticker";
+"virtual_bg" = "Virtual BG";
+"body" = "Body";
+"quality" = "Quality";
+"more_effects" = "More Effects";
+
+/* Home - Feature grid (second section) */
+"face_detect" = "Face Detection";
+"hair_color" = "Hair Color";
+"style_makeover" = "Style Makeover";
+"gesture" = "Gesture";
+"green_screen" = "Green Screen";
+
+/* Panel - Common */
+"off" = "Off";
+
+/* Panel - Beauty */
+"whitening" = "Whitening";
+"smoothing" = "Smoothing";
+"rosiness" = "Rosiness";
+
+/* Panel - Reshape */
+"thin_face" = "Thin Face";
+"v_face" = "V Face";
+"narrow_face" = "Narrow Face";
+"short_face" = "Short Face";
+"cheekbone" = "Cheekbone";
+"jawbone" = "Jawbone";
+"chin" = "Chin";
+"nose_slim" = "Nose Slim";
+"big_eye" = "Big Eye";
+"eye_distance" = "Eye Distance";
+
+/* Panel - Makeup */
+"lipstick" = "Lipstick";
+"blush" = "Blush";
+"eyebrow" = "Eyebrow";
+"eyeshadow" = "Eyeshadow";
+"makeup_lipstick_style_moist" = "Moist";
+"makeup_lipstick_style_vitality" = "Vitality";
+"makeup_lipstick_style_retro" = "Retro";
+"makeup_blush_style_japanese" = "Japanese";
+"makeup_blush_style_sector" = "Sector";
+"makeup_blush_style_tipsy" = "Tipsy";
+
+/* Panel - Sticker */
+"rabbit" = "Rabbit";
+
+/* Panel - Body */
+"slim" = "Slim";
+
+/* Panel - Virtual BG */
+"blur" = "Blur";
+"preset" = "Preset";
+"virtual_bg_image" = "Image";
+
+/* Panel - Quality */
+"sharpen" = "Sharpen";

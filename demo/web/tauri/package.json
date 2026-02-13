@@ -1,0 +1,15 @@
+{
+  "name": "facebetter-demo-tauri",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Facebetter Web Demo 的 Tauri 桌面壳，加载 ../react 的构建产物",
+  "scripts": {
+    "dev": "tauri dev",
+    "build": "tauri build",
+    "tauri": "tauri"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@tauri-apps/cli": "^2"
+  }
+}

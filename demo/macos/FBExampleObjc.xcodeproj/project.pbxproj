@@ -13,10 +13,19 @@
 		84400C692E2BD496004055A8 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 84400C682E2BD496004055A8 /* main.m */; };
 		84400C952E2CE424004055A8 /* CameraManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 84400C942E2CE424004055A8 /* CameraManager.m */; };
 		844A24052EB39731005F3533 /* GLRGBARenderView.m in Sources */ = {isa = PBXBuildFile; fileRef = 844A24032EB39730005F3533 /* GLRGBARenderView.m */; };
-		844A24082EB39AC0005F3533 /* Facebetter.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 844A24062EB39ABB005F3533 /* Facebetter.framework */; };
-		844A24092EB39AC0005F3533 /* Facebetter.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 844A24062EB39ABB005F3533 /* Facebetter.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		846E18C42E6EAFB400D3B53C /* BeautyPanelViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 846E18B42E6EAFB400D3B53C /* BeautyPanelViewController.m */; };
-		84ECE5862EBB5EB20062EBE0 /* HomeViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 84ECE5852EBB5EB20062EBE0 /* HomeViewController.m */; };
+		84A55E022E7000010062EBE0 /* assets in Resources */ = {isa = PBXBuildFile; fileRef = 84A55E012E7000010062EBE0 /* assets */; };
+		84B001022E7000020062EBE0 /* jawbone.png in Resources */ = {isa = PBXBuildFile; fileRef = 84B001012E7000020062EBE0 /* jawbone.png */; };
+		84B001042E7000020062EBE0 /* chin.png in Resources */ = {isa = PBXBuildFile; fileRef = 84B001032E7000020062EBE0 /* chin.png */; };
+		84B001062E7000020062EBE0 /* nose.png in Resources */ = {isa = PBXBuildFile; fileRef = 84B001052E7000020062EBE0 /* nose.png */; };
+		84B001082E7000020062EBE0 /* eyes.png in Resources */ = {isa = PBXBuildFile; fileRef = 84B001072E7000020062EBE0 /* eyes.png */; };
+		84B0010A2E7000020062EBE0 /* lipstick.png in Resources */ = {isa = PBXBuildFile; fileRef = 84B001092E7000020062EBE0 /* lipstick.png */; };
+		84B0010C2E7000020062EBE0 /* eyebrow.png in Resources */ = {isa = PBXBuildFile; fileRef = 84B0010B2E7000020062EBE0 /* eyebrow.png */; };
+		84B0010E2E7000020062EBE0 /* eyeshadow.png in Resources */ = {isa = PBXBuildFile; fileRef = 84B0010D2E7000020062EBE0 /* eyeshadow.png */; };
+		84B001102E7000020062EBE0 /* rabbit.png in Resources */ = {isa = PBXBuildFile; fileRef = 84B0010F2E7000020062EBE0 /* rabbit.png */; };
+		84BC00102E2BD494004055A8 /* BeautyCameraViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 84BC00112E2BD494004055A8 /* BeautyCameraViewController.m */; };
+		84C001062E7000040062EBE0 /* background.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 84C001052E7000040062EBE0 /* background.jpg */; };
+		84E5BC582F3856FB00951283 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 84E5BC562F3856FB00951283 /* Localizable.strings */; };
 		84ECE5AD2EBB5F3E0062EBE0 /* lvjing.png in Resources */ = {isa = PBXBuildFile; fileRef = 84ECE5882EBB5F3D0062EBE0 /* lvjing.png */; };
 		84ECE5AE2EBB5F3E0062EBE0 /* meiyan.png in Resources */ = {isa = PBXBuildFile; fileRef = 84ECE5892EBB5F3D0062EBE0 /* meiyan.png */; };
 		84ECE5AF2EBB5F3E0062EBE0 /* tiezhi2.png in Resources */ = {isa = PBXBuildFile; fileRef = 84ECE58A2EBB5F3D0062EBE0 /* tiezhi2.png */; };
@@ -33,7 +42,6 @@
 		84ECE5BA2EBB5F3E0062EBE0 /* huazhitiaozheng3.png in Resources */ = {isa = PBXBuildFile; fileRef = 84ECE5952EBB5F3D0062EBE0 /* huazhitiaozheng3.png */; };
 		84ECE5BB2EBB5F3E0062EBE0 /* close.png in Resources */ = {isa = PBXBuildFile; fileRef = 84ECE5962EBB5F3D0062EBE0 /* close.png */; };
 		84ECE5BC2EBB5F3E0062EBE0 /* huazhitiaozheng2.png in Resources */ = {isa = PBXBuildFile; fileRef = 84ECE5972EBB5F3D0062EBE0 /* huazhitiaozheng2.png */; };
-		84ECE5BD2EBB5F3E0062EBE0 /* back_mobile.png in Resources */ = {isa = PBXBuildFile; fileRef = 84ECE5982EBB5F3D0062EBE0 /* back_mobile.png */; };
 		84ECE5BE2EBB5F3E0062EBE0 /* renlianjiance.png in Resources */ = {isa = PBXBuildFile; fileRef = 84ECE5992EBB5F3D0062EBE0 /* renlianjiance.png */; };
 		84ECE5BF2EBB5F3E0062EBE0 /* reset.png in Resources */ = {isa = PBXBuildFile; fileRef = 84ECE59A2EBB5F3D0062EBE0 /* reset.png */; };
 		84ECE5C02EBB5F3E0062EBE0 /* tiezhi.png in Resources */ = {isa = PBXBuildFile; fileRef = 84ECE59B2EBB5F3D0062EBE0 /* tiezhi.png */; };
@@ -56,20 +64,6 @@
 		84ECE5D12EBB5F3E0062EBE0 /* before_after.png in Resources */ = {isa = PBXBuildFile; fileRef = 84ECE5AC2EBB5F3E0062EBE0 /* before_after.png */; };
 /* End PBXBuildFile section */
 
-/* Begin PBXCopyFilesBuildPhase section */
-		84DCA0372E367323008E8A26 /* Embed Frameworks */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 10;
-			files = (
-				844A24092EB39AC0005F3533 /* Facebetter.framework in Embed Frameworks */,
-			);
-			name = "Embed Frameworks";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXCopyFilesBuildPhase section */
-
 /* Begin PBXFileReference section */
 		84400C5A2E2BD494004055A8 /* Facebetter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Facebetter.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		84400C5D2E2BD494004055A8 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -86,8 +80,20 @@
 		844A24062EB39ABB005F3533 /* Facebetter.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Facebetter.framework; path = FBExampleObjc/libs/Facebetter.framework; sourceTree = "<group>"; };
 		846E18B42E6EAFB400D3B53C /* BeautyPanelViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BeautyPanelViewController.m; sourceTree = "<group>"; };
 		846E18C52E6EAFBA00D3B53C /* BeautyPanelViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BeautyPanelViewController.h; sourceTree = "<group>"; };
-		84ECE5842EBB5EB20062EBE0 /* HomeViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HomeViewController.h; sourceTree = "<group>"; };
-		84ECE5852EBB5EB20062EBE0 /* HomeViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HomeViewController.m; sourceTree = "<group>"; };
+		84A55E012E7000010062EBE0 /* assets */ = {isa = PBXFileReference; lastKnownFileType = folder; path = assets; sourceTree = "<group>"; };
+		84B001012E7000020062EBE0 /* jawbone.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = jawbone.png; path = FBExampleObjc/Icon/jawbone.png; sourceTree = "<group>"; };
+		84B001032E7000020062EBE0 /* chin.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = chin.png; path = FBExampleObjc/Icon/chin.png; sourceTree = "<group>"; };
+		84B001052E7000020062EBE0 /* nose.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = nose.png; path = FBExampleObjc/Icon/nose.png; sourceTree = "<group>"; };
+		84B001072E7000020062EBE0 /* eyes.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = eyes.png; path = FBExampleObjc/Icon/eyes.png; sourceTree = "<group>"; };
+		84B001092E7000020062EBE0 /* lipstick.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = lipstick.png; path = FBExampleObjc/Icon/lipstick.png; sourceTree = "<group>"; };
+		84B0010B2E7000020062EBE0 /* eyebrow.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = eyebrow.png; path = FBExampleObjc/Icon/eyebrow.png; sourceTree = "<group>"; };
+		84B0010D2E7000020062EBE0 /* eyeshadow.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = eyeshadow.png; path = FBExampleObjc/Icon/eyeshadow.png; sourceTree = "<group>"; };
+		84B0010F2E7000020062EBE0 /* rabbit.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = rabbit.png; path = FBExampleObjc/Icon/rabbit.png; sourceTree = "<group>"; };
+		84BC00112E2BD494004055A8 /* BeautyCameraViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = BeautyCameraViewController.m; sourceTree = "<group>"; };
+		84BC00122E2BD494004055A8 /* BeautyCameraViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BeautyCameraViewController.h; sourceTree = "<group>"; };
+		84C001052E7000040062EBE0 /* background.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; name = background.jpg; path = FBExampleObjc/Icon/background.jpg; sourceTree = "<group>"; };
+		84E5BC572F3856FB00951283 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
+		84E5BC592F38570500951283 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		84ECE5882EBB5F3D0062EBE0 /* lvjing.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = lvjing.png; path = FBExampleObjc/Icon/lvjing.png; sourceTree = "<group>"; };
 		84ECE5892EBB5F3D0062EBE0 /* meiyan.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = meiyan.png; path = FBExampleObjc/Icon/meiyan.png; sourceTree = "<group>"; };
 		84ECE58A2EBB5F3D0062EBE0 /* tiezhi2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = tiezhi2.png; path = FBExampleObjc/Icon/tiezhi2.png; sourceTree = "<group>"; };
@@ -104,7 +110,6 @@
 		84ECE5952EBB5F3D0062EBE0 /* huazhitiaozheng3.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = huazhitiaozheng3.png; path = FBExampleObjc/Icon/huazhitiaozheng3.png; sourceTree = "<group>"; };
 		84ECE5962EBB5F3D0062EBE0 /* close.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = close.png; path = FBExampleObjc/Icon/close.png; sourceTree = "<group>"; };
 		84ECE5972EBB5F3D0062EBE0 /* huazhitiaozheng2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = huazhitiaozheng2.png; path = FBExampleObjc/Icon/huazhitiaozheng2.png; sourceTree = "<group>"; };
-		84ECE5982EBB5F3D0062EBE0 /* back_mobile.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = back_mobile.png; path = FBExampleObjc/Icon/back_mobile.png; sourceTree = "<group>"; };
 		84ECE5992EBB5F3D0062EBE0 /* renlianjiance.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = renlianjiance.png; path = FBExampleObjc/Icon/renlianjiance.png; sourceTree = "<group>"; };
 		84ECE59A2EBB5F3D0062EBE0 /* reset.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = reset.png; path = FBExampleObjc/Icon/reset.png; sourceTree = "<group>"; };
 		84ECE59B2EBB5F3D0062EBE0 /* tiezhi.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = tiezhi.png; path = FBExampleObjc/Icon/tiezhi.png; sourceTree = "<group>"; };
@@ -132,7 +137,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				844A24082EB39AC0005F3533 /* Facebetter.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -164,8 +168,8 @@
 				84400C5E2E2BD494004055A8 /* AppDelegate.m */,
 				84400C602E2BD494004055A8 /* ViewController.h */,
 				84400C612E2BD494004055A8 /* ViewController.m */,
-				84ECE5842EBB5EB20062EBE0 /* HomeViewController.h */,
-				84ECE5852EBB5EB20062EBE0 /* HomeViewController.m */,
+				84BC00122E2BD494004055A8 /* BeautyCameraViewController.h */,
+				84BC00112E2BD494004055A8 /* BeautyCameraViewController.m */,
 				84400C932E2CE424004055A8 /* CameraManager.h */,
 				84400C942E2CE424004055A8 /* CameraManager.m */,
 				844A24042EB39731005F3533 /* GLRGBARenderView.h */,
@@ -173,6 +177,8 @@
 				846E18C52E6EAFBA00D3B53C /* BeautyPanelViewController.h */,
 				846E18B42E6EAFB400D3B53C /* BeautyPanelViewController.m */,
 				84400C632E2BD495004055A8 /* Assets.xcassets */,
+				84E5BC562F3856FB00951283 /* Localizable.strings */,
+				84A55E012E7000010062EBE0 /* assets */,
 				84400C682E2BD496004055A8 /* main.m */,
 				84400C6A2E2BD496004055A8 /* FBExampleObjc.entitlements */,
 			);
@@ -190,8 +196,16 @@
 		84ECE5872EBB5F280062EBE0 /* Icons */ = {
 			isa = PBXGroup;
 			children = (
-				84ECE5982EBB5F3D0062EBE0 /* back_mobile.png */,
 				84ECE58C2EBB5F3D0062EBE0 /* back_preset.png */,
+				84C001052E7000040062EBE0 /* background.jpg */,
+				84B001032E7000020062EBE0 /* chin.png */,
+				84B0010B2E7000020062EBE0 /* eyebrow.png */,
+				84B0010D2E7000020062EBE0 /* eyeshadow.png */,
+				84B001072E7000020062EBE0 /* eyes.png */,
+				84B001012E7000020062EBE0 /* jawbone.png */,
+				84B001092E7000020062EBE0 /* lipstick.png */,
+				84B001052E7000020062EBE0 /* nose.png */,
+				84B0010F2E7000020062EBE0 /* rabbit.png */,
 				84ECE5A52EBB5F3D0062EBE0 /* beautycard2.png */,
 				84ECE59D2EBB5F3D0062EBE0 /* beautycard3.png */,
 				84ECE5AC2EBB5F3E0062EBE0 /* before_after.png */,
@@ -241,7 +255,6 @@
 				84400C562E2BD494004055A8 /* Sources */,
 				84400C572E2BD494004055A8 /* Frameworks */,
 				84400C582E2BD494004055A8 /* Resources */,
-				84DCA0372E367323008E8A26 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -273,6 +286,7 @@
 			knownRegions = (
 				en,
 				Base,
+				"zh-Hans",
 			);
 			mainGroup = 84400C512E2BD494004055A8;
 			productRefGroup = 84400C5B2E2BD494004055A8 /* Products */;
@@ -290,9 +304,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				84ECE5B02EBB5F3E0062EBE0 /* header.png in Resources */,
+				84E5BC582F3856FB00951283 /* Localizable.strings in Resources */,
 				84ECE5C52EBB5F3E0062EBE0 /* disable.png in Resources */,
 				84ECE5C12EBB5F3E0062EBE0 /* lvmukoutu.png in Resources */,
-				84ECE5BD2EBB5F3E0062EBE0 /* back_mobile.png in Resources */,
 				84ECE5C92EBB5F3E0062EBE0 /* meixing.png in Resources */,
 				84ECE5AE2EBB5F3E0062EBE0 /* meiyan.png in Resources */,
 				84ECE5C42EBB5F3E0062EBE0 /* camera3.png in Resources */,
@@ -327,6 +341,16 @@
 				84ECE5CD2EBB5F3E0062EBE0 /* shoushi.png in Resources */,
 				84ECE5BB2EBB5F3E0062EBE0 /* close.png in Resources */,
 				84ECE5AD2EBB5F3E0062EBE0 /* lvjing.png in Resources */,
+				84A55E022E7000010062EBE0 /* assets in Resources */,
+				84B001022E7000020062EBE0 /* jawbone.png in Resources */,
+				84B001042E7000020062EBE0 /* chin.png in Resources */,
+				84B001062E7000020062EBE0 /* nose.png in Resources */,
+				84B001082E7000020062EBE0 /* eyes.png in Resources */,
+				84B0010A2E7000020062EBE0 /* lipstick.png in Resources */,
+				84B0010C2E7000020062EBE0 /* eyebrow.png in Resources */,
+				84B0010E2E7000020062EBE0 /* eyeshadow.png in Resources */,
+				84B001102E7000020062EBE0 /* rabbit.png in Resources */,
+				84C001062E7000040062EBE0 /* background.jpg in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -342,12 +366,24 @@
 				84400C622E2BD494004055A8 /* ViewController.m in Sources */,
 				84400C692E2BD496004055A8 /* main.m in Sources */,
 				84400C952E2CE424004055A8 /* CameraManager.m in Sources */,
-				84ECE5862EBB5EB20062EBE0 /* HomeViewController.m in Sources */,
+				84BC00102E2BD494004055A8 /* BeautyCameraViewController.m in Sources */,
 				84400C5F2E2BD494004055A8 /* AppDelegate.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		84E5BC562F3856FB00951283 /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				84E5BC572F3856FB00951283 /* en */,
+				84E5BC592F38570500951283 /* zh-Hans */,
+			);
+			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		84400C6B2E2BD496004055A8 /* Debug */ = {
@@ -477,10 +513,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = QFCE3TAQXQ;
 				ENABLE_HARDENED_RUNTIME = YES;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)/FBExampleObjc/libs",
-				);
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GCC_C_LANGUAGE_STANDARD = c11;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSCameraUsageDescription = "Use Camera For Video Capture";
@@ -514,10 +547,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = QFCE3TAQXQ;
 				ENABLE_HARDENED_RUNTIME = YES;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)/FBExampleObjc/libs",
-				);
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GCC_C_LANGUAGE_STANDARD = c11;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSCameraUsageDescription = "Use Camera For Video Capture";

@@ -11,9 +11,49 @@ import {
   ChromaKeyParam,
   BackgroundMode,
   VirtualBackgroundOptions,
-  FrameType 
+  FrameType,
+  MirrorMode 
 } from 'facebetter'
 import './BeautyPreview.css'
+
+// Filter IDs (same order as Mac demo: assets/filters/portrait/<id>/<id>.fbd)
+const FILTER_IDS = [
+  'initial_heart', 'first_love', 'vivid', 'confession', 'milk_tea', 'mousse',
+  'japanese', 'dawn', 'cookie', 'lively', 'pure', 'fair', 'snow', 'plain',
+  'natural', 'rose', 'tender', 'tender_2', 'extraordinary'
+]
+// Stickers: { id, path under assets/stickers/ }
+const STICKER_LIST = [{ id: 'rabbit', path: 'face/rabbit/rabbit.fbd' }]
+
+/**
+ * Register filter and sticker resources (same logic as Mac demo).
+ * Fetches .fbd files from public/assets and registers with engine.
+ */
+async function registerFiltersAndStickers(engine) {
+  const base = typeof window !== 'undefined' && window.location ? window.location.origin : ''
+  for (const id of FILTER_IDS) {
+    try {
+      const url = `${base}/assets/filters/portrait/${id}/${id}.fbd`
+      const res = await fetch(url)
+      if (!res.ok) continue
+      const buf = await res.arrayBuffer()
+      engine.registerFilter(id, new Uint8Array(buf))
+    } catch (e) {
+      console.warn(`[BeautyPreview] Failed to register filter: ${id}`, e)
+    }
+  }
+  for (const { id, path } of STICKER_LIST) {
+    try {
+      const url = `${base}/assets/stickers/${path}`
+      const res = await fetch(url)
+      if (!res.ok) continue
+      const buf = await res.arrayBuffer()
+      engine.registerSticker(id, new Uint8Array(buf))
+    } catch (e) {
+      console.warn(`[BeautyPreview] Failed to register sticker: ${id}`, e)
+    }
+  }
+}
 
 /**
  * BeautyPreview Component
@@ -41,9 +81,8 @@ function BeautyPreview() {
 
   // Component state
   const [statusMessage, setStatusMessage] = useState('')
-  const [showBeautyPanel, setShowBeautyPanel] = useState(false)
+  const [showBeautyPanel, setShowBeautyPanel] = useState(true)
   const [showBeautySlider, setShowBeautySlider] = useState(false)
-  const [showSliderValue, setShowSliderValue] = useState(false)
   const [currentTab, setCurrentTab] = useState('beauty')
   const [currentFunction, setCurrentFunction] = useState(null)
   const [isProcessing, setIsProcessing] = useState(false)
@@ -51,8 +90,6 @@ function BeautyPreview() {
   const [isMobileDevice, setIsMobileDevice] = useState(false)
   const [currentSliderValue, setCurrentSliderValue] = useState(0)
   const [sliderValue, setSliderValue] = useState(0)
-  const [sliderValuePosition, setSliderValuePosition] = useState(0)
-  const [isBeforeAfterPressed, setIsBeforeAfterPressed] = useState(false)
   const [isImageMode, setIsImageMode] = useState(false)
   const [faceDetectionResults, setFaceDetectionResults] = useState([])
   const [faceDetectionEnabled, setFaceDetectionEnabled] = useState(false)
@@ -65,13 +102,8 @@ function BeautyPreview() {
   const displayCtxRef = useRef(null)          // Canvas 2D context for display
   const animationFrameIdRef = useRef(null)   // requestAnimationFrame ID
   const lastProcessedFrameRef = useRef(null)  // Last processed ImageData (for photo capture)
-  const sliderValueTimerRef = useRef(null)    // Timer for hiding slider value display
   const currentImageRef = useRef(null)        // Current image file (for image mode)
   const imageElementRef = useRef(null)        // Current image element (for image mode)
-  const savedBeautyParamsRef = useRef({       // Saved beauty params for before/after comparison
-    beauty: { white: 0, smooth: 0, rosiness: 0 },
-    reshape: { thin_face: 0 }
-  })
 
   // Component initialization
   useEffect(() => {
@@ -105,14 +137,14 @@ function BeautyPreview() {
 
   /**
    * Initialize display canvas
-   * Sets canvas size to match container dimensions (max 1200px width)
+   * Sets canvas size to match container dimensions (max 960px width)
    */
   const initCanvas = useCallback(() => {
     const canvas = displayCanvasRef.current
     if (!canvas) return
     
     const container = canvas.parentElement
-    const containerWidth = container ? Math.min(container.clientWidth, 1200) : window.innerWidth
+    const containerWidth = container ? Math.min(container.clientWidth, 1280) : window.innerWidth
     const containerHeight = container ? container.clientHeight : window.innerHeight
     canvas.width = containerWidth
     canvas.height = containerHeight
@@ -160,6 +192,9 @@ function BeautyPreview() {
     engine.setBeautyTypeEnabled(BeautyType.VirtualBackground, true)   // Virtual background replacement
     engine.setBeautyTypeEnabled(BeautyType.ChromaKey, false)          // Chroma key (disabled by default)
 
+    // Register filter and sticker resources (same as Mac demo)
+    await registerFiltersAndStickers(engine)
+
     // Set face detection callback to receive face landmarks and detection results
     engine.setCallbacks({
       onFaceLandmarks: (results) => {
@@ -183,9 +218,9 @@ function BeautyPreview() {
     try {
       const videoStream = await navigator.mediaDevices.getUserMedia({
         video: {
-          width: { ideal: 640 },
-          height: { ideal: 480 },
-          frameRate: { ideal: 15 }
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+          frameRate: { ideal: 30 }
         },
         audio: false
       })
@@ -240,9 +275,9 @@ function BeautyPreview() {
       ctx.drawImage(videoElement, 0, 0)
       const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
       
-      // Process image through Facebetter engine
-      // FrameType.Video: Optimized for video processing (may use different algorithms than static images)
-      const processed = engineRef.current.processImage(imageData, canvas.width, canvas.height, FrameType.Video)
+      // Process image through Facebetter engine (horizontal mirror for front-camera preview)
+      // FrameType.Video: Optimized for video processing; MirrorMode.Horizontal: mirror input before process
+      const processed = engineRef.current.processImage(imageData, canvas.width, canvas.height, FrameType.Video, MirrorMode.Horizontal)
       lastProcessedFrameRef.current = processed
 
       if (displayCtxRef.current && displayCanvasRef.current) {
@@ -254,24 +289,12 @@ function BeautyPreview() {
           displayCtxRef.current = canvas.getContext('2d')
         }
         
-        const tempCanvas = document.createElement('canvas')
-        tempCanvas.width = processed.width
-        tempCanvas.height = processed.height
-        const tempCtx = tempCanvas.getContext('2d')
-        tempCtx.putImageData(processed, 0, 0)
-        
-        displayCtxRef.current.clearRect(0, 0, canvas.width, canvas.height)
-        displayCtxRef.current.save()
-        displayCtxRef.current.scale(-1, 1)
-        displayCtxRef.current.translate(-canvas.width, 0)
-        displayCtxRef.current.drawImage(tempCanvas, 0, 0)
-        displayCtxRef.current.restore()
-        
-        drawFaceDetectionResults(displayCtxRef.current, canvas.width, canvas.height, true)
+        displayCtxRef.current.putImageData(processed, 0, 0)
+        drawFaceDetectionResults(displayCtxRef.current, canvas.width, canvas.height, false)
         
         const container = canvas.parentElement
         if (container) {
-          const maxWidth = Math.min(container.clientWidth, 1200)
+          const maxWidth = Math.min(container.clientWidth, 1280)
           const maxHeight = container.clientHeight
           
           const imageAspect = processed.width / processed.height
@@ -474,6 +497,22 @@ function BeautyPreview() {
           })
           engine.setVirtualBackground(options)
         }
+      } else if (tab === 'sticker') {
+        // Sticker: same logic as Mac demo
+        if (functionKey === 'off' || paramValue <= 0) {
+          engine.setSticker('')
+        } else {
+          engine.setSticker(functionKey)
+        }
+      } else if (tab === 'filter') {
+        // Filter: same logic as Mac demo
+        engine.setBeautyTypeEnabled(BeautyType.Filter, functionKey !== 'off' && paramValue > 0)
+        if (functionKey === 'off' || paramValue <= 0) {
+          engine.setFilterIntensity(0)
+        } else {
+          engine.setFilter(functionKey)
+          engine.setFilterIntensity(paramValue)
+        }
       } else if (tab === 'chroma_key') {
         // Chroma key (green screen) parameters
         if (!engine.isBeautyTypeEnabled(BeautyType.ChromaKey)) {
@@ -582,7 +621,7 @@ function BeautyPreview() {
         
         const container = canvas.parentElement
         if (container) {
-          const maxWidth = Math.min(container.clientWidth, 1200)
+          const maxWidth = Math.min(container.clientWidth, 960)
           const maxHeight = container.clientHeight
           
           const imageAspect = processed.width / processed.height
@@ -636,6 +675,10 @@ function BeautyPreview() {
       engine.setMakeupParam(MakeupParam.Lipstick, 0)
       engine.setMakeupParam(MakeupParam.Blush, 0)
 
+      // Reset sticker and filter (same as Mac beautyPanelDidReset)
+      engine.setSticker('')
+      engine.setFilterIntensity(0)
+
       // Reset virtual background
       const options = new VirtualBackgroundOptions({
         mode: BackgroundMode.None
@@ -678,6 +721,11 @@ function BeautyPreview() {
           mode: BackgroundMode.None
         })
         engine.setVirtualBackground(options)
+      } else if (tab === 'filter') {
+        engine.setBeautyTypeEnabled(BeautyType.Filter, false)
+        engine.setFilterIntensity(0)
+      } else if (tab === 'sticker') {
+        engine.setSticker('')
       } else if (tab === 'chroma_key') {
         engine.setChromaKeyParam(ChromaKeyParam.KeyColor, 0)
         engine.setChromaKeyParam(ChromaKeyParam.Similarity, 0)
@@ -728,11 +776,6 @@ function BeautyPreview() {
   const cleanup = useCallback(() => {
     setIsActive(false)
 
-    if (sliderValueTimerRef.current) {
-      clearTimeout(sliderValueTimerRef.current)
-      sliderValueTimerRef.current = null
-    }
-
     if (animationFrameIdRef.current) {
       cancelAnimationFrame(animationFrameIdRef.current)
       animationFrameIdRef.current = null
@@ -758,7 +801,6 @@ function BeautyPreview() {
     setCurrentTab(tabId)
     setCurrentFunction(null)
     setShowBeautySlider(false)
-    setShowSliderValue(false)
     
     if (tabId === 'chroma_key' && engineRef.current) {
       if (!engineRef.current.isBeautyTypeEnabled(BeautyType.ChromaKey)) {
@@ -775,7 +817,6 @@ function BeautyPreview() {
     setCurrentFunction(data.function)
     setCurrentSliderValue(data.value)
     setSliderValue(data.value)
-    updateSliderValuePosition()
     setShowBeautySlider(true)
     
     applyBeautyParam(data.tab, data.function, data.value / 100.0)
@@ -783,32 +824,16 @@ function BeautyPreview() {
 
   const onHideSlider = useCallback(() => {
     setShowBeautySlider(false)
-    setShowSliderValue(false)
   }, [])
-
-  const onResetBeauty = useCallback(() => {
-    setCurrentSliderValue(0)
-    setCurrentFunction(null)
-    setShowBeautySlider(false)
-    setShowSliderValue(false)
-    resetAllParams()
-  }, [resetAllParams])
 
   const onResetTab = useCallback((tab) => {
     resetTabParams(tab)
   }, [resetTabParams])
 
-  const onHidePanel = useCallback(() => {
-    setShowBeautyPanel(false)
-    setShowBeautySlider(false)
-    setShowSliderValue(false)
-  }, [])
-
   const onSliderChange = useCallback((event) => {
     const value = parseInt(event.target.value)
     setCurrentSliderValue(value)
     setSliderValue(value)
-    updateSliderValuePosition()
 
     if (currentFunction && beautyPanelRef.current) {
       beautyPanelRef.current.updateSliderValue(currentTab, currentFunction, value)
@@ -819,29 +844,8 @@ function BeautyPreview() {
     }
   }, [currentFunction, currentTab, applyBeautyParam])
 
-  const onSliderStart = useCallback(() => {
-    setShowSliderValue(true)
-  }, [])
-
-  const onSliderEnd = useCallback(() => {
-    if (sliderValueTimerRef.current) {
-      clearTimeout(sliderValueTimerRef.current)
-    }
-    sliderValueTimerRef.current = setTimeout(() => {
-      setShowSliderValue(false)
-    }, 500)
-  }, [])
-
-  const updateSliderValuePosition = useCallback(() => {
-    if (!beautySeekBarRef.current) return
-    
-    const slider = beautySeekBarRef.current
-    const sliderRect = slider.getBoundingClientRect()
-    const sliderWidth = sliderRect.width - 32
-    const thumbPos = (currentSliderValue / 100) * sliderWidth
-    
-    setSliderValuePosition(thumbPos + 16)
-  }, [currentSliderValue])
+  const onSliderStart = useCallback(() => {}, [])
+  const onSliderEnd = useCallback(() => {}, [])
 
   const goBack = useCallback(() => {
     navigate('/')
@@ -940,186 +944,6 @@ function BeautyPreview() {
     alert('More options coming soon')
   }, [])
 
-  const onBeautyShapeClick = useCallback(() => {
-    setShowBeautyPanel(true)
-    setCurrentTab('beauty')
-  }, [])
-
-  const onMakeupClick = useCallback(() => {
-    setShowBeautyPanel(true)
-    setCurrentTab('makeup')
-  }, [])
-
-  const onStickerClick = useCallback(() => {
-    setShowBeautyPanel(true)
-    setCurrentTab('sticker')
-  }, [])
-
-  const onFilterClick = useCallback(() => {
-    setShowBeautyPanel(true)
-    setCurrentTab('filter')
-  }, [])
-
-  const saveCurrentBeautyParams = useCallback(() => {
-    if (!beautyPanelRef.current) return
-    
-    const beautyParams = {
-      beauty: {},
-      reshape: {}
-    }
-    
-    const whiteValue = beautyPanelRef.current.getSliderValue('beauty', 'white') || 0
-    const smoothValue = beautyPanelRef.current.getSliderValue('beauty', 'smooth') || 0
-    const rosinessValue = beautyPanelRef.current.getSliderValue('beauty', 'rosiness') || 0
-    
-    beautyParams.beauty.white = whiteValue / 100.0
-    beautyParams.beauty.smooth = smoothValue / 100.0
-    beautyParams.beauty.rosiness = rosinessValue / 100.0
-    
-    const reshapeKeys = ['thin_face', 'v_face', 'narrow_face', 'short_face', 'cheekbone', 'jawbone', 'chin', 'nose_slim', 'big_eye', 'eye_distance']
-    reshapeKeys.forEach(key => {
-      const value = beautyPanelRef.current.getSliderValue('reshape', key) || 0
-      beautyParams.reshape[key] = value / 100.0
-    })
-    
-    savedBeautyParamsRef.current = beautyParams
-  }, [])
-
-  const restoreBeautyParams = useCallback(() => {
-    const params = savedBeautyParamsRef.current
-    
-    if (params.beauty) {
-      if (params.beauty.white !== undefined) {
-        const value = params.beauty.white
-        applyBeautyParam('beauty', 'white', value)
-        if (beautyPanelRef.current) {
-          beautyPanelRef.current.updateSliderValue('beauty', 'white', Math.round(value * 100))
-        }
-      }
-      if (params.beauty.smooth !== undefined) {
-        const value = params.beauty.smooth
-        applyBeautyParam('beauty', 'smooth', value)
-        if (beautyPanelRef.current) {
-          beautyPanelRef.current.updateSliderValue('beauty', 'smooth', Math.round(value * 100))
-        }
-      }
-      if (params.beauty.rosiness !== undefined) {
-        const value = params.beauty.rosiness
-        applyBeautyParam('beauty', 'rosiness', value)
-        if (beautyPanelRef.current) {
-          beautyPanelRef.current.updateSliderValue('beauty', 'rosiness', Math.round(value * 100))
-        }
-      }
-    }
-    
-    if (params.reshape) {
-      const reshapeKeys = ['thin_face', 'v_face', 'narrow_face', 'short_face', 'cheekbone', 'jawbone', 'chin', 'nose_slim', 'big_eye', 'eye_distance']
-      reshapeKeys.forEach(key => {
-        if (params.reshape[key] !== undefined) {
-          const value = params.reshape[key]
-          applyBeautyParam('reshape', key, value)
-          if (beautyPanelRef.current) {
-            beautyPanelRef.current.updateSliderValue('reshape', key, Math.round(value * 100))
-          }
-        }
-      })
-    }
-  }, [applyBeautyParam])
-
-  const onBeforeAfterPress = useCallback(() => {
-    if (isBeforeAfterPressed) return
-    
-    setIsBeforeAfterPressed(true)
-    saveCurrentBeautyParams()
-    resetAllParams()
-  }, [isBeforeAfterPressed, saveCurrentBeautyParams, resetAllParams])
-
-  const onBeforeAfterRelease = useCallback(() => {
-    if (!isBeforeAfterPressed) return
-    
-    setIsBeforeAfterPressed(false)
-    restoreBeautyParams()
-  }, [isBeforeAfterPressed, restoreBeautyParams])
-
-  const capturePhoto = useCallback(async () => {
-    const canvas = displayCanvasRef.current
-    const ctx = displayCtxRef.current
-    
-    if (!canvas || !ctx) {
-      setStatusMessage('Canvas not initialized')
-      setTimeout(() => setStatusMessage(''), 2000)
-      return
-    }
-
-    try {
-      if (!lastProcessedFrameRef.current) {
-        setStatusMessage('No image to save')
-        setTimeout(() => setStatusMessage(''), 2000)
-        return
-      }
-
-      const width = lastProcessedFrameRef.current.width
-      const height = lastProcessedFrameRef.current.height
-
-      if (width === 0 || height === 0) {
-        setStatusMessage('Invalid canvas size')
-        setTimeout(() => setStatusMessage(''), 2000)
-        return
-      }
-
-      const exportCanvas = document.createElement('canvas')
-      exportCanvas.width = width
-      exportCanvas.height = height
-      const exportCtx = exportCanvas.getContext('2d')
-      
-      if (isImageMode) {
-        exportCtx.putImageData(lastProcessedFrameRef.current, 0, 0)
-      } else {
-        const tempCanvas = document.createElement('canvas')
-        tempCanvas.width = width
-        tempCanvas.height = height
-        const tempCtx = tempCanvas.getContext('2d')
-        tempCtx.putImageData(lastProcessedFrameRef.current, 0, 0)
-        
-        exportCtx.save()
-        exportCtx.scale(-1, 1)
-        exportCtx.translate(-width, 0)
-        exportCtx.drawImage(tempCanvas, 0, 0)
-        exportCtx.restore()
-      }
-
-      exportCanvas.toBlob((blob) => {
-        if (!blob) {
-          setStatusMessage('Save failed')
-          setTimeout(() => setStatusMessage(''), 2000)
-          return
-        }
-
-        const url = URL.createObjectURL(blob)
-        const a = document.createElement('a')
-        a.href = url
-        a.download = `facebetter_${Date.now()}.png`
-        document.body.appendChild(a)
-        a.click()
-        document.body.removeChild(a)
-        URL.revokeObjectURL(url)
-
-        setStatusMessage('Photo saved')
-        setTimeout(() => setStatusMessage(''), 2000)
-      }, 'image/png', 1.0)
-    } catch (error) {
-      console.error('Failed to capture photo:', error)
-      setStatusMessage('Failed to capture photo: ' + error.message)
-      setTimeout(() => setStatusMessage(''), 2000)
-    }
-  }, [isImageMode])
-
-  useEffect(() => {
-    if (showBeautySlider) {
-      updateSliderValuePosition()
-    }
-  }, [showBeautySlider, currentSliderValue, updateSliderValuePosition])
-
   useEffect(() => {
     if (isActive && !isImageMode) {
       const startProcessing = () => {
@@ -1171,9 +995,6 @@ function BeautyPreview() {
           currentTab={currentTab}
           onTabChanged={onTabChanged}
           onBeautyParamChanged={onBeautyParamChanged}
-          onResetBeauty={onResetBeauty}
-          onHidePanel={onHidePanel}
-          onCapture={capturePhoto}
           onShowSlider={onShowSlider}
           onHideSlider={onHideSlider}
           onResetTab={onResetTab}
@@ -1182,14 +1003,7 @@ function BeautyPreview() {
 
       {showBeautySlider && showBeautyPanel && (
         <div className="beauty-slider-container">
-          {showSliderValue && (
-            <div 
-              className="beauty-value-text"
-              style={{ left: sliderValuePosition + 'px' }}
-            >
-              {sliderValue}
-            </div>
-          )}
+          <div className="beauty-value-text">{sliderValue}</div>
           <input 
             ref={beautySeekBarRef}
             type="range" 
@@ -1204,46 +1018,6 @@ function BeautyPreview() {
             onMouseDown={onSliderStart}
             onMouseUp={onSliderEnd}
           />
-        </div>
-      )}
-
-      {showBeautyPanel && (
-        <button 
-          className="before-after-btn"
-          onMouseDown={onBeforeAfterPress}
-          onMouseUp={onBeforeAfterRelease}
-          onMouseLeave={onBeforeAfterRelease}
-          onTouchStart={onBeforeAfterPress}
-          onTouchEnd={onBeforeAfterRelease}
-          onTouchCancel={onBeforeAfterRelease}
-        >
-          <img src="/icons/before_after.png" alt="Before/After" className="control-icon" />
-        </button>
-      )}
-
-      {!showBeautyPanel && (
-        <div className="bottom-bar">
-          <div className="bottom-action" onClick={onBeautyShapeClick}>
-            <img src="/icons/meiyan.png" alt="Beauty" className="bottom-action-icon" />
-            <span className="bottom-action-text">Beauty</span>
-          </div>
-          <div className="bottom-action" onClick={onMakeupClick}>
-            <img src="/icons/meizhuang.png" alt="Makeup" className="bottom-action-icon" />
-            <span className="bottom-action-text">Makeup</span>
-          </div>
-          <div className="bottom-action-center">
-            <button className="capture-btn" onClick={capturePhoto}>
-              <div className="capture-inner"></div>
-            </button>
-          </div>
-          <div className="bottom-action" onClick={onStickerClick}>
-            <img src="/icons/tiezhi2.png" alt="Sticker" className="bottom-action-icon" />
-            <span className="bottom-action-text">Sticker</span>
-          </div>
-          <div className="bottom-action" onClick={onFilterClick}>
-            <img src="/icons/lvjing.png" alt="Filter" className="bottom-action-icon" />
-            <span className="bottom-action-text">Filter</span>
-          </div>
         </div>
       )}
 

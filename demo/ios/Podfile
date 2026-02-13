@@ -1,0 +1,9 @@
+platform :ios, '12.0'
+
+target 'FBExampleObjc' do
+  use_frameworks!
+
+  # 标准的远程依赖，pod 会自动下载 zip 包
+  pod 'Facebetter', '1.2.1'
+
+end

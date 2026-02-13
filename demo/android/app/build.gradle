@@ -3,12 +3,12 @@ plugins {
 }
 
 android {
-    namespace 'com.pixpark.fbexample'
-    compileSdk 34
+    namespace = 'net.pixpark.fbexample'
+    compileSdk = 34
 
     defaultConfig {
-        applicationId "com.pixpark.fbexample"
-        minSdk 24
+        applicationId = "net.pixpark.fbexample"
+        minSdk = 24
         targetSdk 34
         versionCode 1
         versionName "1.0"
@@ -24,10 +24,10 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled = false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
-        }
+    }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_11
         targetCompatibility JavaVersion.VERSION_11
@@ -39,7 +39,7 @@ dependencies {
     implementation libs.material
     implementation libs.activity
     implementation libs.constraintlayout
-    implementation files('libs/facebetter.aar')
+    implementation libs.facebetter
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit
     androidTestImplementation libs.espresso.core

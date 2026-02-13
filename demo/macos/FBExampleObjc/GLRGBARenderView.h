@@ -4,17 +4,16 @@
 //
 
 #import <Cocoa/Cocoa.h>
-#import <Facebetter/FBBeautyEffectEngine.h>
+
+@class FBImageFrame;
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface GLRGBARenderView : NSOpenGLView
 
-- (void)renderBuffer:(FBImageBuffer *)buffer;
-
-// 设置是否水平镜像显示（默认 NO）
-- (void)setMirrored:(BOOL)mirrored;
-
+/// Renders RGBA FBImageFrame (convert to FBImageFormatRGBA first if needed).
+- (void)renderFrame:(FBImageFrame *)frame;
+ 
 @end
 
 NS_ASSUME_NONNULL_END

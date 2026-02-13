@@ -94,7 +94,7 @@ function Home() {
           </div>
 
           <div className="atomic-capabilities-section">
-            <h2 className="section-title">Atomic Capabilities</h2>
+            <h2 className="section-title">More effect</h2>
             <div className="atomic-grid">
               <div className="feature-item disabled" onClick={() => showComingSoon('Hair Color')}>
                 <img src="/icons/huanfase.png" alt="Hair Color" className="feature-icon" />

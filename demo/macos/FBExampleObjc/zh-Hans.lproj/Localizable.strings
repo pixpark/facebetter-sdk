@@ -1,0 +1,67 @@
+/* Home - Large buttons */
+"beauty_effect" = "美颜特效";
+"beauty_template" = "美颜模板";
+
+/* Home - Feature grid (first section) */
+"beauty" = "美颜";
+"reshape" = "美型";
+"makeup" = "美妆";
+"filter" = "滤镜";
+"sticker" = "贴纸";
+"virtual_bg" = "虚拟背景";
+"body" = "美体";
+"quality" = "画质调整";
+"more_effects" = "更多特效";
+
+/* Home - Feature grid (second section) */
+"face_detect" = "人脸检测";
+"hair_color" = "换发色";
+"style_makeover" = "风格整装";
+"gesture" = "手势检测";
+"green_screen" = "绿幕抠图";
+
+/* Panel - Common */
+"off" = "关闭";
+
+/* Panel - Beauty */
+"whitening" = "美白";
+"smoothing" = "磨皮";
+"rosiness" = "红润";
+
+/* Panel - Reshape */
+"thin_face" = "瘦脸";
+"v_face" = "V脸";
+"narrow_face" = "窄脸";
+"short_face" = "短脸";
+"cheekbone" = "颧骨";
+"jawbone" = "下颌";
+"chin" = "下巴";
+"nose_slim" = "瘦鼻";
+"big_eye" = "大眼";
+"eye_distance" = "眼距";
+
+/* Panel - Makeup */
+"lipstick" = "口红";
+"blush" = "腮红";
+"eyebrow" = "眉毛";
+"eyeshadow" = "眼影";
+"makeup_lipstick_style_moist" = "水嫩";
+"makeup_lipstick_style_vitality" = "元气";
+"makeup_lipstick_style_retro" = "复古";
+"makeup_blush_style_japanese" = "日系";
+"makeup_blush_style_sector" = "扇形";
+"makeup_blush_style_tipsy" = "微醺";
+
+/* Panel - Sticker */
+"rabbit" = "兔子";
+
+/* Panel - Body */
+"slim" = "瘦身";
+
+/* Panel - Virtual BG */
+"blur" = "模糊";
+"preset" = "预置";
+"virtual_bg_image" = "图片";
+
+/* Panel - Quality */
+"sharpen" = "锐化";

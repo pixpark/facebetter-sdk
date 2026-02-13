@@ -10,14 +10,9 @@
 
 int main(int argc, const char *argv[]) {
   @autoreleasepool {
-    // 手动初始化 NSApplication，避免加载 Storyboard
     NSApplication *application = [NSApplication sharedApplication];
-
-    // 创建 AppDelegate
     AppDelegate *appDelegate = [[AppDelegate alloc] init];
     [application setDelegate:appDelegate];
-
-    // 运行应用
     [application run];
   }
   return 0;

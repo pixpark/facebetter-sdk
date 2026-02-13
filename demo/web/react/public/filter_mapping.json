@@ -1,0 +1,277 @@
+{
+  "categories": {
+    "portrait": {
+      "zh": "人像",
+      "en": "portrait"
+    },
+    "modern": {
+      "zh": "新锐",
+      "en": "modern"
+    },
+    "food": {
+      "zh": "美食",
+      "en": "food"
+    },
+    "landscape": {
+      "zh": "风景",
+      "en": "landscape"
+    }
+  },
+  "filters": {
+    "initial_heart": {
+      "zh": "初见",
+      "en": "initial_heart",
+      "category": "portrait"
+    },
+    "first_love": {
+      "zh": "悸动",
+      "en": "first_love",
+      "category": "portrait"
+    },
+    "vivid": {
+      "zh": "灵动",
+      "en": "vivid",
+      "category": "portrait"
+    },
+    "confession": {
+      "zh": "告白",
+      "en": "confession",
+      "category": "portrait"
+    },
+    "milk_tea": {
+      "zh": "温婉",
+      "en": "milk_tea",
+      "category": "portrait"
+    },
+    "mousse": {
+      "zh": "柔光",
+      "en": "mousse",
+      "category": "portrait"
+    },
+    "japanese": {
+      "zh": "晨间",
+      "en": "japanese",
+      "category": "portrait"
+    },
+    "dawn": {
+      "zh": "曦光",
+      "en": "dawn",
+      "category": "portrait"
+    },
+    "cookie": {
+      "zh": "甜糯",
+      "en": "cookie",
+      "category": "portrait"
+    },
+    "lively": {
+      "zh": "元气",
+      "en": "lively",
+      "category": "portrait"
+    },
+    "pure": {
+      "zh": "纯真",
+      "en": "pure",
+      "category": "portrait"
+    },
+    "fair": {
+      "zh": "瓷肌",
+      "en": "fair",
+      "category": "portrait"
+    },
+    "snow": {
+      "zh": "皑皑",
+      "en": "snow",
+      "category": "portrait"
+    },
+    "plain": {
+      "zh": "素雅",
+      "en": "plain",
+      "category": "portrait"
+    },
+    "natural": {
+      "zh": "裸感",
+      "en": "natural",
+      "category": "portrait"
+    },
+    "rose": {
+      "zh": "绛唇",
+      "en": "rose",
+      "category": "portrait"
+    },
+    "extraordinary": {
+      "zh": "高冷",
+      "en": "extraordinary",
+      "category": "portrait"
+    },
+    "tender": {
+      "zh": "柔嫩",
+      "en": "tender",
+      "category": "portrait"
+    },
+    "tender_2": {
+      "zh": "水嫩",
+      "en": "tender_2",
+      "category": "portrait"
+    },
+    "utopia": {
+      "zh": "迷离",
+      "en": "utopia",
+      "category": "modern"
+    },
+    "monochrome": {
+      "zh": "黑白",
+      "en": "monochrome",
+      "category": "modern"
+    },
+    "contrast": {
+      "zh": "冷萃",
+      "en": "contrast",
+      "category": "modern"
+    },
+    "island": {
+      "zh": "孤岛",
+      "en": "island",
+      "category": "modern"
+    },
+    "years": {
+      "zh": "流年",
+      "en": "years",
+      "category": "modern"
+    },
+    "polaroid": {
+      "zh": "定格",
+      "en": "polaroid",
+      "category": "modern"
+    },
+    "magazine": {
+      "zh": "刊物",
+      "en": "magazine",
+      "category": "modern"
+    },
+    "deep_black": {
+      "zh": "幽邃",
+      "en": "deep_black",
+      "category": "modern"
+    },
+    "unicorn": {
+      "zh": "梦幻",
+      "en": "unicorn",
+      "category": "modern"
+    },
+    "red": {
+      "zh": "朱红",
+      "en": "red",
+      "category": "modern"
+    },
+    "tea_grey": {
+      "zh": "茶墨",
+      "en": "tea_grey",
+      "category": "modern"
+    },
+    "past": {
+      "zh": "往昔",
+      "en": "past",
+      "category": "modern"
+    },
+    "cool_orange": {
+      "zh": "夕曛",
+      "en": "cool_orange",
+      "category": "modern"
+    },
+    "tasty": {
+      "zh": "鲜萃",
+      "en": "tasty",
+      "category": "food"
+    },
+    "mocha": {
+      "zh": "醇厚",
+      "en": "mocha",
+      "category": "food"
+    },
+    "cool": {
+      "zh": "清爽",
+      "en": "cool",
+      "category": "food"
+    },
+    "caramel": {
+      "zh": "琥珀",
+      "en": "caramel",
+      "category": "food"
+    },
+    "delicious": {
+      "zh": "珍馐",
+      "en": "delicious",
+      "category": "food"
+    },
+    "cheese": {
+      "zh": "芝士",
+      "en": "cheese",
+      "category": "food"
+    },
+    "peach_pink": {
+      "zh": "粉黛",
+      "en": "peach_pink",
+      "category": "food"
+    },
+    "grapefruit": {
+      "zh": "西柚",
+      "en": "grapefruit",
+      "category": "food"
+    },
+    "yogurt": {
+      "zh": "纯净",
+      "en": "yogurt",
+      "category": "food"
+    },
+    "midsummer": {
+      "zh": "仲夏",
+      "en": "midsummer",
+      "category": "landscape"
+    },
+    "city": {
+      "zh": "都市",
+      "en": "city",
+      "category": "landscape"
+    },
+    "orchid": {
+      "zh": "幽兰",
+      "en": "orchid",
+      "category": "landscape"
+    },
+    "begonia": {
+      "zh": "海棠",
+      "en": "begonia",
+      "category": "landscape"
+    },
+    "fresh": {
+      "zh": "沁心",
+      "en": "fresh",
+      "category": "landscape"
+    },
+    "amber": {
+      "zh": "琉璃",
+      "en": "amber",
+      "category": "landscape"
+    },
+    "pure_landscape": {
+      "zh": "旷野",
+      "en": "pure",
+      "category": "landscape"
+    },
+    "sincere": {
+      "zh": "真诚",
+      "en": "sincere",
+      "category": "landscape"
+    },
+    "romeo": {
+      "zh": "古典",
+      "en": "romeo",
+      "category": "landscape"
+    },
+    "azure": {
+      "zh": "蔚蓝",
+      "en": "azure",
+      "category": "landscape"
+    }
+  }
+}

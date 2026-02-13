@@ -2,11 +2,13 @@
 //  ViewController.h
 //  FBExampleObjc
 //
-//  Created by admin on 2025/7/19.
-//
 
 #import <Cocoa/Cocoa.h>
+
+NS_ASSUME_NONNULL_BEGIN
 
 @interface ViewController : NSViewController
 
 @end
+
+NS_ASSUME_NONNULL_END
