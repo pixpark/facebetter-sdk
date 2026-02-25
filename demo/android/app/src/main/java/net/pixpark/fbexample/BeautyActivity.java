@@ -190,12 +190,6 @@ public class BeautyActivity extends AppCompatActivity implements GLI420Renderer.
     mBeautyParamApplier = new BeautyParamApplier(this, mBeautyEngine);
     Log.d(TAG, "BeautyEffectEngine initialized");
 
-    mBeautyEngine.enableBeautyType(BeautyType.BASIC, true);
-    mBeautyEngine.enableBeautyType(BeautyType.RESHAPE, true);
-    mBeautyEngine.enableBeautyType(BeautyType.MAKEUP, true);
-    mBeautyEngine.enableBeautyType(BeautyType.VIRTUAL_BACKGROUND, true);
-    mBeautyEngine.enableBeautyType(BeautyType.FILTER, true);
-
     BeautyResourceLoader.registerFilters(mBeautyEngine, this);
     BeautyResourceLoader.registerStickers(mBeautyEngine, this);
   }

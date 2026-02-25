@@ -45,11 +45,6 @@
 
   self.beautyEffectEngine = [FBBeautyEffectEngine createEngineWithConfig:engineConfig];
 
-  [self.beautyEffectEngine setBeautyTypeEnabled:FBBeautyType_Basic enabled:TRUE];
-  [self.beautyEffectEngine setBeautyTypeEnabled:FBBeautyType_Reshape enabled:TRUE];
-  [self.beautyEffectEngine setBeautyTypeEnabled:FBBeautyType_Makeup enabled:TRUE];
-  [self.beautyEffectEngine setBeautyTypeEnabled:FBBeautyType_VirtualBackground enabled:TRUE];
-
   [self registerFiltersAndStickers];
 
   self.beautyPanelViewController = [[BeautyPanelViewController alloc] init];
@@ -205,8 +200,6 @@
   }
 
   if ([tab isEqualToString:@"reshape"]) {
-    [self.beautyEffectEngine setBeautyTypeEnabled:FBBeautyType_Reshape
-                                          enabled:![function isEqualToString:@"off"]];
     if ([function isEqualToString:@"thin_face"]) {
       [self.beautyEffectEngine setReshapeParam:FBReshapeParam_FaceThin floatValue:value];
     } else if ([function isEqualToString:@"v_face"]) {
@@ -243,8 +236,6 @@
   }
 
   if ([tab isEqualToString:@"makeup"]) {
-    [self.beautyEffectEngine setBeautyTypeEnabled:FBBeautyType_Makeup
-                                          enabled:![function isEqualToString:@"off"]];
     if ([function isEqualToString:@"lipstick"]) {
       [self.beautyEffectEngine setMakeupParam:FBMakeupParam_Lipstick floatValue:value];
     } else if ([function isEqualToString:@"blush"]) {
@@ -257,8 +248,6 @@
   }
 
   if ([tab isEqualToString:@"virtual_bg"]) {
-    [self.beautyEffectEngine setBeautyTypeEnabled:FBBeautyType_VirtualBackground
-                                          enabled:![function isEqualToString:@"off"]];
     FBVirtualBackgroundOptions *options = [[FBVirtualBackgroundOptions alloc] init];
     if ([function isEqualToString:@"off"]) {
       options.mode = FBBackgroundModeNone;
@@ -304,8 +293,6 @@
   }
 
   if ([tab isEqualToString:@"filter"]) {
-    [self.beautyEffectEngine setBeautyTypeEnabled:FBBeautyType_Filter
-                                          enabled:![function isEqualToString:@"off"]];
     if ([function isEqualToString:@"off"]) {
       [self.beautyEffectEngine setFilterIntensity:0];
     } else {

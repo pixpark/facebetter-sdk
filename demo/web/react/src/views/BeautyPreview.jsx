@@ -144,7 +144,7 @@ function BeautyPreview() {
     if (!canvas) return
     
     const container = canvas.parentElement
-    const containerWidth = container ? Math.min(container.clientWidth, 1280) : window.innerWidth
+    const containerWidth = container ? Math.min(container.clientWidth, 960) : window.innerWidth
     const containerHeight = container ? container.clientHeight : window.innerHeight
     canvas.width = containerWidth
     canvas.height = containerHeight
@@ -185,24 +185,11 @@ function BeautyPreview() {
     // Initialize the engine (loads models and resources)
     await engine.init()
 
-    // Enable beauty effect types
-    engine.setBeautyTypeEnabled(BeautyType.Basic, true)              // Basic beauty (whitening, smoothing, rosiness)
-    engine.setBeautyTypeEnabled(BeautyType.Reshape, true)             // Face reshaping (face thin, eye size, etc.)
-    engine.setBeautyTypeEnabled(BeautyType.Makeup, true)             // Makeup effects (lipstick, blush, etc.)
-    engine.setBeautyTypeEnabled(BeautyType.VirtualBackground, true)   // Virtual background replacement
-    engine.setBeautyTypeEnabled(BeautyType.ChromaKey, false)          // Chroma key (disabled by default)
-
     // Register filter and sticker resources (same as Mac demo)
     await registerFiltersAndStickers(engine)
 
-    // Set face detection callback to receive face landmarks and detection results
-    engine.setCallbacks({
-      onFaceLandmarks: (results) => {
-        // results: Array of face detection results with bounding boxes, key points, scores, etc.
-        setFaceDetectionResults(results)
-      },
-      maxFaces: 10  // Maximum number of faces to detect
-    })
+    // 不在初始化时注册 onFaceLandmarks 回调，避免无效的人脸检测开销。
+    // 回调仅在用户 UI 上打开"人脸检测"功能时才按需注册（见 applyBeautyParam）。
 
     engineRef.current = engine
 
@@ -218,9 +205,9 @@ function BeautyPreview() {
     try {
       const videoStream = await navigator.mediaDevices.getUserMedia({
         video: {
-          width: { ideal: 1280 },
-          height: { ideal: 720 },
-          frameRate: { ideal: 30 }
+          width: { ideal: 640 },
+          height: { ideal: 480 },
+          frameRate: { ideal: 15 }
         },
         audio: false
       })
@@ -294,7 +281,7 @@ function BeautyPreview() {
         
         const container = canvas.parentElement
         if (container) {
-          const maxWidth = Math.min(container.clientWidth, 1280)
+          const maxWidth = Math.min(container.clientWidth, 960)
           const maxHeight = container.clientHeight
           
           const imageAspect = processed.width / processed.height
@@ -467,13 +454,11 @@ function BeautyPreview() {
       } else if (tab === 'virtual_bg') {
         // Virtual background options
         if (functionKey === 'blur') {
-          engine.setBeautyTypeEnabled(BeautyType.VirtualBackground, true)
           const options = new VirtualBackgroundOptions({
             mode: value > 0 ? BackgroundMode.Blur : BackgroundMode.None
           })
           engine.setVirtualBackground(options)
         } else if (functionKey === 'preset') {
-          engine.setBeautyTypeEnabled(BeautyType.VirtualBackground, true)
           if (value > 0) {
             loadPresetBackground()
           } else {
@@ -483,7 +468,6 @@ function BeautyPreview() {
             engine.setVirtualBackground(options)
           }
         } else if (functionKey === 'image') {
-          engine.setBeautyTypeEnabled(BeautyType.VirtualBackground, true)
           if (value <= 0) {
             const options = new VirtualBackgroundOptions({
               mode: BackgroundMode.None
@@ -491,7 +475,6 @@ function BeautyPreview() {
             engine.setVirtualBackground(options)
           }
         } else if (functionKey === 'none') {
-          engine.setBeautyTypeEnabled(BeautyType.VirtualBackground, false)
           const options = new VirtualBackgroundOptions({
             mode: BackgroundMode.None
           })
@@ -506,7 +489,6 @@ function BeautyPreview() {
         }
       } else if (tab === 'filter') {
         // Filter: same logic as Mac demo
-        engine.setBeautyTypeEnabled(BeautyType.Filter, functionKey !== 'off' && paramValue > 0)
         if (functionKey === 'off' || paramValue <= 0) {
           engine.setFilterIntensity(0)
         } else {
@@ -515,9 +497,6 @@ function BeautyPreview() {
         }
       } else if (tab === 'chroma_key') {
         // Chroma key (green screen) parameters
-        if (!engine.isBeautyTypeEnabled(BeautyType.ChromaKey)) {
-          engine.setBeautyTypeEnabled(BeautyType.ChromaKey, true)
-        }
         
         if (functionKey === 'key_color') {
           // Key color: 0=green, 1=blue, 2=red (value mapped from 0.0-1.0 to 0-2)
@@ -535,7 +514,22 @@ function BeautyPreview() {
         }
       } else if (tab === 'face_detection') {
         if (functionKey === 'enable') {
-          setFaceDetectionEnabled(value > 0)
+          const enabled = value > 0
+          setFaceDetectionEnabled(enabled)
+          // 按需注册/取消 onFaceLandmarks 回调：
+          // 开启时注册回调（引擎开始人脸检测）；关闭时传空对象清除回调（引擎跳过人脸检测）
+          if (engine) {
+            if (enabled) {
+              engine.setCallbacks({
+                onFaceLandmarks: (results) => {
+                  setFaceDetectionResults(results)
+                }
+              })
+            } else {
+              engine.setCallbacks({})
+              setFaceDetectionResults([])
+            }
+          }
         } else if (functionKey === 'show_numbers') {
           setShowKeyPointNumbers(value > 0)
         }
@@ -722,7 +716,6 @@ function BeautyPreview() {
         })
         engine.setVirtualBackground(options)
       } else if (tab === 'filter') {
-        engine.setBeautyTypeEnabled(BeautyType.Filter, false)
         engine.setFilterIntensity(0)
       } else if (tab === 'sticker') {
         engine.setSticker('')
@@ -731,7 +724,6 @@ function BeautyPreview() {
         engine.setChromaKeyParam(ChromaKeyParam.Similarity, 0)
         engine.setChromaKeyParam(ChromaKeyParam.Smoothness, 0)
         engine.setChromaKeyParam(ChromaKeyParam.Desaturation, 0)
-        engine.setBeautyTypeEnabled(BeautyType.ChromaKey, false)
       } else if (tab === 'face_detection') {
         setFaceDetectionEnabled(true)
         setShowKeyPointNumbers(true)
@@ -801,12 +793,6 @@ function BeautyPreview() {
     setCurrentTab(tabId)
     setCurrentFunction(null)
     setShowBeautySlider(false)
-    
-    if (tabId === 'chroma_key' && engineRef.current) {
-      if (!engineRef.current.isBeautyTypeEnabled(BeautyType.ChromaKey)) {
-        engineRef.current.setBeautyTypeEnabled(BeautyType.ChromaKey, true)
-      }
-    }
   }, [])
 
   const onBeautyParamChanged = useCallback((data) => {

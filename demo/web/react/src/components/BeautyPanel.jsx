@@ -14,6 +14,7 @@ const tabs = [
   { id: 'sticker', label: 'Sticker' },
   { id: 'body', label: 'Body' },
   { id: 'virtual_bg', label: 'Virtual BG' },
+  { id: 'face_detection', label: 'Face Detection' },
   { id: 'quality', label: 'Quality' }
 ]
 
@@ -71,6 +72,10 @@ const functionConfigs = {
   virtual_bg: [
     { key: 'blur', label: 'Blur', icon: 'blur', enabled: true, type: TYPE_TOGGLE },
     { key: 'preset', label: 'Virtual BG Image', icon: 'back_preset', enabled: true, type: TYPE_TOGGLE }
+  ],
+  face_detection: [
+    { key: 'enable', label: 'Face Detection', icon: 'renlianjiance', enabled: true, type: TYPE_TOGGLE },
+    { key: 'show_numbers', label: 'Show Numbers', icon: 'tiezhi3', enabled: true, type: TYPE_TOGGLE }
   ],
   quality: [
     { key: 'sharpen', label: 'Sharpen', icon: 'huazhitiaozheng2', enabled: true, type: TYPE_SLIDER }

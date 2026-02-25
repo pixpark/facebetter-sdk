@@ -152,15 +152,7 @@
 
   self.beautyEffectEngine = [FBBeautyEffectEngine createEngineWithConfig:engineConfig];
 
-  // 3. Enable beauty types (actual effect requires specific parameter values)
   if (self.beautyEffectEngine) {
-    [self.beautyEffectEngine setBeautyTypeEnabled:FBBeautyType_Basic enabled:YES];
-    [self.beautyEffectEngine setBeautyTypeEnabled:FBBeautyType_Reshape enabled:YES];
-    [self.beautyEffectEngine setBeautyTypeEnabled:FBBeautyType_Makeup enabled:YES];
-    [self.beautyEffectEngine setBeautyTypeEnabled:FBBeautyType_VirtualBackground enabled:YES];
-    [self.beautyEffectEngine setBeautyTypeEnabled:FBBeautyType_Filter enabled:YES];
-    [self.beautyEffectEngine setBeautyTypeEnabled:FBBeautyType_Sticker enabled:YES];
-
     // 3.5 Register filters and stickers
     [self registerFiltersAndStickers];
   }

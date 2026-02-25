@@ -224,10 +224,6 @@
       return -1;
     }
 
-    [self.engine setBeautyTypeEnabled:FBBeautyType_Basic enabled:YES];
-    [self.engine setBeautyTypeEnabled:FBBeautyType_Reshape enabled:YES];
-
-    // 应用初始滑动条的值
     [self.engine setBasicParam:FBBasicParam_Smoothing floatValue:_initialSmoothingValue];
     [self.engine setBasicParam:FBBasicParam_Whitening floatValue:_initialWhiteningValue];
   }

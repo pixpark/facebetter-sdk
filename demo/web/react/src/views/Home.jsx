@@ -66,25 +66,22 @@ function Home() {
               <img src="/icons/meizhuang.png" alt="Makeup" className="feature-icon" />
               <div className="feature-label">Makeup</div>
             </div>
-            <div className="feature-item disabled" onClick={() => showComingSoon('Body')}>
-              <img src="/icons/meiti.png" alt="Body" className="feature-icon" />
-              <div className="feature-label">Body</div>
-              <span className="soon-badge">Soon</span>
-            </div>
-
-            <div className="feature-item disabled" onClick={() => showComingSoon('Filter')}>
+            <div className="feature-item" onClick={() => navigateToCamera('filter')}>
               <img src="/icons/lvjing.png" alt="Filter" className="feature-icon" />
               <div className="feature-label">Filter</div>
-              <span className="soon-badge">Soon</span>
             </div>
-            <div className="feature-item disabled" onClick={() => showComingSoon('Sticker')}>
+            <div className="feature-item" onClick={() => navigateToCamera('sticker')}>
               <img src="/icons/tiezhi2.png" alt="Sticker" className="feature-icon" />
               <div className="feature-label">Sticker</div>
-              <span className="soon-badge">Soon</span>
             </div>
             <div className="feature-item" onClick={() => navigateToCamera('virtual_bg')}>
               <img src="/icons/xunibeijing.png" alt="Virtual Background" className="feature-icon" />
               <div className="feature-label">Virtual BG</div>
+            </div>
+            <div className="feature-item disabled" onClick={() => showComingSoon('Body')}>
+              <img src="/icons/meiti.png" alt="Body" className="feature-icon" />
+              <div className="feature-label">Body</div>
+              <span className="soon-badge">Soon</span>
             </div>
             <div className="feature-item disabled" onClick={() => showComingSoon('Quality')}>
               <img src="/icons/huazhitiaozheng2.png" alt="Quality" className="feature-icon" />
@@ -96,6 +93,10 @@ function Home() {
           <div className="atomic-capabilities-section">
             <h2 className="section-title">More effect</h2>
             <div className="atomic-grid">
+              <div className="feature-item" onClick={() => navigateToCamera('face_detection')}>
+                <img src="/icons/renlianjiance.png" alt="Face Detection" className="feature-icon" />
+                <div className="feature-label">Face Detection</div>
+              </div>
               <div className="feature-item disabled" onClick={() => showComingSoon('Hair Color')}>
                 <img src="/icons/huanfase.png" alt="Hair Color" className="feature-icon" />
                 <div className="feature-label">Hair Color</div>
@@ -105,10 +106,6 @@ function Home() {
                 <img src="/icons/fengge.png" alt="Style" className="feature-icon" />
                 <div className="feature-label">Style</div>
                 <span className="soon-badge">Soon</span>
-              </div>
-              <div className="feature-item" onClick={() => showComingSoon('Face Detection')}>
-                <img src="/icons/renlianjiance.png" alt="Face Detection" className="feature-icon" />
-                <div className="feature-label">Face Detection</div>
               </div>
               <div className="feature-item disabled" onClick={() => showComingSoon('Hand Detection')}>
                 <img src="/icons/shoushi.png" alt="Hand Detection" className="feature-icon" />

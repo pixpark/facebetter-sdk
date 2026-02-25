@@ -129,8 +129,6 @@ public class ExternalTextureActivity
       config.externalContext = true;
 
       engine = new BeautyEffectEngine(this, config);
-      engine.enableBeautyType(BeautyParams.BeautyType.BASIC, true);
-      engine.enableBeautyType(BeautyParams.BeautyType.RESHAPE, true);
 
       // Apply initial slider values
       engine.setBeautyParam(BasicParam.SMOOTHING, initialSmoothingValue);

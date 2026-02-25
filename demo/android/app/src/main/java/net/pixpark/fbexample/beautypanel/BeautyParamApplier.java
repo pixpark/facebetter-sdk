@@ -133,11 +133,9 @@ public class BeautyParamApplier {
 
   private void applyFilter(String function, float value) {
     if ("none".equals(function) || value == 0.0f) {
-      mEngine.enableBeautyType(BeautyType.FILTER, false);
       mEngine.setFilter("");
       Log.d(TAG, "Filter disabled");
     } else {
-      mEngine.enableBeautyType(BeautyType.FILTER, true);
       mEngine.setFilter(function);
       mEngine.setFilterIntensity(value);
       Log.d(TAG, "Set filter: " + function + ", intensity: " + value);
@@ -220,7 +218,6 @@ public class BeautyParamApplier {
       options.mode = BackgroundMode.NONE;
       mEngine.setVirtualBackground(options);
 
-      mEngine.enableBeautyType(BeautyType.FILTER, false);
       mEngine.setFilter("");
       mEngine.setFilterIntensity(0.0f);
 
@@ -261,7 +258,6 @@ public class BeautyParamApplier {
           mEngine.setVirtualBackground(options);
           break;
         case "filter":
-          mEngine.enableBeautyType(BeautyType.FILTER, false);
           mEngine.setFilter("");
           mEngine.setFilterIntensity(0.0f);
           break;

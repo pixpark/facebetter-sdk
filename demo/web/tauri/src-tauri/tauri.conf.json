@@ -20,7 +20,7 @@
       {
         "title": "Facebetter Demo",
         "width": 960,
-        "height": 670,
+        "height": 640,
         "minWidth": 640,
         "minHeight": 427,
         "resizable": true
