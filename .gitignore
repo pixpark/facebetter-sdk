@@ -657,3 +657,4 @@ tools/figma_sticker_plugin/dist
 tools/facebetter-figma-plugin/dist
 *.aar
 *.framework
+demo/cpp/sdk
