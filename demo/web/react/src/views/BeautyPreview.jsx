@@ -91,6 +91,8 @@ function BeautyPreview() {
   const [currentSliderValue, setCurrentSliderValue] = useState(0)
   const [sliderValue, setSliderValue] = useState(0)
   const [isImageMode, setIsImageMode] = useState(false)
+  /** 静态图处理完成后才可导出（驱动顶栏按钮可用态） */
+  const [imageExportReady, setImageExportReady] = useState(false)
   const [faceDetectionResults, setFaceDetectionResults] = useState([])
   const [faceDetectionEnabled, setFaceDetectionEnabled] = useState(false)
   const [showKeyPointNumbers, setShowKeyPointNumbers] = useState(false)
@@ -633,9 +635,11 @@ function BeautyPreview() {
           canvas.style.width = cssWidth
           canvas.style.height = cssHeight
         }
+        setImageExportReady(true)
       }
     } catch (error) {
       console.error('Image processing failed:', error)
+      setImageExportReady(false)
     }
   }, [drawFaceDetectionResults])
 
@@ -843,6 +847,54 @@ function BeautyPreview() {
     }
   }, [])
 
+  /**
+   * 将当前预览 canvas 导出为 JPEG 或 PNG（仅图片模式，内容为当前美颜结果与画布上的检测框等叠加）
+   */
+  const exportImageAs = useCallback(
+    (mimeType) => {
+      if (!isImageMode || !imageExportReady) return
+
+      const canvas = displayCanvasRef.current
+      if (!canvas || canvas.width === 0 || canvas.height === 0) {
+        setStatusMessage('No image to export')
+        setTimeout(() => setStatusMessage(''), 2000)
+        return
+      }
+
+      const ext = mimeType === 'image/jpeg' ? 'jpg' : 'png'
+      const sourceFile = currentImageRef.current
+      const baseName =
+        sourceFile && typeof sourceFile.name === 'string'
+          ? sourceFile.name.replace(/\.[^./\\]+$/, '')
+          : 'facebetter'
+
+      const finish = (blob) => {
+        if (!blob) {
+          setStatusMessage('Export failed')
+          setTimeout(() => setStatusMessage(''), 2000)
+          return
+        }
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `${baseName}-beauty.${ext}`
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        URL.revokeObjectURL(url)
+        setStatusMessage(ext === 'jpg' ? 'Saved as JPEG' : 'Saved as PNG')
+        setTimeout(() => setStatusMessage(''), 2000)
+      }
+
+      if (mimeType === 'image/jpeg') {
+        canvas.toBlob((blob) => finish(blob), 'image/jpeg', 0.92)
+      } else {
+        canvas.toBlob((blob) => finish(blob), 'image/png')
+      }
+    },
+    [isImageMode, imageExportReady]
+  )
+
   const onImageSelected = useCallback(async (event) => {
     const file = event.target.files[0]
     if (!file) return
@@ -857,6 +909,8 @@ function BeautyPreview() {
       if (isActive) {
         stopCamera()
       }
+
+      setImageExportReady(false)
 
       const reader = new FileReader()
       reader.onload = async (e) => {
@@ -957,22 +1011,47 @@ function BeautyPreview() {
       />
 
       <div className="top-bar">
-        <button className="control-btn" onClick={goBack}>
-          <img src="/icons/close.png" alt="Back" className="control-icon" />
-        </button>
-        <button className="control-btn" onClick={openGallery}>
-          <img src="/icons/gallery.png" alt="Gallery" className="control-icon" />
-        </button>
-        <button 
-          className={`control-btn ${!isMobileDevice ? 'disabled' : ''}`}
-          onClick={flipCamera}
-          disabled={!isMobileDevice}
-        >
-          <img src="/icons/switchcamera.png" alt="Switch Camera" className="control-icon" />
-        </button>
-        <button className="control-btn" onClick={toggleMore}>
-          <img src="/icons/more.png" alt="More" className="control-icon" />
-        </button>
+        <div className="top-bar-left">
+          <button type="button" className="control-btn" onClick={goBack}>
+            <img src="/icons/close.png" alt="Back" className="control-icon" />
+          </button>
+          {isImageMode && (
+            <div className="export-format-group">
+              <button
+                type="button"
+                className="export-format-btn"
+                disabled={!imageExportReady}
+                onClick={() => exportImageAs('image/jpeg')}
+              >
+                JPEG
+              </button>
+              <button
+                type="button"
+                className="export-format-btn"
+                disabled={!imageExportReady}
+                onClick={() => exportImageAs('image/png')}
+              >
+                PNG
+              </button>
+            </div>
+          )}
+        </div>
+        <div className="top-bar-right">
+          <button type="button" className="control-btn" onClick={openGallery}>
+            <img src="/icons/gallery.png" alt="Gallery" className="control-icon" />
+          </button>
+          <button
+            type="button"
+            className={`control-btn ${!isMobileDevice ? 'disabled' : ''}`}
+            onClick={flipCamera}
+            disabled={!isMobileDevice}
+          >
+            <img src="/icons/switchcamera.png" alt="Switch Camera" className="control-icon" />
+          </button>
+          <button type="button" className="control-btn" onClick={toggleMore}>
+            <img src="/icons/more.png" alt="More" className="control-icon" />
+          </button>
+        </div>
       </div>
 
       {showBeautyPanel && (
