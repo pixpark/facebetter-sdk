@@ -334,8 +334,8 @@
       }
     } else if ([tab isEqualToString:@"sticker"]) {
       // Sticker logic: function name is the sticker ID
-      // If function is "off", it means clear sticker
-      if ([function isEqualToString:@"off"]) {
+      // If function is "off" or value is 0, it means clear sticker
+      if ([function isEqualToString:@"off"] || value == 0.0f) {
         [self.beautyEffectEngine setSticker:@""];
       } else {
         // Set sticker
@@ -720,11 +720,11 @@
     }
   }
 
-  // 2. Register sticker (rabbit)
+  // 2. Register sticker (pixel_glass)
   NSString *stickerPath = [[[NSBundle mainBundle] bundlePath]
-      stringByAppendingPathComponent:@"assets/stickers/face/rabbit/rabbit.fbd"];
+      stringByAppendingPathComponent:@"assets/stickers/face/pixel_glass.fbd"];
   if ([fileManager fileExistsAtPath:stickerPath]) {
-    [self.beautyEffectEngine registerSticker:@"rabbit" fbdFilePath:stickerPath];
+    [self.beautyEffectEngine registerSticker:@"pixel_glass" fbdFilePath:stickerPath];
   }
 }
 

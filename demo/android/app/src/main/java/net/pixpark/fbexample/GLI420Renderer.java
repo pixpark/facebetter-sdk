@@ -343,9 +343,6 @@ public class GLI420Renderer extends GLSurfaceView implements GLSurfaceView.Rende
       mVertices[6] = scaleX;
       mVertices[7] = scaleY; // Top right
 
-      Log.d(TAG,
-          String.format("Aspect ratio updated - Video: %.2f, Viewport: %.2f, Scale: %.2f, %.2f",
-              videoAspectRatio, viewportAspectRatio, scaleX, scaleY));
     }
 
     // Update vertex buffer

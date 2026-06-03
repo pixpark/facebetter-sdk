@@ -64,15 +64,15 @@ public final class BeautyPanelConfig {
         return new FunctionConfig[] {
             new FunctionConfig("lipstick", context.getString(R.string.makeup_lipstick), R.drawable.lipstick, true, TYPE_SLIDER,
                 new String[] {
-                    context.getString(R.string.makeup_lipstick_style_moist),
-                    context.getString(R.string.makeup_lipstick_style_vitality),
-                    context.getString(R.string.makeup_lipstick_style_retro)
+                    context.getString(R.string.makeup_lipstick_style_rouge),
+                    context.getString(R.string.makeup_lipstick_style_coral),
+                    context.getString(R.string.makeup_lipstick_style_pink)
                 }),
             new FunctionConfig("blush", context.getString(R.string.makeup_blush), R.drawable.meizhuang, true, TYPE_SLIDER,
                 new String[] {
-                    context.getString(R.string.makeup_blush_style_japanese),
-                    context.getString(R.string.makeup_blush_style_sector),
-                    context.getString(R.string.makeup_blush_style_tipsy)
+                    context.getString(R.string.makeup_blush_style_classic),
+                    context.getString(R.string.makeup_blush_style_peach),
+                    context.getString(R.string.makeup_blush_style_rose)
                 }),
             new FunctionConfig("eyebrow", context.getString(R.string.makeup_eyebrow), R.drawable.eyebrow, true, TYPE_SLIDER,
                 new String[] {

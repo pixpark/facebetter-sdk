@@ -1045,10 +1045,10 @@
     
     return filters;
   } else if ([self.currentTab isEqualToString:@"sticker"]) {
-    // Sticker: Off, Rabbit (toggle type)
+    // Sticker: Off, pixel_glass (toggle type)
     return @[
       @{@"key" : @"off", @"title" : @"Off", @"icon" : @"disable"},
-      @{@"key" : @"rabbit", @"title" : @"Rabbit", @"icon" : @"tiezhi2", @"type" : @"toggle"}
+      @{@"key" : @"pixel_glass", @"title" : @"pixel_glass", @"icon" : @"tiezhi2", @"type" : @"toggle"}
     ];
   } else if ([self.currentTab isEqualToString:@"body"]) {
     // Body: Off, Slim (disabled)

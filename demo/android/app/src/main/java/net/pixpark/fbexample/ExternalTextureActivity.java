@@ -2,11 +2,13 @@ package net.pixpark.fbexample;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.CheckBox;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import java.io.InputStream;
 import net.pixpark.facebetter.BeautyEffectEngine;
 import net.pixpark.facebetter.BeautyParams;
 import net.pixpark.facebetter.BeautyParams.*;
@@ -28,6 +30,8 @@ public class ExternalTextureActivity
   private static final int ERROR_CREATE_FRAME_FAILED = -1;
   private static final int ERROR_PROCESS_FAILED = -2;
   private static final int ERROR_GET_BUFFER_FAILED = -3;
+  private static final String LUT_FILTER_ID = "vivid";
+  private static final String LUT_ASSET_PATH = "filters/portrait/vivid/vivid.fbd";
 
   private GLTextureRenderer glVideoRenderer;
   private BeautyEffectEngine engine;
@@ -35,8 +39,14 @@ public class ExternalTextureActivity
   private SeekBar seekBarWhitening;
   private TextView textSmoothingValue;
   private TextView textWhiteningValue;
+  private CheckBox checkBoxLutEnable;
+  private SeekBar seekBarLutIntensity;
+  private TextView textLutIntensityValue;
   private float initialSmoothingValue = 0.2f;
   private float initialWhiteningValue = 0.0f;
+  private float initialLutIntensityValue = 0.8f;
+  private boolean initialLutEnabled = false;
+  private boolean lutFilterRegistered = false;
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -54,6 +64,9 @@ public class ExternalTextureActivity
     seekBarWhitening = findViewById(R.id.seekbar_whitening);
     textSmoothingValue = findViewById(R.id.text_smoothing_value);
     textWhiteningValue = findViewById(R.id.text_whitening_value);
+    checkBoxLutEnable = findViewById(R.id.checkbox_lut_enable);
+    seekBarLutIntensity = findViewById(R.id.seekbar_lut_intensity);
+    textLutIntensityValue = findViewById(R.id.text_lut_intensity_value);
 
     // Setup smoothing slider listener
     seekBarSmoothing.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -93,11 +106,44 @@ public class ExternalTextureActivity
       public void onStopTrackingTouch(SeekBar seekBar) {}
     });
 
+    // Setup LUT enable checkbox listener
+    checkBoxLutEnable.setOnCheckedChangeListener((buttonView, isChecked) -> {
+      initialLutEnabled = isChecked;
+      if (engine != null) {
+        engine.setFilter(isChecked ? LUT_FILTER_ID : "");
+        Log.d(TAG, "LUT " + (isChecked ? "enabled" : "disabled"));
+      }
+    });
+
+    // Setup LUT intensity slider listener
+    seekBarLutIntensity.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+      @Override
+      public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+        if (fromUser) {
+          initialLutIntensityValue = progress / 100.0f;
+          textLutIntensityValue.setText(String.format("%.2f", initialLutIntensityValue));
+          if (engine != null) {
+            engine.setFilterIntensity(initialLutIntensityValue);
+            Log.d(TAG, "Set LUT intensity: " + initialLutIntensityValue);
+          }
+        }
+      }
+
+      @Override
+      public void onStartTrackingTouch(SeekBar seekBar) {}
+
+      @Override
+      public void onStopTrackingTouch(SeekBar seekBar) {}
+    });
+
     // Initialize display values
     initialSmoothingValue = seekBarSmoothing.getProgress() / 100.0f;
     initialWhiteningValue = seekBarWhitening.getProgress() / 100.0f;
+    initialLutIntensityValue = seekBarLutIntensity.getProgress() / 100.0f;
+    initialLutEnabled = checkBoxLutEnable.isChecked();
     textSmoothingValue.setText(String.format("%.2f", initialSmoothingValue));
     textWhiteningValue.setText(String.format("%.2f", initialWhiteningValue));
+    textLutIntensityValue.setText(String.format("%.2f", initialLutIntensityValue));
   }
 
   @Override
@@ -130,12 +176,39 @@ public class ExternalTextureActivity
 
       engine = new BeautyEffectEngine(this, config);
 
+      // Register vivid LUT filter from assets
+      if (!lutFilterRegistered) {
+        try (InputStream is = getAssets().open(LUT_ASSET_PATH)) {
+          int size = is.available();
+          byte[] buffer = new byte[size];
+          int read = is.read(buffer);
+          if (read != size) {
+            Log.w(TAG, "Vivid filter read short: " + read + "/" + size);
+          }
+          int ret = engine.registerFilter(LUT_FILTER_ID, buffer);
+          if (ret == 0) {
+            lutFilterRegistered = true;
+            Log.d(TAG, "Registered LUT filter: " + LUT_FILTER_ID);
+          } else {
+            Log.e(TAG, "registerFilter failed, code=" + ret);
+          }
+        } catch (Exception e) {
+          Log.e(TAG, "Failed to load LUT filter: " + LUT_ASSET_PATH, e);
+        }
+      }
+
       // Apply initial slider values
       engine.setBeautyParam(BasicParam.SMOOTHING, initialSmoothingValue);
       engine.setBeautyParam(BasicParam.WHITENING, initialWhiteningValue);
+      engine.setFilterIntensity(initialLutIntensityValue);
+      if (initialLutEnabled && lutFilterRegistered) {
+        engine.setFilter(LUT_FILTER_ID);
+      }
       Log.d(TAG,
           "BeautyEffectEngine initialized with SMOOTHING: " + initialSmoothingValue
-              + ", WHITENING: " + initialWhiteningValue);
+              + ", WHITENING: " + initialWhiteningValue
+              + ", LUT: " + (initialLutEnabled ? LUT_FILTER_ID : "<off>")
+              + " @ " + initialLutIntensityValue);
     }
 
     // Create ImageFrame from input texture

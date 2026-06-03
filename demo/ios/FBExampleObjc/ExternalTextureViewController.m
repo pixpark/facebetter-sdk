@@ -26,6 +26,13 @@
 @property(nonatomic, assign) float initialSmoothingValue;
 @property(nonatomic, assign) float initialWhiteningValue;
 
+@property(nonatomic, strong) UISwitch *vividFilterSwitch;
+@property(nonatomic, strong) UISlider *vividIntensitySlider;
+@property(nonatomic, strong) UILabel *vividFilterLabel;
+@property(nonatomic, strong) UILabel *vividIntensityValueLabel;
+@property(nonatomic, assign) BOOL vividFilterEnabled;
+@property(nonatomic, assign) float initialVividIntensity;
+
 @end
 
 @implementation ExternalTextureViewController
@@ -37,6 +44,8 @@
 
   _initialSmoothingValue = 0.2f;
   _initialWhiteningValue = 0.0f;
+  _vividFilterEnabled = NO;
+  _initialVividIntensity = 0.8f;
 
   [self setupUI];
 }
@@ -107,6 +116,43 @@
   self.whiteningValueLabel.textAlignment = NSTextAlignmentCenter;
   [sliderContainer addSubview:self.whiteningValueLabel];
 
+  // Vivid 滤镜开关行
+  self.vividFilterLabel = [[UILabel alloc] init];
+  self.vividFilterLabel.translatesAutoresizingMaskIntoConstraints = NO;
+  self.vividFilterLabel.text = @"Vivid";
+  self.vividFilterLabel.textColor = [UIColor whiteColor];
+  self.vividFilterLabel.font = [UIFont systemFontOfSize:16];
+  [sliderContainer addSubview:self.vividFilterLabel];
+
+  self.vividFilterSwitch = [[UISwitch alloc] init];
+  self.vividFilterSwitch.translatesAutoresizingMaskIntoConstraints = NO;
+  self.vividFilterSwitch.on = _vividFilterEnabled;
+  [self.vividFilterSwitch addTarget:self
+                             action:@selector(vividFilterSwitchChanged:)
+                   forControlEvents:UIControlEventValueChanged];
+  [sliderContainer addSubview:self.vividFilterSwitch];
+
+  // Vivid 滤镜强度滑动条
+  self.vividIntensitySlider = [[UISlider alloc] init];
+  self.vividIntensitySlider.translatesAutoresizingMaskIntoConstraints = NO;
+  self.vividIntensitySlider.minimumValue = 0.0;
+  self.vividIntensitySlider.maximumValue = 1.0;
+  self.vividIntensitySlider.value = _initialVividIntensity;
+  self.vividIntensitySlider.enabled = _vividFilterEnabled;
+  [self.vividIntensitySlider addTarget:self
+                                action:@selector(vividIntensitySliderChanged:)
+                      forControlEvents:UIControlEventValueChanged];
+  [sliderContainer addSubview:self.vividIntensitySlider];
+
+  self.vividIntensityValueLabel = [[UILabel alloc] init];
+  self.vividIntensityValueLabel.translatesAutoresizingMaskIntoConstraints = NO;
+  self.vividIntensityValueLabel.text = [NSString stringWithFormat:@"%.2f", _initialVividIntensity];
+  self.vividIntensityValueLabel.textColor = [UIColor whiteColor];
+  self.vividIntensityValueLabel.font = [UIFont systemFontOfSize:14];
+  self.vividIntensityValueLabel.textAlignment = NSTextAlignmentCenter;
+  self.vividIntensityValueLabel.enabled = _vividFilterEnabled;
+  [sliderContainer addSubview:self.vividIntensityValueLabel];
+
   // 设置约束
   UILayoutGuide *guide = self.view.safeAreaLayoutGuide;
 
@@ -165,7 +211,35 @@
         constraintEqualToAnchor:sliderContainer.trailingAnchor
                       constant:-16],
 
-    [sliderContainer.bottomAnchor constraintEqualToAnchor:self.whiteningLabel.bottomAnchor
+    // Vivid 滤镜开关行
+    [self.vividFilterLabel.leadingAnchor constraintEqualToAnchor:sliderContainer.leadingAnchor
+                                                        constant:16],
+    [self.vividFilterLabel.topAnchor constraintEqualToAnchor:self.whiteningLabel.bottomAnchor
+                                                    constant:16],
+    [self.vividFilterLabel.widthAnchor constraintEqualToConstant:60],
+
+    [self.vividFilterSwitch.leadingAnchor constraintEqualToAnchor:self.vividFilterLabel.trailingAnchor
+                                                         constant:8],
+    [self.vividFilterSwitch.centerYAnchor
+        constraintEqualToAnchor:self.vividFilterLabel.centerYAnchor],
+
+    // Vivid 滤镜强度滑动条
+    [self.vividIntensitySlider.leadingAnchor constraintEqualToAnchor:self.vividFilterSwitch.trailingAnchor
+                                                            constant:8],
+    [self.vividIntensitySlider.centerYAnchor
+        constraintEqualToAnchor:self.vividFilterLabel.centerYAnchor],
+    [self.vividIntensitySlider.trailingAnchor
+        constraintEqualToAnchor:self.vividIntensityValueLabel.leadingAnchor
+                       constant:-8],
+
+    [self.vividIntensityValueLabel.widthAnchor constraintEqualToConstant:50],
+    [self.vividIntensityValueLabel.centerYAnchor
+        constraintEqualToAnchor:self.vividFilterLabel.centerYAnchor],
+    [self.vividIntensityValueLabel.trailingAnchor
+        constraintEqualToAnchor:sliderContainer.trailingAnchor
+                      constant:-16],
+
+    [sliderContainer.bottomAnchor constraintEqualToAnchor:self.vividFilterLabel.bottomAnchor
                                                   constant:16]
   ]];
 
@@ -192,6 +266,36 @@
   }
 }
 
+- (void)vividFilterSwitchChanged:(UISwitch *)sender {
+  _vividFilterEnabled = sender.isOn;
+  self.vividIntensitySlider.enabled = _vividFilterEnabled;
+  self.vividIntensityValueLabel.enabled = _vividFilterEnabled;
+
+  if (self.engine) {
+    if (_vividFilterEnabled) {
+      NSString *vividPath = [[NSBundle mainBundle] pathForResource:@"vivid"
+                                                            ofType:@"fbd"
+                                                       inDirectory:@"assets/filters/portrait/vivid"];
+      if (vividPath) {
+        [self.engine registerFilter:@"vivid" fbdFilePath:vividPath];
+      }
+      [self.engine setFilter:@"vivid"];
+      [self.engine setFilterIntensity:self.vividIntensitySlider.value];
+    } else {
+      [self.engine setFilter:@""];
+      [self.engine unregisterFilter:@"vivid"];
+    }
+  }
+}
+
+- (void)vividIntensitySliderChanged:(UISlider *)sender {
+  float value = sender.value;
+  self.vividIntensityValueLabel.text = [NSString stringWithFormat:@"%.2f", value];
+  if (self.engine && _vividFilterEnabled) {
+    [self.engine setFilterIntensity:value];
+  }
+}
+
 #pragma mark - GLTextureRenderViewDelegate
 
 - (int)onProcessVideoFrame:(TextureFrame)srcFrame dstFrame:(TextureFrame *)dstFrame {
@@ -206,9 +310,10 @@
     
     FBEngineConfig *config = [[FBEngineConfig alloc] init];
     // TODO: 替换为你的 AppId/AppKey 或 licenseJson
-    config.appId = @"";
-    config.appKey = @"";
-    
+ 
+    config.appId = @"dddb24155fd045ab9c2d8aad83ad3a4a";
+    config.appKey = @"-VINb6KRgm5ROMR6DlaIjVBO9CDvwsxRopNvtIbUyLc";
+      
     // 验证 appId 和 appKey
     if (!config.appId || !config.appKey || 
         [config.appId stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]].length == 0 ||

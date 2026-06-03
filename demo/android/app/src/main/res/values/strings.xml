@@ -67,12 +67,12 @@
     <string name="makeup_style_1">Style 1</string>
     <string name="makeup_style_2">Style 2</string>
     <string name="makeup_style_3">Style 3</string>
-    <string name="makeup_lipstick_style_moist">Moist</string>
-    <string name="makeup_lipstick_style_vitality">Vitality</string>
-    <string name="makeup_lipstick_style_retro">Retro</string>
-    <string name="makeup_blush_style_japanese">Japanese</string>
-    <string name="makeup_blush_style_sector">Sector</string>
-    <string name="makeup_blush_style_tipsy">Tipsy</string>
+    <string name="makeup_lipstick_style_rouge">Rouge</string>
+    <string name="makeup_lipstick_style_coral">Coral</string>
+    <string name="makeup_lipstick_style_pink">Pink</string>
+    <string name="makeup_blush_style_classic">Classic</string>
+    <string name="makeup_blush_style_peach">Peach</string>
+    <string name="makeup_blush_style_rose">Rose</string>
     <string name="makeup_eyebrow_style_standard">Standard</string>
     <string name="makeup_eyebrow_style_willow">Willow</string>
     <string name="makeup_eyebrow_style_classical">Classical</string>
@@ -137,6 +137,8 @@
     <!-- External Texture -->
     <string name="smoothing">Smoothing</string>
     <string name="whitening">Whitening</string>
+    <string name="lut_enable">Enable LUT (Vivid)</string>
+    <string name="lut_intensity">LUT Strength</string>
     
     <!-- Toast Messages -->
     <string name="filter_under_development">Filter feature is under development, stay tuned 🎨</string>
