@@ -34,12 +34,28 @@ android {
     }
 }
 
+// Set fb.local.aar=true in demo/android/local.properties to use the local aar; otherwise Maven is used.
+def useLocalFbAar = false
+def lp = rootProject.file('local.properties')
+if (lp.exists()) {
+    def p = new Properties()
+    lp.withInputStream { p.load(it) }
+    useLocalFbAar = p.getProperty('fb.local.aar', 'false').toBoolean()
+}
+println "[fb] dep: ${useLocalFbAar ? 'local aar' : 'maven'}"
+
 dependencies {
     implementation libs.appcompat
     implementation libs.material
     implementation libs.activity
     implementation libs.constraintlayout
-    implementation libs.facebetter
+
+    if (useLocalFbAar) {
+        implementation files('../../../src/engine/android/facebetter/build/outputs/aar/facebetter.aar')
+    } else {
+        implementation libs.facebetter
+    }
+
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit
     androidTestImplementation libs.espresso.core

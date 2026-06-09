@@ -7,10 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		29DD9D361BD89498D6C69BFB /* Pods_FBExampleObjc.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D98B97FEE10437D3B564C4AF /* Pods_FBExampleObjc.framework */; };
+		841869E22FCEA73D00A0CE99 /* demo.png in Resources */ = {isa = PBXBuildFile; fileRef = 841869E12FCEA73D00A0CE99 /* demo.png */; };
 		842663E22ED8876C0016D46A /* ExternalTextureViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 842663E12ED8876C0016D46A /* ExternalTextureViewController.m */; };
 		8426644D2EDA85D10016D46A /* GLTextureRenderView.m in Sources */ = {isa = PBXBuildFile; fileRef = 8426644C2EDA85D10016D46A /* GLTextureRenderView.m */; };
-		842664692EDB29800016D46A /* demo.png in Resources */ = {isa = PBXBuildFile; fileRef = 842664572EDB29800016D46A /* demo.png */; };
 		84441EB02F235E1B0049687F /* assets in Resources */ = {isa = PBXBuildFile; fileRef = 84441EAF2F235E1B0049687F /* assets */; };
 		844A23D62EB3630D005F3533 /* GLRGBARenderView.m in Sources */ = {isa = PBXBuildFile; fileRef = 844A23D52EB3630D005F3533 /* GLRGBARenderView.m */; };
 		846E18DD2E6EDF8A00D3B53C /* BeautyPanelViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 846E18D02E6EDF8A00D3B53C /* BeautyPanelViewController.m */; };
@@ -61,9 +60,21 @@
 		84ECE54E2EBA09060062EBE0 /* meizhuang2.png in Resources */ = {isa = PBXBuildFile; fileRef = 84ECE52A2EBA09060062EBE0 /* meizhuang2.png */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		84DC5E012FC5775E000A89AE /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
-		1F15C22865D7D854ABCA22D8 /* Pods-FBExampleObjc.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-FBExampleObjc.release.xcconfig"; path = "Target Support Files/Pods-FBExampleObjc/Pods-FBExampleObjc.release.xcconfig"; sourceTree = "<group>"; };
-		6756086383F5000B45B4C574 /* Pods-FBExampleObjc.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-FBExampleObjc.debug.xcconfig"; path = "Target Support Files/Pods-FBExampleObjc/Pods-FBExampleObjc.debug.xcconfig"; sourceTree = "<group>"; };
+		841869E12FCEA73D00A0CE99 /* demo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = demo.png; path = FBExampleObjc/Icon/demo.png; sourceTree = "<group>"; };
 		842663E02ED8876C0016D46A /* ExternalTextureViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ExternalTextureViewController.h; sourceTree = "<group>"; };
 		842663E12ED8876C0016D46A /* ExternalTextureViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ExternalTextureViewController.m; sourceTree = "<group>"; };
 		8426643A2EDA85D10016D46A /* GLTextureRenderView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GLTextureRenderView.h; sourceTree = "<group>"; };
@@ -127,7 +138,6 @@
 		84ECE5282EBA09060062EBE0 /* shoushi.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = shoushi.png; path = FBExampleObjc/Icon/shoushi.png; sourceTree = "<group>"; };
 		84ECE5292EBA09060062EBE0 /* meixing2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = meixing2.png; path = FBExampleObjc/Icon/meixing2.png; sourceTree = "<group>"; };
 		84ECE52A2EBA09060062EBE0 /* meizhuang2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = meizhuang2.png; path = FBExampleObjc/Icon/meizhuang2.png; sourceTree = "<group>"; };
-		D98B97FEE10437D3B564C4AF /* Pods_FBExampleObjc.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_FBExampleObjc.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -135,7 +145,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				29DD9D361BD89498D6C69BFB /* Pods_FBExampleObjc.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -149,7 +158,6 @@
 				84ECE54F2EBA090A0062EBE0 /* Icons */,
 				84DCA0722E372964008E8A26 /* Products */,
 				84DCA0B82E37461F008E8A26 /* Frameworks */,
-				AD2825A5C47F95FCA6B84C84 /* Pods */,
 			);
 			sourceTree = "<group>";
 		};
@@ -196,7 +204,6 @@
 			isa = PBXGroup;
 			children = (
 				844A240B2EB39C5D005F3533 /* Facebetter.framework */,
-				D98B97FEE10437D3B564C4AF /* Pods_FBExampleObjc.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -204,6 +211,7 @@
 		84ECE54F2EBA090A0062EBE0 /* Icons */ = {
 			isa = PBXGroup;
 			children = (
+				841869E12FCEA73D00A0CE99 /* demo.png */,
 				84ECE5142EBA09050062EBE0 /* back_preset.png */,
 				84ECE5122EBA09050062EBE0 /* beautycard2.png */,
 				84ECE5152EBA09050062EBE0 /* beautycard3.png */,
@@ -245,15 +253,6 @@
 			name = Icons;
 			sourceTree = "<group>";
 		};
-		AD2825A5C47F95FCA6B84C84 /* Pods */ = {
-			isa = PBXGroup;
-			children = (
-				6756086383F5000B45B4C574 /* Pods-FBExampleObjc.debug.xcconfig */,
-				1F15C22865D7D854ABCA22D8 /* Pods-FBExampleObjc.release.xcconfig */,
-			);
-			path = Pods;
-			sourceTree = "<group>";
-		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -261,11 +260,10 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 84DCA08A2E372966008E8A26 /* Build configuration list for PBXNativeTarget "FBExampleObjc" */;
 			buildPhases = (
-				52F3571BF4B6E1841E61659A /* [CP] Check Pods Manifest.lock */,
 				84DCA06D2E372964008E8A26 /* Sources */,
 				84DCA06E2E372964008E8A26 /* Frameworks */,
 				84DCA06F2E372964008E8A26 /* Resources */,
-				FBD247CD0F79D9D8263771D1 /* [CP] Embed Pods Frameworks */,
+				84DC5E012FC5775E000A89AE /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -329,7 +327,6 @@
 				84ECE5352EBA09060062EBE0 /* camera3.png in Resources */,
 				84ECE5362EBA09060062EBE0 /* beautycard2.png in Resources */,
 				84ECE5372EBA09060062EBE0 /* reset.png in Resources */,
-				842664692EDB29800016D46A /* demo.png in Resources */,
 				84ECE5382EBA09060062EBE0 /* back_preset.png in Resources */,
 				84441EB02F235E1B0049687F /* assets in Resources */,
 				84ECE5392EBA09060062EBE0 /* beautycard3.png in Resources */,
@@ -342,6 +339,7 @@
 				84ECE5402EBA09060062EBE0 /* disable.png in Resources */,
 				84ECE5412EBA09060062EBE0 /* camera2.png in Resources */,
 				84ECE5422EBA09060062EBE0 /* renlianjiance.png in Resources */,
+				841869E22FCEA73D00A0CE99 /* demo.png in Resources */,
 				84ECE5432EBA09060062EBE0 /* meiyan.png in Resources */,
 				84ECE5442EBA09060062EBE0 /* gallery.png in Resources */,
 				84ECE5452EBA09060062EBE0 /* header.png in Resources */,
@@ -358,52 +356,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
-
-/* Begin PBXShellScriptBuildPhase section */
-		52F3571BF4B6E1841E61659A /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-FBExampleObjc-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-		FBD247CD0F79D9D8263771D1 /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-FBExampleObjc/Pods-FBExampleObjc-frameworks-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			inputPaths = (
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-FBExampleObjc/Pods-FBExampleObjc-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-FBExampleObjc/Pods-FBExampleObjc-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		84DCA06D2E372964008E8A26 /* Sources */ = {
@@ -563,7 +515,6 @@
 		};
 		84DCA08B2E372966008E8A26 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 6756086383F5000B45B4C574 /* Pods-FBExampleObjc.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -572,8 +523,12 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = QFCE3TAQXQ;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
-				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					/Users/admin/Desktop/github/fb/build/ios/device/out/lib/,
+				);
 				GENERATE_INFOPLIST_FILE = YES;
+				HEADER_SEARCH_PATHS = /Users/admin/Desktop/github/fb/build/ios/device/out/lib/Facebetter.framework;
 				INFOPLIST_FILE = FBExampleObjc/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Facebetter;
 				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = YES;
@@ -603,7 +558,6 @@
 		};
 		84DCA08C2E372966008E8A26 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 1F15C22865D7D854ABCA22D8 /* Pods-FBExampleObjc.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -612,8 +566,12 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = QFCE3TAQXQ;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
-				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					/Users/admin/Desktop/github/fb/build/ios/device/out/lib/,
+				);
 				GENERATE_INFOPLIST_FILE = YES;
+				HEADER_SEARCH_PATHS = /Users/admin/Desktop/github/fb/build/ios/device/out/lib/Facebetter.framework;
 				INFOPLIST_FILE = FBExampleObjc/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Facebetter;
 				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = YES;

@@ -33,6 +33,10 @@
 @property(nonatomic, assign) BOOL vividFilterEnabled;
 @property(nonatomic, assign) float initialVividIntensity;
 
+@property(nonatomic, strong) UISwitch *stickerSwitch;
+@property(nonatomic, strong) UILabel *stickerLabel;
+@property(nonatomic, assign) BOOL stickerEnabled;
+
 @end
 
 @implementation ExternalTextureViewController
@@ -46,6 +50,7 @@
   _initialWhiteningValue = 0.0f;
   _vividFilterEnabled = NO;
   _initialVividIntensity = 0.8f;
+  _stickerEnabled = NO;
 
   [self setupUI];
 }
@@ -104,8 +109,8 @@
   self.whiteningSlider.maximumValue = 1.0;
   self.whiteningSlider.value = _initialWhiteningValue;
   [self.whiteningSlider addTarget:self
-                          action:@selector(whiteningSliderChanged:)
-                forControlEvents:UIControlEventValueChanged];
+                           action:@selector(whiteningSliderChanged:)
+                 forControlEvents:UIControlEventValueChanged];
   [sliderContainer addSubview:self.whiteningSlider];
 
   self.whiteningValueLabel = [[UILabel alloc] init];
@@ -153,6 +158,22 @@
   self.vividIntensityValueLabel.enabled = _vividFilterEnabled;
   [sliderContainer addSubview:self.vividIntensityValueLabel];
 
+  // Sticker 贴纸开关行（验证外部纹理模式下的 SetSticker 链路）
+  self.stickerLabel = [[UILabel alloc] init];
+  self.stickerLabel.translatesAutoresizingMaskIntoConstraints = NO;
+  self.stickerLabel.text = @"Sticker (Black Glass)";
+  self.stickerLabel.textColor = [UIColor whiteColor];
+  self.stickerLabel.font = [UIFont systemFontOfSize:16];
+  [sliderContainer addSubview:self.stickerLabel];
+
+  self.stickerSwitch = [[UISwitch alloc] init];
+  self.stickerSwitch.translatesAutoresizingMaskIntoConstraints = NO;
+  self.stickerSwitch.on = _stickerEnabled;
+  [self.stickerSwitch addTarget:self
+                         action:@selector(stickerSwitchChanged:)
+               forControlEvents:UIControlEventValueChanged];
+  [sliderContainer addSubview:self.stickerSwitch];
+
   // 设置约束
   UILayoutGuide *guide = self.view.safeAreaLayoutGuide;
 
@@ -176,8 +197,7 @@
 
     [self.smoothingSlider.leadingAnchor constraintEqualToAnchor:self.smoothingLabel.trailingAnchor
                                                        constant:8],
-    [self.smoothingSlider.centerYAnchor
-        constraintEqualToAnchor:self.smoothingLabel.centerYAnchor],
+    [self.smoothingSlider.centerYAnchor constraintEqualToAnchor:self.smoothingLabel.centerYAnchor],
     [self.smoothingSlider.trailingAnchor
         constraintEqualToAnchor:self.smoothingValueLabel.leadingAnchor
                        constant:-8],
@@ -185,9 +205,8 @@
     [self.smoothingValueLabel.widthAnchor constraintEqualToConstant:50],
     [self.smoothingValueLabel.centerYAnchor
         constraintEqualToAnchor:self.smoothingLabel.centerYAnchor],
-    [self.smoothingValueLabel.trailingAnchor
-        constraintEqualToAnchor:sliderContainer.trailingAnchor
-                      constant:-16],
+    [self.smoothingValueLabel.trailingAnchor constraintEqualToAnchor:sliderContainer.trailingAnchor
+                                                            constant:-16],
 
     // 美白行
     [self.whiteningLabel.leadingAnchor constraintEqualToAnchor:sliderContainer.leadingAnchor
@@ -198,8 +217,7 @@
 
     [self.whiteningSlider.leadingAnchor constraintEqualToAnchor:self.whiteningLabel.trailingAnchor
                                                        constant:8],
-    [self.whiteningSlider.centerYAnchor
-        constraintEqualToAnchor:self.whiteningLabel.centerYAnchor],
+    [self.whiteningSlider.centerYAnchor constraintEqualToAnchor:self.whiteningLabel.centerYAnchor],
     [self.whiteningSlider.trailingAnchor
         constraintEqualToAnchor:self.whiteningValueLabel.leadingAnchor
                        constant:-8],
@@ -207,9 +225,8 @@
     [self.whiteningValueLabel.widthAnchor constraintEqualToConstant:50],
     [self.whiteningValueLabel.centerYAnchor
         constraintEqualToAnchor:self.whiteningLabel.centerYAnchor],
-    [self.whiteningValueLabel.trailingAnchor
-        constraintEqualToAnchor:sliderContainer.trailingAnchor
-                      constant:-16],
+    [self.whiteningValueLabel.trailingAnchor constraintEqualToAnchor:sliderContainer.trailingAnchor
+                                                            constant:-16],
 
     // Vivid 滤镜开关行
     [self.vividFilterLabel.leadingAnchor constraintEqualToAnchor:sliderContainer.leadingAnchor
@@ -218,14 +235,16 @@
                                                     constant:16],
     [self.vividFilterLabel.widthAnchor constraintEqualToConstant:60],
 
-    [self.vividFilterSwitch.leadingAnchor constraintEqualToAnchor:self.vividFilterLabel.trailingAnchor
-                                                         constant:8],
+    [self.vividFilterSwitch.leadingAnchor
+        constraintEqualToAnchor:self.vividFilterLabel.trailingAnchor
+                       constant:8],
     [self.vividFilterSwitch.centerYAnchor
         constraintEqualToAnchor:self.vividFilterLabel.centerYAnchor],
 
     // Vivid 滤镜强度滑动条
-    [self.vividIntensitySlider.leadingAnchor constraintEqualToAnchor:self.vividFilterSwitch.trailingAnchor
-                                                            constant:8],
+    [self.vividIntensitySlider.leadingAnchor
+        constraintEqualToAnchor:self.vividFilterSwitch.trailingAnchor
+                       constant:8],
     [self.vividIntensitySlider.centerYAnchor
         constraintEqualToAnchor:self.vividFilterLabel.centerYAnchor],
     [self.vividIntensitySlider.trailingAnchor
@@ -237,10 +256,23 @@
         constraintEqualToAnchor:self.vividFilterLabel.centerYAnchor],
     [self.vividIntensityValueLabel.trailingAnchor
         constraintEqualToAnchor:sliderContainer.trailingAnchor
-                      constant:-16],
+                       constant:-16],
 
-    [sliderContainer.bottomAnchor constraintEqualToAnchor:self.vividFilterLabel.bottomAnchor
-                                                  constant:16]
+    // Sticker 贴纸开关行
+    [self.stickerLabel.leadingAnchor constraintEqualToAnchor:sliderContainer.leadingAnchor
+                                                    constant:16],
+    [self.stickerLabel.topAnchor constraintEqualToAnchor:self.vividFilterLabel.bottomAnchor
+                                                constant:16],
+
+    [self.stickerSwitch.leadingAnchor constraintEqualToAnchor:self.stickerLabel.trailingAnchor
+                                                     constant:8],
+    [self.stickerSwitch.centerYAnchor constraintEqualToAnchor:self.stickerLabel.centerYAnchor],
+    [self.stickerSwitch.trailingAnchor
+        constraintLessThanOrEqualToAnchor:sliderContainer.trailingAnchor
+                                 constant:-16],
+
+    [sliderContainer.bottomAnchor constraintEqualToAnchor:self.stickerLabel.bottomAnchor
+                                                 constant:16]
   ]];
 
   // 初始化输入纹理
@@ -273,9 +305,10 @@
 
   if (self.engine) {
     if (_vividFilterEnabled) {
-      NSString *vividPath = [[NSBundle mainBundle] pathForResource:@"vivid"
-                                                            ofType:@"fbd"
-                                                       inDirectory:@"assets/filters/portrait/vivid"];
+      NSString *vividPath =
+          [[NSBundle mainBundle] pathForResource:@"vivid"
+                                          ofType:@"fbd"
+                                     inDirectory:@"assets/filters/portrait/vivid"];
       if (vividPath) {
         [self.engine registerFilter:@"vivid" fbdFilePath:vividPath];
       }
@@ -296,18 +329,37 @@
   }
 }
 
+- (void)stickerSwitchChanged:(UISwitch *)sender {
+  _stickerEnabled = sender.isOn;
+
+  if (!self.engine) {
+    return;
+  }
+
+  if (_stickerEnabled) {
+    NSString *stickerPath = [[NSBundle mainBundle] pathForResource:@"black_glass"
+                                                           ofType:@"fbd"
+                                                      inDirectory:@"assets/stickers/face"];
+    if (stickerPath) {
+      [self.engine registerSticker:@"black_glass" fbdFilePath:stickerPath];
+    }
+    // 延迟到 GL 线程（外部纹理模式）由 StickerFilter::DoRender 真正加载贴纸纹理。
+    [self.engine setSticker:@"black_glass"];
+  } else {
+    [self.engine setSticker:@""];
+    [self.engine unregisterSticker:@"black_glass"];
+  }
+}
+
 #pragma mark - GLTextureRenderViewDelegate
 
 - (int)onProcessVideoFrame:(TextureFrame)srcFrame dstFrame:(TextureFrame *)dstFrame {
   // Initialize engine if not initialized
   if (!self.engine) {
-    
-    
     FBLogConfig *logConfig = [[FBLogConfig alloc] init];
     logConfig.consoleEnabled = YES;
     [FBBeautyEffectEngine setLogConfig:logConfig];
 
-    
     FBEngineConfig *config = [[FBEngineConfig alloc] init];
     // TODO: 替换为你的 AppId/AppKey 或 licenseJson
  
@@ -315,13 +367,16 @@
     config.appKey = @"-VINb6KRgm5ROMR6DlaIjVBO9CDvwsxRopNvtIbUyLc";
       
     // 验证 appId 和 appKey
-    if (!config.appId || !config.appKey || 
-        [config.appId stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]].length == 0 ||
-        [config.appKey stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]].length == 0) {
-      NSLog(@"[Facebetter] Error: appId and appKey must be configured. Please set your appId and appKey in the code.");
+    if (!config.appId || !config.appKey ||
+        [config.appId stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]
+                .length == 0 ||
+        [config.appKey stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]
+                .length == 0) {
+      NSLog(@"[Facebetter] Error: appId and appKey must be configured. Please set your appId and "
+            @"appKey in the code.");
       return -1;
     }
-    
+
     config.externalContext = YES;
 
     self.engine = [FBBeautyEffectEngine createEngineWithConfig:config];
@@ -336,9 +391,9 @@
   // Create ImageFrame from input texture
   int stride = srcFrame.width * 4;  // RGBA stride
   FBImageFrame *inputFrame = [FBImageFrame createWithTexture:srcFrame.textureId
-                                                        width:srcFrame.width
-                                                       height:srcFrame.height
-                                                       stride:stride];
+                                                       width:srcFrame.width
+                                                      height:srcFrame.height
+                                                      stride:stride];
   if (!inputFrame) {
     NSLog(@"createWithTexture failed");
     return -1;
@@ -346,8 +401,7 @@
 
   // Process image
   inputFrame.type = FBFrameTypeImage;
-  FBImageFrame *outputFrame =
-      [self.engine processImage:inputFrame];
+  FBImageFrame *outputFrame = [self.engine processImage:inputFrame];
   if (!outputFrame) {
     NSLog(@"processImage returned nil");
     return -2;
@@ -377,5 +431,3 @@
 }
 
 @end
-
-

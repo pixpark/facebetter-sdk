@@ -139,6 +139,7 @@
     <string name="whitening">Whitening</string>
     <string name="lut_enable">Enable LUT (Vivid)</string>
     <string name="lut_intensity">LUT Strength</string>
+    <string name="sticker_enable">Enable Sticker (Black Glass)</string>
     
     <!-- Toast Messages -->
     <string name="filter_under_development">Filter feature is under development, stay tuned 🎨</string>

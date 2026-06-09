@@ -32,6 +32,8 @@ public class ExternalTextureActivity
   private static final int ERROR_GET_BUFFER_FAILED = -3;
   private static final String LUT_FILTER_ID = "vivid";
   private static final String LUT_ASSET_PATH = "filters/portrait/vivid/vivid.fbd";
+  private static final String STICKER_ID = "black_glass";
+  private static final String STICKER_ASSET_PATH = "stickers/face/black_glass/black_glass.fbd";
 
   private GLTextureRenderer glVideoRenderer;
   private BeautyEffectEngine engine;
@@ -42,11 +44,14 @@ public class ExternalTextureActivity
   private CheckBox checkBoxLutEnable;
   private SeekBar seekBarLutIntensity;
   private TextView textLutIntensityValue;
+  private CheckBox checkBoxStickerEnable;
   private float initialSmoothingValue = 0.2f;
   private float initialWhiteningValue = 0.0f;
   private float initialLutIntensityValue = 0.8f;
   private boolean initialLutEnabled = false;
   private boolean lutFilterRegistered = false;
+  private boolean initialStickerEnabled = false;
+  private boolean stickerRegistered = false;
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -67,6 +72,7 @@ public class ExternalTextureActivity
     checkBoxLutEnable = findViewById(R.id.checkbox_lut_enable);
     seekBarLutIntensity = findViewById(R.id.seekbar_lut_intensity);
     textLutIntensityValue = findViewById(R.id.text_lut_intensity_value);
+    checkBoxStickerEnable = findViewById(R.id.checkbox_sticker_enable);
 
     // Setup smoothing slider listener
     seekBarSmoothing.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -136,11 +142,21 @@ public class ExternalTextureActivity
       public void onStopTrackingTouch(SeekBar seekBar) {}
     });
 
+    // Setup Sticker enable checkbox listener
+    checkBoxStickerEnable.setOnCheckedChangeListener((buttonView, isChecked) -> {
+      initialStickerEnabled = isChecked;
+      if (engine != null) {
+        engine.setSticker(isChecked ? STICKER_ID : "");
+        Log.d(TAG, "Sticker " + (isChecked ? "enabled" : "disabled"));
+      }
+    });
+
     // Initialize display values
     initialSmoothingValue = seekBarSmoothing.getProgress() / 100.0f;
     initialWhiteningValue = seekBarWhitening.getProgress() / 100.0f;
     initialLutIntensityValue = seekBarLutIntensity.getProgress() / 100.0f;
     initialLutEnabled = checkBoxLutEnable.isChecked();
+    initialStickerEnabled = checkBoxStickerEnable.isChecked();
     textSmoothingValue.setText(String.format("%.2f", initialSmoothingValue));
     textWhiteningValue.setText(String.format("%.2f", initialWhiteningValue));
     textLutIntensityValue.setText(String.format("%.2f", initialLutIntensityValue));
@@ -197,6 +213,27 @@ public class ExternalTextureActivity
         }
       }
 
+      // Register rabbit sticker from assets (for external texture mode SetSticker verification)
+      if (!stickerRegistered) {
+          try (InputStream is = getAssets().open(STICKER_ASSET_PATH)) {
+            int size = is.available();
+            byte[] buffer = new byte[size];
+            int read = is.read(buffer);
+            if (read != size) {
+              Log.w(TAG, "Black glass sticker read short: " + read + "/" + size);
+            }
+          int ret = engine.registerSticker(STICKER_ID, buffer);
+          if (ret == 0) {
+            stickerRegistered = true;
+            Log.d(TAG, "Registered sticker: " + STICKER_ID);
+          } else {
+            Log.e(TAG, "registerSticker failed, code=" + ret);
+          }
+        } catch (Exception e) {
+          Log.e(TAG, "Failed to load sticker: " + STICKER_ASSET_PATH, e);
+        }
+      }
+
       // Apply initial slider values
       engine.setBeautyParam(BasicParam.SMOOTHING, initialSmoothingValue);
       engine.setBeautyParam(BasicParam.WHITENING, initialWhiteningValue);
@@ -204,11 +241,15 @@ public class ExternalTextureActivity
       if (initialLutEnabled && lutFilterRegistered) {
         engine.setFilter(LUT_FILTER_ID);
       }
+      if (initialStickerEnabled && stickerRegistered) {
+        // 延迟到 GL 线程（外部纹理模式）由 StickerFilter::DoRender 真正加载贴纸纹理。
+        engine.setSticker(STICKER_ID);
+      }
       Log.d(TAG,
           "BeautyEffectEngine initialized with SMOOTHING: " + initialSmoothingValue
-              + ", WHITENING: " + initialWhiteningValue
-              + ", LUT: " + (initialLutEnabled ? LUT_FILTER_ID : "<off>")
-              + " @ " + initialLutIntensityValue);
+              + ", WHITENING: " + initialWhiteningValue + ", LUT: "
+              + (initialLutEnabled ? LUT_FILTER_ID : "<off>") + " @ " + initialLutIntensityValue
+              + ", Sticker: " + (initialStickerEnabled ? STICKER_ID : "<off>"));
     }
 
     // Create ImageFrame from input texture
