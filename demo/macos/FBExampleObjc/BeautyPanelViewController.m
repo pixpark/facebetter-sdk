@@ -580,14 +580,14 @@ static const CGFloat kSliderStripHeight = 40.0;
     ];
   } else if ([self.currentTab isEqualToString:@"makeup"]) {
     NSArray *lipstickSub = @[
-      @{@"key" : @"0", @"titleKey" : @"makeup_lipstick_style_moist"},
-      @{@"key" : @"1", @"titleKey" : @"makeup_lipstick_style_vitality"},
-      @{@"key" : @"2", @"titleKey" : @"makeup_lipstick_style_retro"}
+      @{@"key" : @"0", @"titleKey" : @"makeup_lipstick_style_rouge"},
+      @{@"key" : @"1", @"titleKey" : @"makeup_lipstick_style_coral"},
+      @{@"key" : @"2", @"titleKey" : @"makeup_lipstick_style_pink"}
     ];
     NSArray *blushSub = @[
-      @{@"key" : @"0", @"titleKey" : @"makeup_blush_style_japanese"},
-      @{@"key" : @"1", @"titleKey" : @"makeup_blush_style_sector"},
-      @{@"key" : @"2", @"titleKey" : @"makeup_blush_style_tipsy"}
+      @{@"key" : @"0", @"titleKey" : @"makeup_blush_style_classic"},
+      @{@"key" : @"1", @"titleKey" : @"makeup_blush_style_peach"},
+      @{@"key" : @"2", @"titleKey" : @"makeup_blush_style_rose"}
     ];
     return @[
       @{@"key" : @"off", @"title" : NSLocalizedString(@"off", nil), @"icon" : @"disable"},

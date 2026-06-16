@@ -45,12 +45,12 @@
 "blush" = "Blush";
 "eyebrow" = "Eyebrow";
 "eyeshadow" = "Eyeshadow";
-"makeup_lipstick_style_moist" = "Moist";
-"makeup_lipstick_style_vitality" = "Vitality";
-"makeup_lipstick_style_retro" = "Retro";
-"makeup_blush_style_japanese" = "Japanese";
-"makeup_blush_style_sector" = "Sector";
-"makeup_blush_style_tipsy" = "Tipsy";
+"makeup_lipstick_style_rouge" = "Rouge";
+"makeup_lipstick_style_coral" = "Coral";
+"makeup_lipstick_style_pink" = "Pink";
+"makeup_blush_style_classic" = "Classic";
+"makeup_blush_style_peach" = "Peach";
+"makeup_blush_style_rose" = "Rose";
 
 /* Panel - Sticker */
 "rabbit" = "Rabbit";

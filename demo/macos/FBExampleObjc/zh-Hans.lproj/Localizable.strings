@@ -45,12 +45,12 @@
 "blush" = "腮红";
 "eyebrow" = "眉毛";
 "eyeshadow" = "眼影";
-"makeup_lipstick_style_moist" = "水嫩";
-"makeup_lipstick_style_vitality" = "元气";
-"makeup_lipstick_style_retro" = "复古";
-"makeup_blush_style_japanese" = "日系";
-"makeup_blush_style_sector" = "扇形";
-"makeup_blush_style_tipsy" = "微醺";
+"makeup_lipstick_style_rouge" = "复古红";
+"makeup_lipstick_style_coral" = "珊瑚";
+"makeup_lipstick_style_pink" = "粉色";
+"makeup_blush_style_classic" = "经典";
+"makeup_blush_style_peach" = "蜜桃";
+"makeup_blush_style_rose" = "玫瑰";
 
 /* Panel - Sticker */
 "rabbit" = "兔子";
