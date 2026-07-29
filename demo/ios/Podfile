@@ -7,6 +7,6 @@ target 'FBExampleObjc' do
   if ENV['FB_USE_LOCAL'] == '1'
     pod 'Facebetter', :path => '../../build/ios'
   else
-    pod 'Facebetter', '1.4.6'
+    pod 'Facebetter', '1.4.7'
   end
 end
