@@ -104,6 +104,17 @@
   align-items: center;
   justify-content: center;
   position: relative;
+  border: 1.5px solid transparent;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.function-icon-wrap.toggle-on {
+  border-color: #00FF00;
+  background: rgba(0, 255, 0, 0.15);
+}
+
+.function-icon-wrap.toggle-off {
+  border-color: transparent;
 }
 
 .function-icon {

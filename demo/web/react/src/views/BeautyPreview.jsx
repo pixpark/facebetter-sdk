@@ -410,6 +410,9 @@ function BeautyPreview() {
           case 'rosiness':
             engine.setBasicParam(BasicParam.Rosiness, paramValue)
             break
+          case 'skin_only':
+            engine.setSkinOnlyBeauty(paramValue > 0)
+            break
         }
       } else if (tab === 'reshape') {
         switch (functionKey) {
@@ -656,6 +659,7 @@ function BeautyPreview() {
       engine.setBasicParam(BasicParam.Whitening, 0)
       engine.setBasicParam(BasicParam.Smoothing, 0)
       engine.setBasicParam(BasicParam.Rosiness, 0)
+      engine.setSkinOnlyBeauty(false)
 
       // Reset reshape parameters
       engine.setReshapeParam(ReshapeParam.FaceThin, 0)
@@ -700,6 +704,7 @@ function BeautyPreview() {
         engine.setBasicParam(BasicParam.Whitening, 0)
         engine.setBasicParam(BasicParam.Smoothing, 0)
         engine.setBasicParam(BasicParam.Rosiness, 0)
+        engine.setSkinOnlyBeauty(false)
       } else if (tab === 'reshape') {
         engine.setReshapeParam(ReshapeParam.FaceThin, 0)
         engine.setReshapeParam(ReshapeParam.FaceVShape, 0)

@@ -36,7 +36,8 @@ const functionConfigs = {
   beauty: [
     { key: 'white', label: 'Whitening', icon: 'meiyan', enabled: true, type: TYPE_SLIDER },
     { key: 'smooth', label: 'Smoothing', icon: 'meiyan2', enabled: true, type: TYPE_SLIDER },
-    { key: 'rosiness', label: 'Rosiness', icon: 'meiyan', enabled: true, type: TYPE_SLIDER }
+    { key: 'rosiness', label: 'Rosiness', icon: 'meiyan', enabled: true, type: TYPE_SLIDER },
+    { key: 'skin_only', label: 'Skin Only', icon: 'huazhitiaozheng2', enabled: true, type: TYPE_TOGGLE }
   ],
   reshape: [
     { key: 'thin_face', label: 'Thin Face', icon: 'meixing2', enabled: true, type: TYPE_SLIDER },
