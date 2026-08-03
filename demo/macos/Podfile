@@ -3,6 +3,6 @@ platform :macos, '10.13'
 target 'FBExampleObjc' do
   use_frameworks!
  
-  pod 'Facebetter', '1.5.0'
+  pod 'Facebetter', '1.5.1'
 end
  
