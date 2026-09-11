@@ -273,23 +273,33 @@ class StudioViewModel(application: Application) : AndroidViewModel(application),
 }
 
 private fun ImageProxy.toImageFrame(frontFacing: Boolean): ImageFrame? {
-    val y = planes[0]
-    val u = planes[1]
-    val v = planes[2]
-    y.buffer.rewind()
-    u.buffer.rewind()
-    v.buffer.rewind()
-    val frame = ImageFrame.createWithAndroid420(
-        width,
-        height,
-        y.buffer,
-        y.rowStride,
-        u.buffer,
-        u.rowStride,
-        v.buffer,
-        v.rowStride,
-        u.pixelStride,
-    ) ?: return null
+    val frame = when (planes.size) {
+        1 -> {
+            // CameraX OUTPUT_IMAGE_FORMAT_RGBA_8888 — matches texture-path chroma.
+            val plane = planes[0]
+            plane.buffer.rewind()
+            ImageFrame.createWithRGBA(plane.buffer, width, height, plane.rowStride)
+        }
+        else -> {
+            val y = planes[0]
+            val u = planes[1]
+            val v = planes[2]
+            y.buffer.rewind()
+            u.buffer.rewind()
+            v.buffer.rewind()
+            ImageFrame.createWithAndroid420(
+                width,
+                height,
+                y.buffer,
+                y.rowStride,
+                u.buffer,
+                u.rowStride,
+                v.buffer,
+                v.rowStride,
+                u.pixelStride,
+            )
+        }
+    } ?: return null
     when (imageInfo.rotationDegrees % 360) {
         90 -> frame.rotate(ImageFrame.Rotation.ROTATION_90)
         180 -> frame.rotate(ImageFrame.Rotation.ROTATION_180)
