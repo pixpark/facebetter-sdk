@@ -90,8 +90,8 @@ struct ReshapeGroup: Identifiable {
 
 enum BeautyCatalog {
   static let smoothingStyles: [CatalogOption<FBSmoothingStyle>] = [
-    .init(id: .natural, labelKey: "smoothing.natural"),
     .init(id: .texture, labelKey: "smoothing.texture"),
+    .init(id: .natural, labelKey: "smoothing.natural"),
     .init(id: .smooth, labelKey: "smoothing.smooth"),
   ]
 

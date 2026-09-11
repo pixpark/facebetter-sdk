@@ -20,7 +20,7 @@ import net.pixpark.facebetter.BeautyParams.WhiteningStyle
 
 data class StudioParams(
     val smoothing: Float = 0f,
-    val smoothingStyle: SmoothingStyle = SmoothingStyle.NATURAL,
+    val smoothingStyle: SmoothingStyle = SmoothingStyle.TEXTURE,
     val whitening: Float = 0f,
     val whiteningStyle: WhiteningStyle = WhiteningStyle.COLD_WHITE,
     val rosiness: Float = 0f,

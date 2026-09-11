@@ -48,7 +48,7 @@ enum class BgFill { Off, Blur, Preset };
 
 struct Params {
   float smoothing = 0.f;
-  SmoothingStyle smoothing_style = SmoothingStyle::Natural;
+  SmoothingStyle smoothing_style = SmoothingStyle::Texture;
   float whitening = 0.f;
   WhiteningStyle whitening_style = WhiteningStyle::ColdWhite;
   float rosiness = 0.f;

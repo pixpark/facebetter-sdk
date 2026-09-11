@@ -65,8 +65,8 @@ data class ReshapeItem(
 
 object BeautyCatalog {
     val smoothingStyles = listOf(
-        CatalogOption(SmoothingStyle.NATURAL, "smoothing.natural"),
         CatalogOption(SmoothingStyle.TEXTURE, "smoothing.texture"),
+        CatalogOption(SmoothingStyle.NATURAL, "smoothing.natural"),
         CatalogOption(SmoothingStyle.SMOOTH, "smoothing.smooth"),
     )
 

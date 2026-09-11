@@ -524,8 +524,8 @@ void DrawSkin(Studio& studio) {
   ImGui::PopStyleColor(2);
 
   const SmoothingStyle styles[] = {
-      SmoothingStyle::Natural, SmoothingStyle::Texture, SmoothingStyle::Smooth};
-  const char* style_keys[] = {"smoothing.natural", "smoothing.texture",
+      SmoothingStyle::Texture, SmoothingStyle::Natural, SmoothingStyle::Smooth};
+  const char* style_keys[] = {"smoothing.texture", "smoothing.natural",
                               "smoothing.smooth"};
   ChipGrid(3, 3, [&](int i, ImVec2 size) {
     if (Chip(T(style_keys[i]), p.smoothing_style == styles[i], size)) {

@@ -2,7 +2,7 @@ import Foundation
 
 struct BeautyParams: Equatable {
   var smoothing: Float = 0
-  var smoothingStyle: FBSmoothingStyle = .natural
+  var smoothingStyle: FBSmoothingStyle = .texture
   var whitening: Float = 0
   var whiteningStyle: FBWhiteningStyle = .coldWhite
   var rosiness: Float = 0

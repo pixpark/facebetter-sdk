@@ -48,8 +48,8 @@ export const TABS = [
 ]
 
 export const SKIN_PRESETS = [
-  { id: 'natural', smoothingStyle: SmoothingStyle.Natural },
   { id: 'texture', smoothingStyle: SmoothingStyle.Texture },
+  { id: 'natural', smoothingStyle: SmoothingStyle.Natural },
   { id: 'smooth', smoothingStyle: SmoothingStyle.Smooth },
 ]
 
@@ -276,7 +276,7 @@ export function createDefaultParams() {
   }
   return {
     smoothing: 0,
-    smoothingStyle: SmoothingStyle.Natural,
+    smoothingStyle: SmoothingStyle.Texture,
     whitening: 0,
     whiteningStyle: WhiteningStyle.ColdWhite,
     rosiness: 0,
