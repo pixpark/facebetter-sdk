@@ -7,23 +7,25 @@ export const demoRoot = dirname(fileURLToPath(import.meta.url))
 export const useLocalSdk =
   existsSync(join(demoRoot, '.use_local_sdk')) || process.env.FACEBETTER_LOCAL === '1'
 
-export const localWebRoot = resolve(demoRoot, '../../../../fb/src/engine/web')
+export const localWebRoot = resolve(demoRoot, '../../../../fb/build/web')
 export const localFacebetter = join(localWebRoot, 'facebetter')
 export const localFacebetterCore = join(localWebRoot, 'facebetter-core')
+export const localFacebetterRel = '../../../../fb/build/web/facebetter'
+export const localFacebetterCoreRel = '../../../../fb/build/web/facebetter-core'
 
 const LOCAL_PACKAGES = [
-  ['facebetter', localFacebetter],
-  ['facebetter-core', localFacebetterCore],
+  ['facebetter', localFacebetter, 'dist/facebetter.esm.js'],
+  ['facebetter-core', localFacebetterCore, 'dist/facebetter-core.js'],
 ]
 
 export function assertLocalSdk() {
   if (!useLocalSdk) return
-  for (const [name, dir] of LOCAL_PACKAGES) {
-    if (!existsSync(join(dir, 'package.json'))) {
+  for (const [name, dir, artifact] of LOCAL_PACKAGES) {
+    if (!existsSync(join(dir, 'package.json')) || !existsSync(join(dir, artifact))) {
       throw new Error(
         `Local ${name} not found:\n  ${dir}\n` +
-          'Build the sibling engine packages first, for example:\n' +
-          `  cd ${localWebRoot}/facebetter && npm run build`
+          'Build the sibling engine packages first:\n' +
+          '  cd ../../../../fb && ./scripts/build_web.sh'
       )
     }
   }

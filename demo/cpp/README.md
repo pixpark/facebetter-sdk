@@ -1,6 +1,8 @@
 # Facebetter Desktop C++ Demo
 
-GLFW + Dear ImGui 示例，演示 C++ API。滤镜和贴纸与 `demo/web/react` 共用，请保留完整仓库再编译。
+GLFW + Dear ImGui 的 Facebetter Demo 界面，演示 C++ API。默认加载示例图，也可开摄像头、拖入图片或导出 PNG。滤镜和贴纸与 `demo/web/react` 共用，请保留完整仓库再编译。
+
+主线程用 vsync + `glfwWaitEventsTimeout`，处理线程用条件变量背压，静止画面时 CPU 接近空闲。
 
 ## 准备 SDK
 
@@ -33,4 +35,4 @@ Windows 请在 **Developer Command Prompt** 里执行，或加 `-G Ninja`。CMak
 
 ## 授权
 
-把 `main.cpp` 里的 AppID / AppKey（或 license token）换成[控制台](https://facebetter.net)里的凭证。说明见 [License & Auth](https://facebetter.net/docs/intro/license)。
+把 `studio.cc` 里的 AppID / AppKey（或 license token）换成[控制台](https://facebetter.net)里的凭证。说明见 [License & Auth](https://facebetter.net/docs/intro/license)。

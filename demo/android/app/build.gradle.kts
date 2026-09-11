@@ -58,7 +58,7 @@ fun sdkProp(name: String): String? =
 
 val useLocalSdk = sdkProp("facebetter.local").equals("true", ignoreCase = true)
 val engineRoot = rootProject.file("../../../fb")
-val defaultLocalAar = engineRoot.resolve("src/engine/android/facebetter/build/outputs/aar/facebetter.aar")
+val defaultLocalAar = engineRoot.resolve("build/android/facebetter.aar")
 val localAar = sdkProp("facebetter.localAar")?.let { rootProject.file(it) } ?: defaultLocalAar
 
 if (useLocalSdk) {

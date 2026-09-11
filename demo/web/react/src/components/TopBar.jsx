@@ -15,9 +15,9 @@ export default function TopBar({
         <div className="flex items-center gap-2">
           <Icon name="auto_awesome" fill className="text-gray-200 text-xl" />
           <span className="text-headline-sm font-semibold text-gray-100 tracking-tight">
-            FaceBetter
+            Facebetter
             <span className="text-gray-400 text-xs px-2 py-0.5 rounded-full bg-[#181a20] border border-white/10 font-normal ml-2">
-              Studio
+              Demo
             </span>
           </span>
         </div>

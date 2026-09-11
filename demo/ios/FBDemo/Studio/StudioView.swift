@@ -4,7 +4,6 @@ import SwiftUI
 struct StudioView: View {
   @EnvironmentObject private var studio: StudioModel
   @State private var pickerItem: PhotosPickerItem?
-  @State private var ignoreCompareUntilRelease = false
 
   var body: some View {
     ZStack {
@@ -37,14 +36,14 @@ struct StudioView: View {
             .padding(.bottom, 8)
         }
         if !studio.isComparing {
-          Text(studio.t("preview.hold"))
-            .font(.caption2)
-            .foregroundStyle(.white.opacity(0.55))
-            .padding(.horizontal, 10)
-            .padding(.vertical, 5)
-            .background(.black.opacity(0.35), in: Capsule())
-            .padding(.bottom, 8)
-            .allowsHitTesting(false)
+          HStack(spacing: 8) {
+            hintChip(studio.t("preview.hold"))
+            if studio.panelExpanded {
+              hintChip(studio.t("preview.collapseHint"))
+            }
+          }
+          .padding(.bottom, 8)
+          .allowsHitTesting(false)
         }
         BeautyPanel()
       }
@@ -65,20 +64,22 @@ struct StudioView: View {
   private var previewGesture: some Gesture {
     DragGesture(minimumDistance: 0)
       .onChanged { _ in
-        if studio.panelExpanded {
-          studio.panelExpanded = false
-          ignoreCompareUntilRelease = true
-          return
-        }
-        guard !ignoreCompareUntilRelease else { return }
         if !studio.isComparing {
           studio.isComparing = true
         }
       }
       .onEnded { _ in
         studio.isComparing = false
-        ignoreCompareUntilRelease = false
       }
+  }
+
+  private func hintChip(_ text: String) -> some View {
+    Text(text)
+      .font(.caption2)
+      .foregroundStyle(.white.opacity(0.55))
+      .padding(.horizontal, 10)
+      .padding(.vertical, 5)
+      .background(.black.opacity(0.35), in: Capsule())
   }
 
   private var topBar: some View {
@@ -211,7 +212,7 @@ private struct LandmarkOverlay: View {
   var body: some View {
     GeometryReader { proxy in
       Canvas { context, size in
-        let content = aspectFillRect(imageSize: imageSize, in: size)
+        let content = aspectFitRect(imageSize: imageSize, in: size)
         guard content.width > 0, content.height > 0 else { return }
         for face in faces {
           let rect = face.rect
@@ -245,11 +246,11 @@ private struct LandmarkOverlay: View {
   }
 }
 
-private func aspectFillRect(imageSize: CGSize, in viewSize: CGSize) -> CGRect {
+private func aspectFitRect(imageSize: CGSize, in viewSize: CGSize) -> CGRect {
   guard imageSize.width > 0, imageSize.height > 0, viewSize.width > 0, viewSize.height > 0 else {
     return .zero
   }
-  let scale = max(viewSize.width / imageSize.width, viewSize.height / imageSize.height)
+  let scale = min(viewSize.width / imageSize.width, viewSize.height / imageSize.height)
   let width = imageSize.width * scale
   let height = imageSize.height * scale
   return CGRect(

@@ -1,4 +1,4 @@
-# Facebetter Desktop C++ Demo (GLFW + ImGui + OpenCV)
+# Facebetter Desktop C++ Demo (GLFW + ImGui)
 #
 # 客户默认：解压官方包到 sdk/（或 -DFACEBETTER_SDK_DIR=），然后
 #   cmake -B build && cmake --build build
@@ -155,13 +155,26 @@ endif()
 # ---------------------------------------------------------------------------
 # 可执行文件
 # ---------------------------------------------------------------------------
-add_executable(facebetter_demo main.cpp)
-target_include_directories(facebetter_demo PRIVATE ${OpenCV_INCLUDE_DIRS})
+add_executable(facebetter_demo
+  main.cpp
+  studio.cc
+  ui.cc)
+target_include_directories(facebetter_demo PRIVATE
+  ${CMAKE_CURRENT_SOURCE_DIR}
+  ${OpenCV_INCLUDE_DIRS})
+find_package(Threads REQUIRED)
 target_link_libraries(facebetter_demo PRIVATE
   facebetter
   imgui
   glad::glad
-  ${OpenCV_LIBS})
+  ${OpenCV_LIBS}
+  Threads::Threads)
+if(WIN32)
+  target_link_libraries(facebetter_demo PRIVATE comdlg32)
+endif()
+if(MSVC)
+  target_compile_options(facebetter_demo PRIVATE /utf-8)
+endif()
 
 if(FB_DEMO_IN_TREE AND TARGET pack_bundle)
   add_dependencies(facebetter_demo pack_bundle)
@@ -172,11 +185,18 @@ file(TO_CMAKE_PATH "${FB_DEMO_RESOURCE_FILE}" _fb_res)
 file(TO_CMAKE_PATH "${FB_DEMO_STICKER_DIR}" _fb_sticker)
 file(TO_CMAKE_PATH "${FB_DEMO_FILTER_DIR}" _fb_filter)
 file(TO_CMAKE_PATH "${FB_DEMO_BACKGROUND_PATH}" _fb_bg)
+set(FB_DEMO_FACE_PATH "${FB_DEMO_WEB_PUBLIC}/face.jpg")
+file(TO_CMAKE_PATH "${FB_DEMO_FACE_PATH}" _fb_face)
+set(FB_DEMO_ICON_FONT
+    "${CMAKE_CURRENT_SOURCE_DIR}/fonts/MaterialIcons-Regular.ttf")
+file(TO_CMAKE_PATH "${FB_DEMO_ICON_FONT}" _fb_icon_font)
 target_compile_definitions(facebetter_demo PRIVATE
   FB_DEMO_RESOURCE_DIR="${_fb_res}"
   FB_DEMO_STICKER_DIR="${_fb_sticker}"
   FB_DEMO_FILTER_DIR="${_fb_filter}"
-  FB_DEMO_BACKGROUND_PATH="${_fb_bg}")
+  FB_DEMO_BACKGROUND_PATH="${_fb_bg}"
+  FB_DEMO_FACE_PATH="${_fb_face}"
+  FB_DEMO_ICON_FONT="${_fb_icon_font}")
 
 # 客户包：把运行时库拷到可执行文件旁，并设 RPATH
 if(NOT FB_DEMO_IN_TREE AND FB_DEMO_RUNTIME_LIB)

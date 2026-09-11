@@ -421,8 +421,10 @@ function StickerPanel({ params, setParams }) {
   )
 }
 
-export default function Inspector({ tab, onTab, params, setParams, filterMap, onReset }) {
+export default function Inspector({ tab, onTab, params, setParams, filterMap, stats, onReset }) {
   const { t } = useI18n()
+  const fps = Math.round(stats?.fps || 0)
+  const ms = (stats?.avgProcessTimeMs || 0).toFixed(1)
   return (
     <aside className="w-[380px] shrink-0 bg-[#111317] border-l border-[#222630] flex flex-col z-40 shadow-xl">
       <div className="px-5 py-3 border-b border-[#222630] flex items-center justify-between">
@@ -430,8 +432,8 @@ export default function Inspector({ tab, onTab, params, setParams, filterMap, on
           <span className="w-2 h-2 rounded-full bg-emerald-400" />
           <span className="text-body-sm font-semibold text-gray-100">{t('console.title')}</span>
         </div>
-        <span className="text-telemetry-xs text-gray-400 font-medium px-2 py-0.5 rounded-full bg-[#1c1b1d] border border-white/10">
-          {t('console.live')}
+        <span className="text-telemetry-xs text-gray-400 font-medium px-2 py-0.5 rounded-full bg-[#1c1b1d] border border-white/10 tabular-nums">
+          {fps} FPS&nbsp;&nbsp;{ms} ms
         </span>
       </div>
       <div className="px-3 py-2 border-b border-[#222630] bg-[#14161c] grid grid-cols-6 gap-1">

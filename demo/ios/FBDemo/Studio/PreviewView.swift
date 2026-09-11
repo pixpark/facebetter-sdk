@@ -22,7 +22,7 @@ final class PreviewMTKView: MTKView {
     colorPixelFormat = .bgra8Unorm
     isPaused = true
     enableSetNeedsDisplay = true
-    contentMode = .scaleAspectFill
+    contentMode = .scaleAspectFit
     backgroundColor = .black
     isOpaque = true
   }
@@ -73,7 +73,7 @@ final class PreviewMTKView: MTKView {
       }
 
       let targetSize = CGSize(width: drawableSize.width, height: drawableSize.height)
-      let scale = max(
+      let scale = min(
         targetSize.width / source.extent.width,
         targetSize.height / source.extent.height
       )

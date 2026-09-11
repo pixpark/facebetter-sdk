@@ -69,6 +69,7 @@ export function useStudioEngine() {
   const [source, setSource] = useState('image')
   const [frameId, setFrameId] = useState(0)
   const [filterMap, setFilterMap] = useState({})
+  const [stats, setStats] = useState({ fps: 0, avgProcessTimeMs: 0 })
   const appliedParamsRef = useRef(null)
 
   const bumpFrame = useCallback(() => setFrameId((id) => id + 1), [])
@@ -93,6 +94,15 @@ export function useStudioEngine() {
       frameType,
       mirror
     )
+    try {
+      const next = engine.getStats()
+      setStats({
+        fps: next?.fps || 0,
+        avgProcessTimeMs: next?.avgProcessTimeMs || 0,
+      })
+    } catch {
+      /* stats are optional */
+    }
     bumpFrame()
   }, [bumpFrame])
 
@@ -295,6 +305,7 @@ export function useStudioEngine() {
     source,
     frameId,
     filterMap,
+    stats,
     original: originalRef.current,
     processed: processedRef.current,
     loadImageFile,

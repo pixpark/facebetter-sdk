@@ -444,7 +444,7 @@ export function LocaleProvider({ children }) {
 
   useEffect(() => {
     document.documentElement.lang = locale === 'zh' ? 'zh-CN' : 'en'
-    document.title = 'FaceBetter Studio'
+    document.title = 'Facebetter Demo'
   }, [locale])
 
   const value = useMemo(() => ({ locale, setLocale, t }), [locale, setLocale, t])

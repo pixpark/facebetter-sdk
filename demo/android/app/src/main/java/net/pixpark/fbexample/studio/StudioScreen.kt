@@ -86,14 +86,9 @@ fun StudioScreen(
                     .pointerInput(Unit) {
                         awaitEachGesture {
                             awaitFirstDown()
-                            if (viewModel.panelExpanded) {
-                                viewModel.panelExpanded = false
-                                waitForUpOrCancellation()
-                            } else {
-                                viewModel.setCompareMode(true)
-                                waitForUpOrCancellation()
-                                viewModel.setCompareMode(false)
-                            }
+                            viewModel.setCompareMode(true)
+                            waitForUpOrCancellation()
+                            viewModel.setCompareMode(false)
                         }
                     },
             )
@@ -150,16 +145,17 @@ fun StudioScreen(
                     )
                 }
                 if (!viewModel.isComparing) {
-                    Text(
-                        text = viewModel.t("preview.hold"),
-                        color = Color.White.copy(0.55f),
-                        fontSize = 11.sp,
+                    Row(
                         modifier = Modifier
                             .align(Alignment.CenterHorizontally)
-                            .padding(bottom = 8.dp)
-                            .background(Color.Black.copy(0.35f), RoundedCornerShape(50))
-                            .padding(horizontal = 10.dp, vertical = 5.dp),
-                    )
+                            .padding(bottom = 8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        HintChip(viewModel.t("preview.hold"))
+                        if (viewModel.panelExpanded) {
+                            HintChip(viewModel.t("preview.collapseHint"))
+                        }
+                    }
                 }
                 BeautyPanel(viewModel = viewModel)
             }
@@ -172,7 +168,7 @@ private fun PreviewPane(bitmap: Bitmap?, modifier: Modifier = Modifier) {
     AndroidView(
         factory = { context ->
             ImageView(context).apply {
-                scaleType = ImageView.ScaleType.CENTER_CROP
+                scaleType = ImageView.ScaleType.FIT_CENTER
                 setBackgroundColor(android.graphics.Color.BLACK)
             }
         },
@@ -291,6 +287,18 @@ private fun FpsBadge(viewModel: StudioViewModel, modifier: Modifier = Modifier) 
 }
 
 @Composable
+private fun HintChip(text: String) {
+    Text(
+        text = text,
+        color = Color.White.copy(0.55f),
+        fontSize = 11.sp,
+        modifier = Modifier
+            .background(Color.Black.copy(0.35f), RoundedCornerShape(50))
+            .padding(horizontal = 10.dp, vertical = 5.dp),
+    )
+}
+
+@Composable
 private fun StatusChip(text: String, comparing: Boolean, modifier: Modifier = Modifier) {
     Row(
         modifier = modifier
@@ -316,7 +324,7 @@ private fun LandmarkOverlay(
     modifier: Modifier = Modifier,
 ) {
     Canvas(modifier = modifier) {
-        val content = aspectFillRect(
+        val content = aspectFitRect(
             imageWidth = imageWidth.toFloat(),
             imageHeight = imageHeight.toFloat(),
             viewWidth = size.width,
@@ -362,7 +370,7 @@ private data class ContentRect(
     val height: Float,
 )
 
-private fun aspectFillRect(
+private fun aspectFitRect(
     imageWidth: Float,
     imageHeight: Float,
     viewWidth: Float,
@@ -371,7 +379,7 @@ private fun aspectFillRect(
     if (imageWidth <= 0f || imageHeight <= 0f || viewWidth <= 0f || viewHeight <= 0f) {
         return ContentRect(0f, 0f, 0f, 0f)
     }
-    val scale = maxOf(viewWidth / imageWidth, viewHeight / imageHeight)
+    val scale = minOf(viewWidth / imageWidth, viewHeight / imageHeight)
     val width = imageWidth * scale
     val height = imageHeight * scale
     return ContentRect(
