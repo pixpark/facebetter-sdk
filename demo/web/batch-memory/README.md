@@ -8,7 +8,7 @@ npm install
 npm run dev
 ```
 
-依赖 npm 包 `facebetter@1.5.1`。浏览器打开终端提示的地址（默认 `http://localhost:5174`）。
+依赖 npm 包 `facebetter@2.0.0`。浏览器打开终端提示的地址（默认 `http://localhost:5174`）。
 
 ## 推荐步骤
 

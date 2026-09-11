@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "facebetter": "1.5.1"
+    "facebetter": "2.0.0"
   },
   "devDependencies": {
     "vite": "^7.1.11"

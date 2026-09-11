@@ -17,7 +17,7 @@ Sample apps for the **Facebetter SDK**. Clone this repository, then open the dem
 | iOS | `demo/ios` | `pod install` — CocoaPods `Facebetter` **2.0.0**. Open `FBDemo.xcworkspace` |
 | Android | `demo/android` | Maven Central `net.pixpark:facebetter:2.0.0`. Open the folder in Android Studio |
 | Web | `demo/web/react` | `npm install` — npm `facebetter@2.0.0` |
-| macOS | `demo/macos` | `pod install` — CocoaPods `Facebetter` **1.5.1**. Open the `.xcworkspace` |
+| macOS | `demo/macos` | `pod install` — CocoaPods `Facebetter` **2.0.0**. Open the `.xcworkspace` |
 | Desktop C++ | `demo/cpp` | Unzip the C++ SDK into `demo/cpp/sdk/`, then `cmake -B build`. See the [Windows](https://facebetter.net/docs/windows/quick-start) / [Linux](https://facebetter.net/docs/linux/quick-start) guides |
 
 ```bash

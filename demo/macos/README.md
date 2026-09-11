@@ -1,6 +1,6 @@
 # Facebetter — macOS Demo
 
-AppKit 相机 Demo。通过 **CocoaPods** 安装 `Facebetter` **1.5.1**。打开 **`.xcworkspace`**，不要打开 `.xcodeproj`。
+AppKit 相机 Demo。通过 **CocoaPods** 安装 `Facebetter` **2.0.0**。打开 **`.xcworkspace`**，不要打开 `.xcodeproj`。
 
 ```bash
 cd demo/macos
