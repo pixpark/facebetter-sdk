@@ -22,35 +22,37 @@ import net.pixpark.facebetter.FaceDetectionResult
 import net.pixpark.facebetter.ImageFrame
 import net.pixpark.fbexample.AppLocale
 import net.pixpark.fbexample.L10n
-import net.pixpark.fbexample.beauty.BeautyCatalog
+import net.pixpark.fbexample.beauty.BeautySession
 import net.pixpark.fbexample.beauty.BeautyTab
 import net.pixpark.fbexample.beauty.MakeupItem
 import net.pixpark.fbexample.beauty.SkinItem
 import net.pixpark.fbexample.beauty.StudioParams
+import net.pixpark.fbexample.beauty.detectStudioLocale
+import net.pixpark.fbexample.beauty.loadFilterLabels
+import net.pixpark.fbexample.beauty.persistStudioLocale
 import net.pixpark.fbexample.engine.BeautyEngine
 import net.pixpark.fbexample.engine.MediaStoreSaver
 import net.pixpark.fbexample.engine.scaledIfNeeded
 import net.pixpark.fbexample.engine.toDisplayBitmap
 import net.pixpark.facebetter.BeautyParams.Reshape
-import org.json.JSONObject
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.math.roundToInt
 
 enum class StudioSource { CAMERA, IMAGE }
 
-class StudioViewModel(application: Application) : AndroidViewModel(application) {
+class StudioViewModel(application: Application) : AndroidViewModel(application), BeautySession {
     private val engine = BeautyEngine(application)
     private val compareFlag = AtomicBoolean(false)
     private val captureFlag = AtomicBoolean(false)
     private val engineReady = AtomicBoolean(false)
 
-    var params by mutableStateOf(StudioParams())
+    override var params by mutableStateOf(StudioParams())
         private set
-    var tab by mutableStateOf(BeautyTab.SKIN)
-    var selectedSkin by mutableStateOf(SkinItem.SMOOTHING)
-    var selectedReshape by mutableStateOf(Reshape.FACE_THIN)
-    var selectedMakeup by mutableStateOf(MakeupItem.LIPSTICK)
-    var locale by mutableStateOf(detectLocale())
+    override var tab by mutableStateOf(BeautyTab.SKIN)
+    override var selectedSkin by mutableStateOf(SkinItem.SMOOTHING)
+    override var selectedReshape by mutableStateOf(Reshape.FACE_THIN)
+    override var selectedMakeup by mutableStateOf(MakeupItem.LIPSTICK)
+    override var locale by mutableStateOf(detectStudioLocale(application))
         private set
     var source by mutableStateOf(StudioSource.CAMERA)
         private set
@@ -63,11 +65,10 @@ class StudioViewModel(application: Application) : AndroidViewModel(application) 
         private set
     var fps by mutableDoubleStateOf(0.0)
         private set
-    var panelExpanded by mutableStateOf(false)
+    override var panelExpanded by mutableStateOf(false)
     var previewBitmap by mutableStateOf<Bitmap?>(null)
         private set
-    var filterLabels by mutableStateOf<Map<String, Pair<String, String>>>(emptyMap())
-        private set
+    private var filterLabels: Map<String, Pair<String, String>> = emptyMap()
 
     private var originalStill: Bitmap? = null
     private val previewBuffers = arrayOfNulls<Bitmap>(2)
@@ -89,7 +90,7 @@ class StudioViewModel(application: Application) : AndroidViewModel(application) 
                 faces = next
             }
         }
-        loadFilterLabels()
+        filterLabels = loadFilterLabels(application)
         engine.start()
         engineReady.set(engine.isReady)
         if (engine.statusKey.isNotEmpty()) {
@@ -101,18 +102,14 @@ class StudioViewModel(application: Application) : AndroidViewModel(application) 
         flash("status.permissionCamera")
     }
 
-    fun t(key: String): String = L10n.text(key, locale)
+    override fun t(key: String): String = L10n.text(key, locale)
 
     fun updateLocale(next: AppLocale) {
         locale = next
-        getApplication<Application>()
-            .getSharedPreferences(PREFS, 0)
-            .edit()
-            .putString(LOCALE_KEY, next.name.lowercase())
-            .apply()
+        persistStudioLocale(getApplication(), next)
     }
 
-    fun updateParams(transform: StudioParams.() -> StudioParams) {
+    override fun updateParams(transform: StudioParams.() -> StudioParams) {
         val next = params.transform()
         params = next
         engine.apply(next)
@@ -165,7 +162,25 @@ class StudioViewModel(application: Application) : AndroidViewModel(application) 
         flash("status.cameraOn")
     }
 
-    fun filterLabel(id: String): String {
+    fun suspendForExternalTexture() {
+        engineReady.set(false)
+        engine.release()
+    }
+
+    fun resumeAfterExternalTexture() {
+        locale = detectStudioLocale(getApplication())
+        engine.start()
+        engine.apply(params)
+        engineReady.set(engine.isReady)
+        if (source == StudioSource.IMAGE) {
+            reprocessStill()
+        }
+        if (engine.statusKey.isNotEmpty()) {
+            flash(engine.statusKey)
+        }
+    }
+
+    override fun filterLabel(id: String): String {
         val row = filterLabels[id] ?: return id.replace('_', ' ')
         return if (locale == AppLocale.ZH) row.first else row.second.replace('_', ' ')
     }
@@ -254,37 +269,6 @@ class StudioViewModel(application: Application) : AndroidViewModel(application) 
             frameCount = 0
             lastFpsAt = now
         }
-    }
-
-    private fun detectLocale(): AppLocale {
-        val saved = getApplication<Application>()
-            .getSharedPreferences(PREFS, 0)
-            .getString(LOCALE_KEY, null)
-        if (saved != null) return AppLocale.fromCode(saved)
-        val language = java.util.Locale.getDefault().language
-        return if (language.startsWith("zh")) AppLocale.ZH else AppLocale.EN
-    }
-
-    private fun loadFilterLabels() {
-        val json = runCatching {
-            getApplication<Application>().assets.open("facebetter/filter_mapping.json").use {
-                it.bufferedReader().readText()
-            }
-        }.getOrNull() ?: return
-        val filters = JSONObject(json).optJSONObject("filters") ?: return
-        val labels = mutableMapOf<String, Pair<String, String>>()
-        val keys = filters.keys()
-        while (keys.hasNext()) {
-            val id = keys.next()
-            val row = filters.optJSONObject(id) ?: continue
-            labels[id] = row.optString("zh", id) to row.optString("en", id)
-        }
-        filterLabels = labels
-    }
-
-    companion object {
-        private const val PREFS = "fb.studio"
-        private const val LOCALE_KEY = "locale"
     }
 }
 

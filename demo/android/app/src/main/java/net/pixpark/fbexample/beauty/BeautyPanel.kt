@@ -38,11 +38,10 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import net.pixpark.fbexample.studio.StudioViewModel
 import net.pixpark.fbexample.studio.toPercent
 
 @Composable
-fun BeautyPanel(viewModel: StudioViewModel) {
+fun BeautyPanel(viewModel: BeautySession) {
     Column(
         modifier = Modifier
             .padding(horizontal = 8.dp, vertical = 6.dp)
@@ -69,7 +68,7 @@ fun BeautyPanel(viewModel: StudioViewModel) {
 }
 
 @Composable
-private fun TabBar(viewModel: StudioViewModel) {
+private fun TabBar(viewModel: BeautySession) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -115,7 +114,7 @@ private val BeautyTab.icon: ImageVector
     }
 
 @Composable
-private fun SkinSection(viewModel: StudioViewModel) {
+private fun SkinSection(viewModel: BeautySession) {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         IntensitySlider(
             title = viewModel.t(viewModel.selectedSkin.labelKey),
@@ -175,7 +174,7 @@ private fun SkinSection(viewModel: StudioViewModel) {
 }
 
 @Composable
-private fun ReshapeSection(viewModel: StudioViewModel) {
+private fun ReshapeSection(viewModel: BeautySession) {
     val value = viewModel.params.reshape[viewModel.selectedReshape] ?: 0f
     val title = BeautyCatalog.reshapeItems.firstOrNull { it.key == viewModel.selectedReshape }?.labelKey
         ?: "reshape.faceThin"
@@ -202,7 +201,7 @@ private fun ReshapeSection(viewModel: StudioViewModel) {
 }
 
 @Composable
-private fun MakeupSection(viewModel: StudioViewModel) {
+private fun MakeupSection(viewModel: BeautySession) {
     val styles = when (viewModel.selectedMakeup) {
         MakeupItem.BLUSH -> BeautyCatalog.blushStyles
         MakeupItem.CONTOUR -> BeautyCatalog.contourStyles
@@ -275,7 +274,7 @@ private fun MakeupSection(viewModel: StudioViewModel) {
     }
 }
 
-private fun makeupStyleSelected(viewModel: StudioViewModel, id: Any): Boolean {
+private fun makeupStyleSelected(viewModel: BeautySession, id: Any): Boolean {
     val params = viewModel.params
     return when (id) {
         params.blushStyle, params.contourStyle, params.eyeshadowStyle,
@@ -285,7 +284,7 @@ private fun makeupStyleSelected(viewModel: StudioViewModel, id: Any): Boolean {
     }
 }
 
-private fun applyMakeupStyle(viewModel: StudioViewModel, id: Any) {
+private fun applyMakeupStyle(viewModel: BeautySession, id: Any) {
     viewModel.updateParams {
         when (id) {
             is net.pixpark.facebetter.BeautyParams.BlushStyle -> copy(blushStyle = id)
@@ -299,14 +298,14 @@ private fun applyMakeupStyle(viewModel: StudioViewModel, id: Any) {
     }
 }
 
-private fun makeupColorSelected(viewModel: StudioViewModel, id: Any): Boolean {
+private fun makeupColorSelected(viewModel: BeautySession, id: Any): Boolean {
     val params = viewModel.params
     return id == params.lipstickColor || id == params.blushColor || id == params.eyeshadowColor ||
         id == params.eyelinerColor || id == params.eyebrowColor || id == params.eyelashColor ||
         id == params.pupilColor
 }
 
-private fun applyMakeupColor(viewModel: StudioViewModel, id: Any) {
+private fun applyMakeupColor(viewModel: BeautySession, id: Any) {
     viewModel.updateParams {
         when (id) {
             is net.pixpark.facebetter.BeautyParams.LipstickColor -> copy(lipstickColor = id)
@@ -322,7 +321,7 @@ private fun applyMakeupColor(viewModel: StudioViewModel, id: Any) {
 }
 
 @Composable
-private fun FilterSection(viewModel: StudioViewModel) {
+private fun FilterSection(viewModel: BeautySession) {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         ChipRow {
             ChoiceChip(
@@ -348,7 +347,7 @@ private fun FilterSection(viewModel: StudioViewModel) {
 }
 
 @Composable
-private fun StickerSection(viewModel: StudioViewModel) {
+private fun StickerSection(viewModel: BeautySession) {
     ChipRow {
         ChoiceChip(
             title = viewModel.t("sticker.none"),
@@ -366,7 +365,7 @@ private fun StickerSection(viewModel: StudioViewModel) {
 }
 
 @Composable
-private fun BackgroundSection(viewModel: StudioViewModel) {
+private fun BackgroundSection(viewModel: BeautySession) {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         ChipRow {
             BackgroundFill.entries.forEach { fill ->

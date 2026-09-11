@@ -14,7 +14,10 @@ import net.pixpark.fbexample.beauty.StudioParams
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 
-class BeautyEngine(private val context: Context) {
+class BeautyEngine(
+    private val context: Context,
+    private val externalContext: Boolean = false,
+) {
     private val lock = ReentrantLock()
     private var engine: BeautyEffectEngine? = null
     private var previous = StudioParams()
@@ -33,6 +36,9 @@ class BeautyEngine(private val context: Context) {
 
     fun start() {
         lock.withLock {
+            if (engine != null) {
+                return
+            }
             try {
                 val log = BeautyEffectEngine.LogConfig()
                 log.consoleEnabled = true
@@ -48,7 +54,7 @@ class BeautyEngine(private val context: Context) {
                     config.appId = CONFIG_APP_ID
                     config.appKey = CONFIG_APP_KEY
                 }
-                config.externalContext = false
+                config.externalContext = externalContext
 
                 val created = BeautyEffectEngine(context.applicationContext, config)
                 engine = created
@@ -114,11 +120,32 @@ class BeautyEngine(private val context: Context) {
         }
     }
 
+    fun processTexture(texture: Int, width: Int, height: Int, bypass: Boolean): Int {
+        lock.withLock {
+            val current = engine
+            if (bypass || current == null || !isReady || texture == 0 || width <= 0 || height <= 0) {
+                return texture
+            }
+            val input = ImageFrame.createWithTexture(texture, width, height, width * 4) ?: return texture
+            input.type = ImageFrame.FrameType.VIDEO
+            val output = try {
+                current.processImage(input)
+            } finally {
+                input.release()
+            }
+            val outTex = output?.texture ?: 0
+            output?.release()
+            return if (outTex != 0) outTex else texture
+        }
+    }
+
     fun release() {
         lock.withLock {
             engine?.release()
             engine = null
             isReady = false
+            previous = StudioParams()
+            statusKey = "status.initializing"
         }
     }
 

@@ -15,17 +15,18 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Cameraswitch
 import androidx.compose.material.icons.outlined.FilterCenterFocus
 import androidx.compose.material.icons.outlined.IosShare
 import androidx.compose.material.icons.outlined.Language
+import androidx.compose.material.icons.outlined.Layers
 import androidx.compose.material.icons.outlined.PhotoLibrary
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.Videocam
@@ -49,6 +50,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -63,6 +65,7 @@ fun StudioScreen(
     onPickImage: () -> Unit,
     onStartCamera: () -> Unit,
     onFlipCamera: () -> Unit,
+    onOpenTexture: () -> Unit,
     onFinish: () -> Unit,
 ) {
     BackHandler {
@@ -123,6 +126,7 @@ fun StudioScreen(
                     onPickImage = onPickImage,
                     onStartCamera = onStartCamera,
                     onFlipCamera = onFlipCamera,
+                    onOpenTexture = onOpenTexture,
                 )
                 FpsBadge(
                     viewModel = viewModel,
@@ -187,35 +191,69 @@ private fun TopBar(
     onPickImage: () -> Unit,
     onStartCamera: () -> Unit,
     onFlipCamera: () -> Unit,
+    onOpenTexture: () -> Unit,
 ) {
     var languageOpen by remember { mutableStateOf(false) }
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 10.dp, end = 10.dp, top = 8.dp),
+            .padding(start = 12.dp, end = 12.dp, top = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
     ) {
-        TopIcon(Icons.Outlined.PhotoLibrary, viewModel.t("nav.gallery"), onClick = onPickImage)
+        TopIcon(
+            Icons.Outlined.PhotoLibrary,
+            viewModel.t("nav.gallery"),
+            modifier = Modifier.weight(1f),
+            onClick = onPickImage,
+        )
         if (viewModel.source == StudioSource.IMAGE) {
-            TopIcon(Icons.Outlined.Videocam, viewModel.t("nav.camera"), active = true, onClick = onStartCamera)
+            TopIcon(
+                Icons.Outlined.Videocam,
+                viewModel.t("nav.camera"),
+                active = true,
+                modifier = Modifier.weight(1f),
+                onClick = onStartCamera,
+            )
         } else {
-            TopIcon(Icons.Outlined.Cameraswitch, viewModel.t("nav.flip"), onClick = onFlipCamera)
+            TopIcon(
+                Icons.Outlined.Cameraswitch,
+                viewModel.t("nav.flip"),
+                modifier = Modifier.weight(1f),
+                onClick = onFlipCamera,
+            )
         }
-        TopIcon(Icons.Outlined.Refresh, viewModel.t("nav.reset"), onClick = { viewModel.reset() })
-        TopIcon(Icons.Outlined.IosShare, viewModel.t("nav.export"), onClick = { viewModel.capture() })
-        Spacer(modifier = Modifier.weight(1f))
+        TopIcon(
+            Icons.Outlined.Refresh,
+            viewModel.t("nav.reset"),
+            modifier = Modifier.weight(1f),
+            onClick = { viewModel.reset() },
+        )
+        TopIcon(
+            Icons.Outlined.IosShare,
+            viewModel.t("nav.export"),
+            modifier = Modifier.weight(1f),
+            onClick = { viewModel.capture() },
+        )
         TopIcon(
             Icons.Outlined.FilterCenterFocus,
             viewModel.t("nav.landmarks"),
             active = viewModel.showLandmarks,
+            modifier = Modifier.weight(1f),
             onClick = { viewModel.showLandmarks = !viewModel.showLandmarks },
         )
-        Box {
+        TopIcon(
+            Icons.Outlined.Layers,
+            viewModel.t("nav.texture"),
+            modifier = Modifier.weight(1f),
+            onClick = onOpenTexture,
+        )
+        Box(modifier = Modifier.weight(1f)) {
             TopIcon(
                 Icons.Outlined.Language,
                 viewModel.locale.shortLabel,
                 active = true,
+                modifier = Modifier.fillMaxWidth(),
                 onClick = { languageOpen = true },
             )
             DropdownMenu(expanded = languageOpen, onDismissRequest = { languageOpen = false }) {
@@ -238,22 +276,25 @@ private fun TopIcon(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     title: String,
     active: Boolean = false,
+    modifier: Modifier = Modifier,
     onClick: () -> Unit,
 ) {
     Surface(
         onClick = onClick,
+        modifier = modifier,
         shape = RoundedCornerShape(12.dp),
         color = if (active) Color.White else Color.White.copy(0.10f),
         contentColor = if (active) Color.Black else Color.White,
     ) {
         Column(
             modifier = Modifier
-                .width(48.dp)
-                .padding(vertical = 8.dp),
+                .fillMaxWidth()
+                .height(46.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterVertically),
         ) {
-            Icon(icon, contentDescription = title, modifier = Modifier.size(16.dp))
-            Text(title, fontSize = 10.sp, maxLines = 1)
+            Icon(icon, contentDescription = title, modifier = Modifier.size(15.dp))
+            Text(title, fontSize = 10.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
     }
 }
