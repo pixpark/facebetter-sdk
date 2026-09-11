@@ -51,7 +51,7 @@ dependencies {
     implementation libs.constraintlayout
 
     if (useLocalFbAar) {
-        implementation files('../../../src/engine/android/facebetter/build/outputs/aar/facebetter.aar')
+        implementation files('../../../../fb/src/engine/android/facebetter/build/outputs/aar/facebetter.aar')
     } else {
         implementation libs.facebetter
     }

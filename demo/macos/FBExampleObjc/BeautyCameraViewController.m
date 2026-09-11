@@ -18,6 +18,8 @@
 @property(nonatomic, strong) GLRGBARenderView *previewView;
 @property(nonatomic, strong) id eventMonitor;
 @property(nonatomic, strong) NSLayoutConstraint *panelHeightConstraint;
+@property(nonatomic, strong) NSMutableDictionary<NSString *, NSString *> *stickerPaths;
+@property(nonatomic, strong) NSMutableDictionary<NSString *, NSString *> *filterPaths;
 @end
 
 @implementation BeautyCameraViewController
@@ -45,7 +47,7 @@
 
   self.beautyEffectEngine = [FBBeautyEffectEngine createEngineWithConfig:engineConfig];
 
-  [self registerFiltersAndStickers];
+  [self scanFilterAndStickerPaths];
 
   self.beautyPanelViewController = [[BeautyPanelViewController alloc] init];
   self.beautyPanelViewController.delegate = self;
@@ -186,77 +188,49 @@
 
   if ([tab isEqualToString:@"beauty"]) {
     if ([function isEqualToString:@"smooth"]) {
-      [self.beautyEffectEngine setBasicParam:FBBasicParam_Smoothing floatValue:value];
+      [self.beautyEffectEngine setSmoothing:value];
     } else if ([function isEqualToString:@"white"]) {
-      [self.beautyEffectEngine setBasicParam:FBBasicParam_Whitening floatValue:value];
+      [self.beautyEffectEngine setWhitening:value];
     } else if ([function isEqualToString:@"ai"]) {
-      [self.beautyEffectEngine setBasicParam:FBBasicParam_Rosiness floatValue:value];
+      [self.beautyEffectEngine setRosiness:value];
     } else if ([function isEqualToString:@"off"]) {
-      [self.beautyEffectEngine setBasicParam:FBBasicParam_Smoothing floatValue:0];
-      [self.beautyEffectEngine setBasicParam:FBBasicParam_Whitening floatValue:0];
-      [self.beautyEffectEngine setBasicParam:FBBasicParam_Rosiness floatValue:0];
+      [self.beautyEffectEngine setSmoothing:0];
+      [self.beautyEffectEngine setWhitening:0];
+      [self.beautyEffectEngine setRosiness:0];
     }
     return;
   }
 
   if ([tab isEqualToString:@"reshape"]) {
-    if ([function isEqualToString:@"thin_face"]) {
-      [self.beautyEffectEngine setReshapeParam:FBReshapeParam_FaceThin floatValue:value];
-    } else if ([function isEqualToString:@"v_face"]) {
-      [self.beautyEffectEngine setReshapeParam:FBReshapeParam_FaceVShape floatValue:value];
-    } else if ([function isEqualToString:@"narrow_face"]) {
-      [self.beautyEffectEngine setReshapeParam:FBReshapeParam_FaceNarrow floatValue:value];
-    } else if ([function isEqualToString:@"short_face"]) {
-      [self.beautyEffectEngine setReshapeParam:FBReshapeParam_FaceShort floatValue:value];
-    } else if ([function isEqualToString:@"cheekbone"]) {
-      [self.beautyEffectEngine setReshapeParam:FBReshapeParam_Cheekbone floatValue:value];
-    } else if ([function isEqualToString:@"jawbone"]) {
-      [self.beautyEffectEngine setReshapeParam:FBReshapeParam_Jawbone floatValue:value];
-    } else if ([function isEqualToString:@"chin"]) {
-      [self.beautyEffectEngine setReshapeParam:FBReshapeParam_Chin floatValue:value];
-    } else if ([function isEqualToString:@"nose_slim"]) {
-      [self.beautyEffectEngine setReshapeParam:FBReshapeParam_NoseSlim floatValue:value];
-    } else if ([function isEqualToString:@"big_eye"]) {
-      [self.beautyEffectEngine setReshapeParam:FBReshapeParam_EyeSize floatValue:value];
-    } else if ([function isEqualToString:@"eye_distance"]) {
-      [self.beautyEffectEngine setReshapeParam:FBReshapeParam_EyeDistance floatValue:value];
-    } else if ([function isEqualToString:@"off"]) {
-      [self.beautyEffectEngine setReshapeParam:FBReshapeParam_FaceThin floatValue:0];
-      [self.beautyEffectEngine setReshapeParam:FBReshapeParam_FaceVShape floatValue:0];
-      [self.beautyEffectEngine setReshapeParam:FBReshapeParam_FaceNarrow floatValue:0];
-      [self.beautyEffectEngine setReshapeParam:FBReshapeParam_FaceShort floatValue:0];
-      [self.beautyEffectEngine setReshapeParam:FBReshapeParam_Cheekbone floatValue:0];
-      [self.beautyEffectEngine setReshapeParam:FBReshapeParam_Jawbone floatValue:0];
-      [self.beautyEffectEngine setReshapeParam:FBReshapeParam_Chin floatValue:0];
-      [self.beautyEffectEngine setReshapeParam:FBReshapeParam_NoseSlim floatValue:0];
-      [self.beautyEffectEngine setReshapeParam:FBReshapeParam_EyeSize floatValue:0];
-      [self.beautyEffectEngine setReshapeParam:FBReshapeParam_EyeDistance floatValue:0];
+    if ([function isEqualToString:@"off"]) {
+      [self resetAllReshape];
+    } else {
+      FBReshape param = [self mapToReshape:function];
+      if ((NSInteger)param >= 0) {
+        [self.beautyEffectEngine setReshape:param intensity:value];
+      }
     }
     return;
   }
 
   if ([tab isEqualToString:@"makeup"]) {
     if ([function isEqualToString:@"lipstick"]) {
-      [self.beautyEffectEngine setMakeupParam:FBMakeupParam_Lipstick floatValue:value];
+      [self.beautyEffectEngine setLipstick:value];
     } else if ([function isEqualToString:@"blush"]) {
-      [self.beautyEffectEngine setMakeupParam:FBMakeupParam_Blush floatValue:value];
+      [self.beautyEffectEngine setBlush:value];
     } else if ([function isEqualToString:@"off"]) {
-      [self.beautyEffectEngine setMakeupParam:FBMakeupParam_Lipstick floatValue:0];
-      [self.beautyEffectEngine setMakeupParam:FBMakeupParam_Blush floatValue:0];
+      [self.beautyEffectEngine setLipstick:0];
+      [self.beautyEffectEngine setBlush:0];
     }
     return;
   }
 
   if ([tab isEqualToString:@"virtual_bg"]) {
-    FBVirtualBackgroundOptions *options = [[FBVirtualBackgroundOptions alloc] init];
     if ([function isEqualToString:@"off"]) {
-      options.mode = FBBackgroundModeNone;
-      [self.beautyEffectEngine setVirtualBackground:options];
+      [self.beautyEffectEngine clearVirtualBackground];
     } else if ([function isEqualToString:@"blur"]) {
-      options.mode = FBBackgroundModeBlur;
-      [self.beautyEffectEngine setVirtualBackground:options];
+      [self.beautyEffectEngine setVirtualBackgroundBlur:value];
     } else if ([function isEqualToString:@"preset"]) {
-      FBImageFrame *imageFrame = nil;
       NSString *imagePath = [[NSBundle mainBundle] pathForResource:@"background" ofType:@"jpg"];
       if (!imagePath) {
         NSString *resRoot = [[NSBundle mainBundle] resourcePath];
@@ -268,16 +242,7 @@
         }
       }
       if (imagePath && [[NSFileManager defaultManager] fileExistsAtPath:imagePath]) {
-        imageFrame = [FBImageFrame createWithFile:imagePath];
-      }
-      if (!imageFrame) {
-        NSImage *img = [NSImage imageNamed:@"background"];
-        if (img) imageFrame = [FBImageFrame createWithNSImage:img];
-      }
-      if (imageFrame) {
-        options.mode = FBBackgroundModeImage;
-        options.backgroundImage = imageFrame;
-        [self.beautyEffectEngine setVirtualBackground:options];
+        [self.beautyEffectEngine setVirtualBackground:imagePath];
       }
     }
     return;
@@ -285,19 +250,25 @@
 
   if ([tab isEqualToString:@"sticker"]) {
     if ([function isEqualToString:@"off"]) {
-      [self.beautyEffectEngine setSticker:@""];
+      [self.beautyEffectEngine clearSticker];
     } else {
-      [self.beautyEffectEngine setSticker:function];
+      NSString *path = self.stickerPaths[function];
+      if (path.length) {
+        [self.beautyEffectEngine setSticker:path];
+      }
     }
     return;
   }
 
   if ([tab isEqualToString:@"filter"]) {
     if ([function isEqualToString:@"off"]) {
-      [self.beautyEffectEngine setFilterIntensity:0];
+      [self.beautyEffectEngine clearFilter];
     } else {
-      [self.beautyEffectEngine setFilter:function];
-      [self.beautyEffectEngine setFilterIntensity:value];
+      NSString *path = self.filterPaths[function];
+      if (path.length) {
+        [self.beautyEffectEngine setFilter:path];
+        [self.beautyEffectEngine setFilterIntensity:value];
+      }
     }
     return;
   }
@@ -305,28 +276,60 @@
   NSLog(@"[Facebetter] Beauty param - tab: %@, function: %@, value: %.2f", tab, function, value);
 }
 
+- (FBReshape)mapToReshape:(NSString *)function {
+  static NSDictionary<NSString *, NSNumber *> *kMap;
+  static dispatch_once_t onceToken;
+  dispatch_once(&onceToken, ^{
+    kMap = @{
+      @"thin_face" : @(FBReshape_FaceThin),
+      @"v_face" : @(FBReshape_FaceVShape),
+      @"narrow_face" : @(FBReshape_FaceNarrow),
+      @"short_face" : @(FBReshape_FaceShort),
+      @"cheekbone" : @(FBReshape_Cheekbone),
+      @"jawbone" : @(FBReshape_Jawbone),
+      @"chin" : @(FBReshape_Chin),
+      @"nose_slim" : @(FBReshape_NoseSlim),
+      @"big_eye" : @(FBReshape_EyeSize),
+      @"eye_distance" : @(FBReshape_EyeDistance),
+      @"face_small" : @(FBReshape_FaceSmall),
+      @"forehead" : @(FBReshape_Forehead),
+      @"nose_long" : @(FBReshape_NoseLong),
+      @"philtrum" : @(FBReshape_Philtrum),
+      @"mouth_size" : @(FBReshape_MouthSize),
+      @"mouth_position" : @(FBReshape_MouthPosition),
+      @"mouth_smile" : @(FBReshape_MouthSmile),
+      @"lip_thickness" : @(FBReshape_LipThickness),
+      @"eye_round" : @(FBReshape_EyeRound),
+      @"eye_position" : @(FBReshape_EyePosition),
+      @"eye_angle" : @(FBReshape_EyeAngle),
+      @"eye_corner_open" : @(FBReshape_EyeCornerOpen),
+      @"lower_eyelid" : @(FBReshape_LowerEyelid),
+      @"brow_position" : @(FBReshape_BrowPosition),
+      @"brow_distance" : @(FBReshape_BrowDistance),
+      @"brow_thickness" : @(FBReshape_BrowThickness),
+    };
+  });
+  NSNumber *value = kMap[function];
+  return value ? (FBReshape)value.integerValue : (FBReshape)-1;
+}
+
+- (void)resetAllReshape {
+  for (NSInteger p = FBReshape_FaceThin; p <= FBReshape_BrowThickness; ++p) {
+    [self.beautyEffectEngine setReshape:(FBReshape)p intensity:0];
+  }
+}
+
 - (void)beautyPanelDidReset {
   if (!self.beautyEffectEngine) return;
-  [self.beautyEffectEngine setBasicParam:FBBasicParam_Smoothing floatValue:0];
-  [self.beautyEffectEngine setBasicParam:FBBasicParam_Whitening floatValue:0];
-  [self.beautyEffectEngine setBasicParam:FBBasicParam_Rosiness floatValue:0];
-  [self.beautyEffectEngine setReshapeParam:FBReshapeParam_FaceThin floatValue:0];
-  [self.beautyEffectEngine setReshapeParam:FBReshapeParam_FaceVShape floatValue:0];
-  [self.beautyEffectEngine setReshapeParam:FBReshapeParam_FaceNarrow floatValue:0];
-  [self.beautyEffectEngine setReshapeParam:FBReshapeParam_FaceShort floatValue:0];
-  [self.beautyEffectEngine setReshapeParam:FBReshapeParam_Cheekbone floatValue:0];
-  [self.beautyEffectEngine setReshapeParam:FBReshapeParam_Jawbone floatValue:0];
-  [self.beautyEffectEngine setReshapeParam:FBReshapeParam_Chin floatValue:0];
-  [self.beautyEffectEngine setReshapeParam:FBReshapeParam_NoseSlim floatValue:0];
-  [self.beautyEffectEngine setReshapeParam:FBReshapeParam_EyeSize floatValue:0];
-  [self.beautyEffectEngine setReshapeParam:FBReshapeParam_EyeDistance floatValue:0];
-  [self.beautyEffectEngine setMakeupParam:FBMakeupParam_Lipstick floatValue:0];
-  [self.beautyEffectEngine setMakeupParam:FBMakeupParam_Blush floatValue:0];
-  [self.beautyEffectEngine setSticker:@""];
-  FBVirtualBackgroundOptions *options = [[FBVirtualBackgroundOptions alloc] init];
-  options.mode = FBBackgroundModeNone;
-  [self.beautyEffectEngine setVirtualBackground:options];
-  [self.beautyEffectEngine setFilterIntensity:0];
+  [self.beautyEffectEngine setSmoothing:0];
+  [self.beautyEffectEngine setWhitening:0];
+  [self.beautyEffectEngine setRosiness:0];
+  [self resetAllReshape];
+  [self.beautyEffectEngine setLipstick:0];
+  [self.beautyEffectEngine setBlush:0];
+  [self.beautyEffectEngine clearSticker];
+  [self.beautyEffectEngine clearVirtualBackground];
+  [self.beautyEffectEngine clearFilter];
 }
 
 - (void)beautyPanelDidResetTab:(NSString *)tab {
@@ -346,10 +349,10 @@
 - (void)beautyPanelDidChangeMakeupStyle:(NSString *)function styleIndex:(NSInteger)styleIndex {
   (void)function;
   (void)styleIndex;
-  // Engine currently only has setMakeupParam(param, value); style not exposed. Store or apply when API is added.
+  // Makeup style APIs (setLipstickColor / setBlushStyle) are available on the engine.
 }
 
-- (void)registerFiltersAndStickers {
+- (void)scanFilterAndStickerPaths {
   if (!self.beautyEffectEngine) return;
 
   NSFileManager *fileManager = [NSFileManager defaultManager];
@@ -358,6 +361,7 @@
   if (!resourcesRoot.length) {
     resourcesRoot = [[NSBundle mainBundle] bundlePath];
   }
+  self.filterPaths = [NSMutableDictionary dictionary];
   NSString *filtersPath = [resourcesRoot stringByAppendingPathComponent:@"assets/filters/portrait"];
   NSError *error = nil;
   NSArray *filterDirs = [fileManager contentsOfDirectoryAtPath:filtersPath error:&error];
@@ -367,26 +371,34 @@
       NSString *fbdPath = [filtersPath stringByAppendingPathComponent:
           [dirName stringByAppendingPathComponent:[dirName stringByAppendingPathExtension:@"fbd"]]];
       if ([fileManager fileExistsAtPath:fbdPath]) {
-        [self.beautyEffectEngine registerFilter:dirName fbdFilePath:fbdPath];
+        self.filterPaths[dirName] = fbdPath;
       }
     }
   }
 
-  // 贴纸：扫描 assets/stickers/分类名/贴纸名/贴纸名.fbd（如 face/rabbit/rabbit.fbd）
+  // 贴纸：扫描 assets/stickers，记录 name -> .fbd 路径，应用时直接 SetSticker(path)
+  self.stickerPaths = [NSMutableDictionary dictionary];
   NSString *stickersRoot = [resourcesRoot stringByAppendingPathComponent:@"assets/stickers"];
   NSArray *categoryDirs = [fileManager contentsOfDirectoryAtPath:stickersRoot error:&error];
   if (!error && categoryDirs.count) {
+    BOOL isDir = NO;
     for (NSString *category in categoryDirs) {
       if ([category hasPrefix:@"."]) continue;
       NSString *categoryPath = [stickersRoot stringByAppendingPathComponent:category];
-      NSArray *stickerDirs = [fileManager contentsOfDirectoryAtPath:categoryPath error:&error];
+      if (![fileManager fileExistsAtPath:categoryPath isDirectory:&isDir] || !isDir) continue;
+      NSArray *entries = [fileManager contentsOfDirectoryAtPath:categoryPath error:&error];
       if (error) continue;
-      for (NSString *stickerName in stickerDirs) {
-        if ([stickerName hasPrefix:@"."]) continue;
-        NSString *fbdPath = [categoryPath stringByAppendingPathComponent:
-            [stickerName stringByAppendingPathComponent:[stickerName stringByAppendingPathExtension:@"fbd"]]];
-        if ([fileManager fileExistsAtPath:fbdPath]) {
-          [self.beautyEffectEngine registerSticker:stickerName fbdFilePath:fbdPath];
+      for (NSString *entry in entries) {
+        if ([entry hasPrefix:@"."]) continue;
+        NSString *entryPath = [categoryPath stringByAppendingPathComponent:entry];
+        if ([entry.pathExtension.lowercaseString isEqualToString:@"fbd"]) {
+          self.stickerPaths[entry.stringByDeletingPathExtension] = entryPath;
+          continue;
+        }
+        NSString *nested = [entryPath stringByAppendingPathComponent:
+            [entry stringByAppendingPathExtension:@"fbd"]];
+        if ([fileManager fileExistsAtPath:nested]) {
+          self.stickerPaths[entry] = nested;
         }
       }
     }

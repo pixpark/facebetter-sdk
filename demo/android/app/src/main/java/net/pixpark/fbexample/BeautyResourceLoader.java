@@ -2,60 +2,70 @@ package net.pixpark.fbexample;
 
 import android.content.Context;
 import android.util.Log;
-import net.pixpark.facebetter.BeautyEffectEngine;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 
-/** Registers filters and stickers from assets to engine. */
+/** Loads filters and stickers from assets. */
 public final class BeautyResourceLoader {
   private static final String TAG = "BeautyResourceLoader";
+  private static final Map<String, byte[]> FILTER_CACHE = new HashMap<>();
+  private static final Map<String, byte[]> STICKER_CACHE = new HashMap<>();
 
-  private static final String[] PORTRAIT_FILTERS = {
-      "confession", "cookie", "dawn", "extraordinary", "fair", "first_love",
-      "initial_heart", "japanese", "lively", "milk_tea", "mousse", "natural",
-      "plain", "pure", "rose", "snow", "tender", "tender_2", "vivid"
-  };
-
-  public static void registerFilters(BeautyEffectEngine engine, Context context) {
-    if (engine == null || context == null) return;
-    for (String filterId : PORTRAIT_FILTERS) {
-      try {
-        String path = "filters/portrait/" + filterId + "/" + filterId + ".fbd";
-        InputStream is = context.getAssets().open(path);
-        int size = is.available();
-        byte[] buffer = new byte[size];
-        is.read(buffer);
-        is.close();
-
-        int result = engine.registerFilter(filterId, buffer);
-        if (result == 0) {
-          Log.d(TAG, "Filter registered: " + filterId);
-        } else {
-          Log.e(TAG, "Failed to register filter: " + filterId + ", result: " + result);
-        }
-      } catch (Exception e) {
-        Log.e(TAG, "Error registering filter: " + filterId, e);
+  public static byte[] loadFilter(Context context, String filterId) {
+    if (context == null || filterId == null || filterId.isEmpty()) {
+      return null;
+    }
+    byte[] cached = FILTER_CACHE.get(filterId);
+    if (cached != null) {
+      return cached;
+    }
+    String path = "filters/portrait/" + filterId + "/" + filterId + ".fbd";
+    try (InputStream is = context.getAssets().open(path)) {
+      int size = is.available();
+      byte[] buffer = new byte[size];
+      int read = is.read(buffer);
+      if (read != size) {
+        Log.w(TAG, "Filter read short: " + path + " " + read + "/" + size);
       }
+      FILTER_CACHE.put(filterId, buffer);
+      Log.d(TAG, "Loaded filter: " + filterId + " from " + path);
+      return buffer;
+    } catch (Exception e) {
+      Log.e(TAG, "Failed to load filter from assets: " + filterId, e);
+      return null;
     }
   }
 
-  public static void registerStickers(BeautyEffectEngine engine, Context context) {
-    if (engine == null || context == null) return;
-    try {
-      InputStream is = context.getAssets().open("stickers/face/rabbit/rabbit.fbd");
-      int size = is.available();
-      byte[] buffer = new byte[size];
-      is.read(buffer);
-      is.close();
-
-      int result = engine.registerSticker("rabbit", buffer);
-      if (result == 0) {
-        Log.d(TAG, "Sticker registered: rabbit");
-      } else {
-        Log.e(TAG, "Failed to register rabbit sticker, result: " + result);
-      }
-    } catch (Exception e) {
-      Log.e(TAG, "Error registering rabbit sticker", e);
+  public static byte[] loadSticker(Context context, String stickerId) {
+    if (context == null || stickerId == null || stickerId.isEmpty()) {
+      return null;
     }
+    byte[] cached = STICKER_CACHE.get(stickerId);
+    if (cached != null) {
+      return cached;
+    }
+    String[] candidates = {
+        "stickers/face/" + stickerId + "/" + stickerId + ".fbd",
+        "stickers/face/" + stickerId + ".fbd"
+    };
+    for (String path : candidates) {
+      try (InputStream is = context.getAssets().open(path)) {
+        int size = is.available();
+        byte[] buffer = new byte[size];
+        int read = is.read(buffer);
+        if (read != size) {
+          Log.w(TAG, "Sticker read short: " + path + " " + read + "/" + size);
+        }
+        STICKER_CACHE.put(stickerId, buffer);
+        Log.d(TAG, "Loaded sticker: " + stickerId + " from " + path);
+        return buffer;
+      } catch (Exception ignored) {
+        // try next candidate
+      }
+    }
+    Log.e(TAG, "Failed to load sticker from assets: " + stickerId);
+    return null;
   }
 
   private BeautyResourceLoader() {}

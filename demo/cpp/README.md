@@ -1,107 +1,44 @@
 # Facebetter Desktop C++ Demo (GLFW + ImGui)
 
-Standalone desktop C++ demo using GLFW + Dear ImGui with the prebuilt Facebetter SDK.
+桌面端 C++ 示例：使用 GLFW + Dear ImGui 调用 FB 引擎 C++ 接口，美颜面板布局参考 [demo/macos](https://github.com/your-org/fb/tree/main/demo/macos) 的 BeautyPanelViewController。
 
-The UI shows a static image preview on the left and a beauty parameter panel on the right, with sliders for basic beauty, face reshape, makeup and sticker.
+## 依赖引入方式
 
-## Directory layout
+- **GLFW**：使用主工程 facebetter 的依赖（`third_party/gpupixel/third_party/glfw`），不重复引入。
+- **ImGui**：通过 **CPM.cmake + Git 源码仓库** 引入（配置时自动拉取 [ocornut/imgui](https://github.com/ocornut/imgui)），不放入本地。
 
-- `demo/cpp/main.cpp` – demo source code.
-- `demo/cpp/third-party/` – embedded third-party dependencies:
-  - `glfw` – window + OpenGL context.
-  - `glad` – OpenGL function loader.
-  - `imgui` – Dear ImGui and backends for GLFW + OpenGL3.
-- `demo/cpp/sdk/` – Facebetter prebuilt SDK for this demo:
-  - `include/facebetter/*.h` – C++ headers.
-  - `lib/` – platform-specific libraries.
-  - `resource/resource.fbd` – model/resource file used by the engine.
+## 构建
 
-## Preparing the SDK
-
-Place your Facebetter SDK files in `demo/cpp/sdk`. A typical setup is:
-
-- **Windows SDK**: unzip `facebetter-sdk-win.zip` directly into `demo/cpp/sdk`, so that you get:
-  - `demo/cpp/sdk/include/facebetter/*.h`
-  - `demo/cpp/sdk/lib/facebetter.lib`
-  - `demo/cpp/sdk/lib/facebetter.dll`
-  - `demo/cpp/sdk/resource/resource.fbd`
-- **Linux SDK**: copy the Linux version libraries into:
-  - `demo/cpp/sdk/lib/libfacebetter.so`
-
-The CMake project is already configured to use these locations.
-
-## Build on Windows (Ninja)
-
-From the repository root:
+在引擎仓 `fb` 根目录（与本仓库并列）：
 
 ```bash
-cd demo/cpp
 mkdir -p build && cd build
-cmake .. -G "Ninja" -DCMAKE_BUILD_TYPE=Release
-cmake --build .
+cmake .. -DFB_DEMO=ON -DCMAKE_BUILD_TYPE=Release
+cmake --build . --target facebetter_demo
 ```
 
-Notes:
+可执行文件生成在 `build/out/bin/facebetter_demo`（或 `build/bin/`，取决于 CMake 配置）。运行前确保 `resource.fbd` 在 `build/out/` 下（主工程构建时会自动打包到该目录）。
 
-- You need `ninja` on your PATH.
-- After the build, CMake automatically copies `sdk/lib/facebetter.dll`
-next to the executable so it can be loaded at runtime.
-
-## Build on Linux (Ninja)
-
-From `demo/cpp`:
+## 运行
 
 ```bash
-cd demo/cpp
-mkdir -p build && cd build
-cmake .. -G "Ninja" -DCMAKE_BUILD_TYPE=Release
-cmake --build .
+./out/bin/facebetter_demo
 ```
 
-Requirements: 
-
-- A C++17 compiler (e.g. gcc or clang).
-- `ninja` (if you use the Ninja generator).
-- OpenGL development files (CMake will find `OpenGL::GL`).
-
-Make sure `demo/cpp/sdk/lib/libfacebetter.so` exists before building.
-
-## Run
-
-### Windows (Ninja build)
-
-After building with Ninja, the executable will be in:
-
-- `demo/cpp/build/facebetter_demo.exe`
-
-You can run it directly from the build directory:
+或从 build 目录：
 
 ```bash
-cd demo/cpp/build
-./facebetter_demo.exe
+cd build && ./out/bin/facebetter_demo
 ```
 
-`facebetter.dll` will be in the same directory (copied automatically by CMake).
+## 当前功能
 
-### Linux (Ninja build)
+- 主窗口：左侧预览占位（无相机），右侧美颜面板。
+- 美颜面板：Tab（beauty / reshape / makeup / filter / sticker / body / virtual_bg / quality）+ 功能按钮 + 滑条，与 macOS demo 布局一致。
+- 参数通过 `BeautyEffectEngine` C++ API 设置（`SetSmoothing` / `SetWhitening` / `SetReshape` / `SetLipstick` / `SetBlush`、`SetFilter`、`SetSticker`、`SetVirtualBackgroundBlur` / `SetVirtualBackground` 等）。
+- 预览区暂无相机；可后续接入 libuvc 或平台 API（Media Foundation / V4L2 / AVFoundation）实现实时画面。
 
-After building with Ninja:
+## 方案说明
 
-```bash
-cd demo/cpp/build
-./facebetter_demo
-```
-
-Make sure `libfacebetter.so` is either:
-
-- In the same directory as the executable, or
-- In a directory listed in `LD_LIBRARY_PATH`, or
-- Installed in a standard library path (e.g. `/usr/lib`).
-
-## Runtime behavior
-
-- The engine loads `resource.fbd` from `demo/cpp/sdk/resource/resource.fbd`
-through the `FB_DEMO_RESOURCE_DIR` macro defined in `CMakeLists.txt`.
-- If `demo.png` is placed next to `resource.fbd`, the demo loads it,
-sends it through the Facebetter engine, and displays the processed result.
-
+- **CPM + Git 引入 ImGui**：不克隆到仓库，配置时按 `GIT_TAG` 拉取，版本可锁、可复现。
+- **GLFW 使用主工程**：避免与 facebetter 已链接的 glfw 重复，防止符号冲突。

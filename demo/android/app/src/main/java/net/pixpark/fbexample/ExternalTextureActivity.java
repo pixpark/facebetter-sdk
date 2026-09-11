@@ -8,10 +8,7 @@ import android.widget.TextView;
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import java.io.InputStream;
 import net.pixpark.facebetter.BeautyEffectEngine;
-import net.pixpark.facebetter.BeautyParams;
-import net.pixpark.facebetter.BeautyParams.*;
 import net.pixpark.facebetter.ImageFrame;
 
 /**
@@ -31,9 +28,7 @@ public class ExternalTextureActivity
   private static final int ERROR_PROCESS_FAILED = -2;
   private static final int ERROR_GET_BUFFER_FAILED = -3;
   private static final String LUT_FILTER_ID = "vivid";
-  private static final String LUT_ASSET_PATH = "filters/portrait/vivid/vivid.fbd";
   private static final String STICKER_ID = "black_glass";
-  private static final String STICKER_ASSET_PATH = "stickers/face/black_glass/black_glass.fbd";
 
   private GLTextureRenderer glVideoRenderer;
   private BeautyEffectEngine engine;
@@ -49,9 +44,7 @@ public class ExternalTextureActivity
   private float initialWhiteningValue = 0.0f;
   private float initialLutIntensityValue = 0.8f;
   private boolean initialLutEnabled = false;
-  private boolean lutFilterRegistered = false;
   private boolean initialStickerEnabled = false;
-  private boolean stickerRegistered = false;
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -80,7 +73,7 @@ public class ExternalTextureActivity
       public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
         if (fromUser && engine != null) {
           float value = progress / 100.0f;
-          engine.setBeautyParam(BasicParam.SMOOTHING, value);
+          engine.setSmoothing(value);
           textSmoothingValue.setText(String.format("%.2f", value));
           Log.d(TAG, "Set SMOOTHING: " + value);
         }
@@ -99,7 +92,7 @@ public class ExternalTextureActivity
       public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
         if (fromUser && engine != null) {
           float value = progress / 100.0f;
-          engine.setBeautyParam(BasicParam.WHITENING, value);
+          engine.setWhitening(value);
           textWhiteningValue.setText(String.format("%.2f", value));
           Log.d(TAG, "Set WHITENING: " + value);
         }
@@ -116,7 +109,11 @@ public class ExternalTextureActivity
     checkBoxLutEnable.setOnCheckedChangeListener((buttonView, isChecked) -> {
       initialLutEnabled = isChecked;
       if (engine != null) {
-        engine.setFilter(isChecked ? LUT_FILTER_ID : "");
+        if (isChecked) {
+          applyLutFilter();
+        } else {
+          engine.clearFilter();
+        }
         Log.d(TAG, "LUT " + (isChecked ? "enabled" : "disabled"));
       }
     });
@@ -146,7 +143,14 @@ public class ExternalTextureActivity
     checkBoxStickerEnable.setOnCheckedChangeListener((buttonView, isChecked) -> {
       initialStickerEnabled = isChecked;
       if (engine != null) {
-        engine.setSticker(isChecked ? STICKER_ID : "");
+        if (isChecked) {
+          byte[] data = BeautyResourceLoader.loadSticker(this, STICKER_ID);
+          if (data != null) {
+            engine.setSticker(data);
+          }
+        } else {
+          engine.clearSticker();
+        }
         Log.d(TAG, "Sticker " + (isChecked ? "enabled" : "disabled"));
       }
     });
@@ -185,65 +189,24 @@ public class ExternalTextureActivity
       BeautyEffectEngine.setLogConfig(logConfig);
 
       BeautyEffectEngine.EngineConfig config = new BeautyEffectEngine.EngineConfig();
-      // TODO: Replace with your AppId/AppKey or licenseJson
+      // TODO: Replace with your AppId/AppKey or licenseToken
       config.appId = "dddb24155fd045ab9c2d8aad83ad3a4a";
       config.appKey = "-VINb6KRgm5ROMR6DlaIjVBO9CDvwsxRopNvtIbUyLc";
       config.externalContext = true;
 
       engine = new BeautyEffectEngine(this, config);
 
-      // Register vivid LUT filter from assets
-      if (!lutFilterRegistered) {
-        try (InputStream is = getAssets().open(LUT_ASSET_PATH)) {
-          int size = is.available();
-          byte[] buffer = new byte[size];
-          int read = is.read(buffer);
-          if (read != size) {
-            Log.w(TAG, "Vivid filter read short: " + read + "/" + size);
-          }
-          int ret = engine.registerFilter(LUT_FILTER_ID, buffer);
-          if (ret == 0) {
-            lutFilterRegistered = true;
-            Log.d(TAG, "Registered LUT filter: " + LUT_FILTER_ID);
-          } else {
-            Log.e(TAG, "registerFilter failed, code=" + ret);
-          }
-        } catch (Exception e) {
-          Log.e(TAG, "Failed to load LUT filter: " + LUT_ASSET_PATH, e);
+      engine.setSmoothing(initialSmoothingValue);
+      engine.setWhitening(initialWhiteningValue);
+      if (initialLutEnabled) {
+        applyLutFilter();
+        engine.setFilterIntensity(initialLutIntensityValue);
+      }
+      if (initialStickerEnabled) {
+        byte[] data = BeautyResourceLoader.loadSticker(this, STICKER_ID);
+        if (data != null) {
+          engine.setSticker(data);
         }
-      }
-
-      // Register rabbit sticker from assets (for external texture mode SetSticker verification)
-      if (!stickerRegistered) {
-          try (InputStream is = getAssets().open(STICKER_ASSET_PATH)) {
-            int size = is.available();
-            byte[] buffer = new byte[size];
-            int read = is.read(buffer);
-            if (read != size) {
-              Log.w(TAG, "Black glass sticker read short: " + read + "/" + size);
-            }
-          int ret = engine.registerSticker(STICKER_ID, buffer);
-          if (ret == 0) {
-            stickerRegistered = true;
-            Log.d(TAG, "Registered sticker: " + STICKER_ID);
-          } else {
-            Log.e(TAG, "registerSticker failed, code=" + ret);
-          }
-        } catch (Exception e) {
-          Log.e(TAG, "Failed to load sticker: " + STICKER_ASSET_PATH, e);
-        }
-      }
-
-      // Apply initial slider values
-      engine.setBeautyParam(BasicParam.SMOOTHING, initialSmoothingValue);
-      engine.setBeautyParam(BasicParam.WHITENING, initialWhiteningValue);
-      engine.setFilterIntensity(initialLutIntensityValue);
-      if (initialLutEnabled && lutFilterRegistered) {
-        engine.setFilter(LUT_FILTER_ID);
-      }
-      if (initialStickerEnabled && stickerRegistered) {
-        // 延迟到 GL 线程（外部纹理模式）由 StickerFilter::DoRender 真正加载贴纸纹理。
-        engine.setSticker(STICKER_ID);
       }
       Log.d(TAG,
           "BeautyEffectEngine initialized with SMOOTHING: " + initialSmoothingValue
@@ -284,5 +247,17 @@ public class ExternalTextureActivity
     outputFrame.release();
     inputFrame.release();
     return ERROR_SUCCESS;
+  }
+
+  private void applyLutFilter() {
+    if (engine == null) {
+      return;
+    }
+    byte[] data = BeautyResourceLoader.loadFilter(this, LUT_FILTER_ID);
+    if (data == null) {
+      Log.e(TAG, "LUT filter asset not found: " + LUT_FILTER_ID);
+      return;
+    }
+    engine.setFilter(data);
   }
 }

@@ -26,7 +26,6 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import net.pixpark.facebetter.BeautyEffectEngine;
-import net.pixpark.facebetter.BeautyParams.BeautyType;
 import net.pixpark.facebetter.ImageFrame;
 import net.pixpark.fbexample.beautypanel.BeautyBarHandler;
 import net.pixpark.fbexample.beautypanel.BeautyBarListener;
@@ -189,9 +188,6 @@ public class BeautyActivity extends AppCompatActivity implements GLI420Renderer.
     mBeautyEngine = new BeautyEffectEngine(this, config);
     mBeautyParamApplier = new BeautyParamApplier(this, mBeautyEngine);
     Log.d(TAG, "BeautyEffectEngine initialized");
-
-    BeautyResourceLoader.registerFilters(mBeautyEngine, this);
-    BeautyResourceLoader.registerStickers(mBeautyEngine, this);
   }
 
   private void initPreview() {

@@ -35,7 +35,7 @@ demo/web/react/
 npm install
 ```
 
-**注意**：Facebetter SDK 已通过 npm 安装。安装 `facebetter` 时会自动安装 `facebetter-core` 依赖，无需手动配置。
+**注意**：本 Demo 通过 `file:` 依赖并列引擎仓里的本地 SDK（`../fb/src/engine/web/facebetter` 与 `facebetter-core`），不走 npm 已发布版本。
 
 ### 开发模式
 
@@ -79,7 +79,7 @@ npm run build
 
 - React 18 (Hooks API)
 - React Router 6
-- Facebetter Web SDK v1.1.0 (通过 npm 安装，自动包含 facebetter-core)
+- Facebetter Web SDK（本地 `src/engine/web/facebetter`，WASM 为 `facebetter-core`）
 - Vite
 
 ## 注意事项
@@ -87,7 +87,7 @@ npm run build
 1. **浏览器兼容性**：需要支持 WebAssembly 的现代浏览器（Chrome 57+, Firefox 52+, Safari 11+, Edge 16+）
 2. **HTTPS 要求**：相机访问需要 HTTPS 环境（localhost 除外）
 3. **性能优化**：已实现 canvas 和 ImageData 复用，提升视频处理性能
-4. **SDK 安装**：Facebetter SDK 通过 npm 自动安装。`facebetter` 包会自动安装 `facebetter-core` 依赖，无需手动配置
+4. **SDK 安装**：通过 `package.json` 的 `file:` 指向仓库内 `src/engine/web/facebetter` 与 `facebetter-core`
 
 ## 开发计划
 

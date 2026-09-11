@@ -52,12 +52,28 @@
     <string name="reshape_v_face">V Face</string>
     <string name="reshape_narrow_face">Narrow Face</string>
     <string name="reshape_short_face">Short Face</string>
+    <string name="reshape_face_small">Small Face</string>
     <string name="reshape_cheekbone">Cheekbone</string>
     <string name="reshape_jawbone">Jawbone</string>
     <string name="reshape_chin">Chin</string>
+    <string name="reshape_forehead">Forehead</string>
     <string name="reshape_nose_slim">Nose Slim</string>
+    <string name="reshape_nose_long">Nose Long</string>
+    <string name="reshape_philtrum">Philtrum</string>
+    <string name="reshape_mouth_size">Mouth Size</string>
+    <string name="reshape_mouth_position">Mouth Position</string>
+    <string name="reshape_mouth_smile">Smile</string>
+    <string name="reshape_lip_thickness">Lip Thickness</string>
     <string name="reshape_big_eye">Big Eye</string>
+    <string name="reshape_eye_round">Round Eye</string>
     <string name="reshape_eye_distance">Eye Distance</string>
+    <string name="reshape_eye_position">Eye Position</string>
+    <string name="reshape_eye_angle">Eye Angle</string>
+    <string name="reshape_eye_corner_open">Open Corner</string>
+    <string name="reshape_lower_eyelid">Lower Eyelid</string>
+    <string name="reshape_brow_position">Brow Position</string>
+    <string name="reshape_brow_distance">Brow Distance</string>
+    <string name="reshape_brow_thickness">Brow Thickness</string>
     
     <!-- Makeup Functions -->
     <string name="makeup_lipstick">Lipstick</string>
@@ -108,7 +124,6 @@
     <!-- Sticker Functions -->
     <string name="sticker_cute">Cute</string>
     <string name="sticker_funny">Funny</string>
-    <string name="sticker_rabbit">Rabbit</string>
     
     <!-- Body Functions -->
     <string name="body_slim">Slim</string>

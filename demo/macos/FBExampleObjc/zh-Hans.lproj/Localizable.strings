@@ -33,12 +33,28 @@
 "v_face" = "V脸";
 "narrow_face" = "窄脸";
 "short_face" = "短脸";
+"face_small" = "小脸";
 "cheekbone" = "颧骨";
 "jawbone" = "下颌";
 "chin" = "下巴";
+"forehead" = "额头";
 "nose_slim" = "瘦鼻";
+"nose_long" = "鼻长";
+"philtrum" = "人中";
+"mouth_size" = "嘴型";
+"mouth_position" = "嘴位";
+"mouth_smile" = "微笑";
+"lip_thickness" = "唇厚";
 "big_eye" = "大眼";
+"eye_round" = "圆眼";
 "eye_distance" = "眼距";
+"eye_position" = "眼位";
+"eye_angle" = "眼角";
+"eye_corner_open" = "开眼角";
+"lower_eyelid" = "眼睑";
+"brow_position" = "眉位";
+"brow_distance" = "眉距";
+"brow_thickness" = "眉粗";
 
 /* Panel - Makeup */
 "lipstick" = "口红";

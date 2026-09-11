@@ -34,8 +34,8 @@ const FILTER_LABELS_EN = {
 
 const functionConfigs = {
   beauty: [
-    { key: 'white', label: 'Whitening', icon: 'meiyan', enabled: true, type: TYPE_SLIDER },
-    { key: 'smooth', label: 'Smoothing', icon: 'meiyan2', enabled: true, type: TYPE_SLIDER },
+    { key: 'white', label: 'Whitening', icon: 'meiyan', enabled: true, type: TYPE_SLIDER, subOptions: ['Cold White', 'Pink White', 'Warm White', 'Wheat', 'Tan'] },
+    { key: 'smooth', label: 'Smoothing', icon: 'meiyan2', enabled: true, type: TYPE_SLIDER, subOptions: ['Natural', 'Texture', 'Smooth'] },
     { key: 'rosiness', label: 'Rosiness', icon: 'meiyan', enabled: true, type: TYPE_SLIDER },
     { key: 'skin_only', label: 'Skin Only', icon: 'huazhitiaozheng2', enabled: true, type: TYPE_TOGGLE }
   ],
@@ -44,18 +44,38 @@ const functionConfigs = {
     { key: 'v_face', label: 'V-Face', icon: 'meixing2', enabled: true, type: TYPE_SLIDER },
     { key: 'narrow_face', label: 'Narrow Face', icon: 'meixing2', enabled: true, type: TYPE_SLIDER },
     { key: 'short_face', label: 'Short Face', icon: 'meixing2', enabled: true, type: TYPE_SLIDER },
+    { key: 'face_small', label: 'Small Face', icon: 'meixing2', enabled: true, type: TYPE_SLIDER },
     { key: 'cheekbone', label: 'Cheekbone', icon: 'meixing2', enabled: true, type: TYPE_SLIDER },
     { key: 'jawbone', label: 'Jawbone', icon: 'jawbone', enabled: true, type: TYPE_SLIDER },
     { key: 'chin', label: 'Chin', icon: 'chin', enabled: true, type: TYPE_SLIDER },
-    { key: 'nose_slim', label: 'Nose', icon: 'nose', enabled: true, type: TYPE_SLIDER },
+    { key: 'forehead', label: 'Forehead', icon: 'meixing2', enabled: true, type: TYPE_SLIDER },
+    { key: 'nose_slim', label: 'Nose Slim', icon: 'nose', enabled: true, type: TYPE_SLIDER },
+    { key: 'nose_long', label: 'Nose Long', icon: 'nose', enabled: true, type: TYPE_SLIDER },
+    { key: 'philtrum', label: 'Philtrum', icon: 'meixing2', enabled: true, type: TYPE_SLIDER },
+    { key: 'mouth_size', label: 'Mouth Size', icon: 'meixing2', enabled: true, type: TYPE_SLIDER },
+    { key: 'mouth_position', label: 'Mouth Pos', icon: 'meixing2', enabled: true, type: TYPE_SLIDER },
+    { key: 'mouth_smile', label: 'Smile', icon: 'meixing2', enabled: true, type: TYPE_SLIDER },
+    { key: 'lip_thickness', label: 'Lip Thick', icon: 'lipstick', enabled: true, type: TYPE_SLIDER },
     { key: 'big_eye', label: 'Big Eye', icon: 'eyes', enabled: true, type: TYPE_SLIDER },
-    { key: 'eye_distance', label: 'Eye Distance', icon: 'eyes', enabled: true, type: TYPE_SLIDER }
+    { key: 'eye_round', label: 'Round Eye', icon: 'eyes', enabled: true, type: TYPE_SLIDER },
+    { key: 'eye_distance', label: 'Eye Dist', icon: 'eyes', enabled: true, type: TYPE_SLIDER },
+    { key: 'eye_position', label: 'Eye Pos', icon: 'eyes', enabled: true, type: TYPE_SLIDER },
+    { key: 'eye_angle', label: 'Eye Angle', icon: 'eyes', enabled: true, type: TYPE_SLIDER },
+    { key: 'eye_corner', label: 'Eye Corner', icon: 'eyes', enabled: true, type: TYPE_SLIDER },
+    { key: 'lower_eyelid', label: 'Lower Lid', icon: 'eyes', enabled: true, type: TYPE_SLIDER },
+    { key: 'brow_position', label: 'Brow Pos', icon: 'eyebrow', enabled: true, type: TYPE_SLIDER },
+    { key: 'brow_distance', label: 'Brow Dist', icon: 'eyebrow', enabled: true, type: TYPE_SLIDER },
+    { key: 'brow_thickness', label: 'Brow Thick', icon: 'eyebrow', enabled: true, type: TYPE_SLIDER }
   ],
   makeup: [
-    { key: 'lipstick', label: 'Lipstick', icon: 'lipstick', enabled: true, type: TYPE_SLIDER, subOptions: ['Moist', 'Vitality', 'Retro'] },
-    { key: 'blush', label: 'Blush', icon: 'meizhuang', enabled: true, type: TYPE_SLIDER, subOptions: ['Japanese', 'Sector', 'Tipsy'] },
-    { key: 'eyebrow', label: 'Eyebrow', icon: 'eyebrow', enabled: true, type: TYPE_SLIDER },
-    { key: 'eyeshadow', label: 'Eyeshadow', icon: 'eyeshadow', enabled: true, type: TYPE_SLIDER }
+    { key: 'lipstick', label: 'Lipstick', icon: 'lipstick', enabled: true, type: TYPE_SLIDER, subOptions: ['Rouge', 'Retro Red', 'Peach', 'Coral Orange', 'Gentle Pink', 'Vitality Orange'] },
+    { key: 'blush', label: 'Blush', icon: 'meizhuang', enabled: true, type: TYPE_SLIDER, subOptions: ['Sun Kissed', 'Igari', 'Soft', 'Apple', 'Classic', 'Doll', 'Rose'] },
+    { key: 'contour', label: 'Contour', icon: 'meizhuang', enabled: true, type: TYPE_SLIDER, subOptions: ['Natural', 'Sculpt', 'Glow', 'Slim', 'Nose', 'Glam'] },
+    { key: 'eyebrow', label: 'Eyebrow', icon: 'eyebrow', enabled: true, type: TYPE_SLIDER, subOptions: ['Natural', 'Soft', 'Feathered', 'Mist', 'Arched', 'Powder', 'Wild', 'Full', 'Straight'] },
+    { key: 'eyeshadow', label: 'Eyeshadow', icon: 'eyeshadow', enabled: true, type: TYPE_SLIDER, subOptions: ['Soft', 'Crease', 'Smoky', 'Halo', 'Glow', 'Drama', 'Warm'] },
+    { key: 'eyeliner', label: 'Eyeliner', icon: 'eyeshadow', enabled: true, type: TYPE_SLIDER, subOptions: ['Classic', 'Flick', 'Cat Eye', 'Natural', 'Bold', 'Soft'] },
+    { key: 'eyelash', label: 'Eyelash', icon: 'eyeshadow', enabled: true, type: TYPE_SLIDER, subOptions: ['Classic', 'Manga', 'Winged', 'Wispy', 'Clustered', 'Doll'] },
+    { key: 'pupil', label: 'Pupil', icon: 'eyes', enabled: true, type: TYPE_SLIDER, subOptions: ['Hazel', 'Ice', 'Mocha', 'Olive', 'Gloss', 'Moss', 'Sand', 'Glow', 'Slate'] }
   ],
   filter: FILTER_KEYS.map(key => ({
     key,
@@ -64,15 +84,16 @@ const functionConfigs = {
     enabled: true,
     type: TYPE_SLIDER
   })),
-  sticker: [
-    { key: 'rabbit', label: 'Rabbit', icon: 'rabbit', enabled: true, type: TYPE_SLIDER }
-  ],
+  sticker: [],
   body: [
-    { key: 'slim', label: 'Slim', icon: 'meiti', enabled: true, type: TYPE_SLIDER }
+    { key: 'slim', label: 'Slim', icon: 'meiti', enabled: false, type: TYPE_SLIDER }
   ],
   virtual_bg: [
     { key: 'blur', label: 'Blur', icon: 'blur', enabled: true, type: TYPE_TOGGLE },
-    { key: 'preset', label: 'Virtual BG Image', icon: 'back_preset', enabled: true, type: TYPE_TOGGLE }
+    { key: 'preset', label: 'Virtual BG Image', icon: 'back_preset', enabled: true, type: TYPE_TOGGLE },
+    { key: 'chroma_green', label: 'Chroma Green', icon: 'blur', enabled: true, type: TYPE_TOGGLE },
+    { key: 'chroma_blue', label: 'Chroma Blue', icon: 'blur', enabled: true, type: TYPE_TOGGLE },
+    { key: 'chroma_red', label: 'Chroma Red', icon: 'blur', enabled: true, type: TYPE_TOGGLE }
   ],
   face_detection: [
     { key: 'enable', label: 'Face Detection', icon: 'renlianjiance', enabled: true, type: TYPE_TOGGLE },
@@ -230,10 +251,18 @@ const BeautyPanel = forwardRef(({ currentTab, onTabChanged, onBeautyParamChanged
     const functionKey = `${currentTab}:${func.key}`
     const currentState = toggleStates.get(functionKey) || false
     const newState = !currentState
+    const chromaKeys = ['chroma_green', 'chroma_blue', 'chroma_red']
+    const isChroma = currentTab === 'virtual_bg' && chromaKeys.includes(func.key)
 
     setToggleStates(prev => {
       const newMap = new Map(prev)
-      newMap.set(functionKey, newState)
+      if (isChroma && newState) {
+        for (const key of chromaKeys) {
+          newMap.set(`${currentTab}:${key}`, key === func.key)
+        }
+      } else {
+        newMap.set(functionKey, newState)
+      }
       return newMap
     })
 
@@ -254,6 +283,13 @@ const BeautyPanel = forwardRef(({ currentTab, onTabChanged, onBeautyParamChanged
    */
   const onSubOptionClick = (index, option) => {
     setCurrentSubOption(`style${index + 1}`)
+    if (currentFunction) {
+      onBeautyParamChanged({
+        tab: currentTab,
+        function: `${currentFunction}_style`,
+        value: index
+      })
+    }
     hideSubOptionsPanel()
     onShowSlider({
       tab: currentTab,

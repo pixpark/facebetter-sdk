@@ -23,7 +23,7 @@ get_platform_dir() {
             echo "demo/android/app/src/main/libs"
             ;;
         ios)
-            echo "demo/ios/FBExampleObjc/libs"
+            echo "demo/ios2/libs"
             ;;
         macos)
             echo "demo/macos/FBExampleObjc/libs"

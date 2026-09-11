@@ -1,0 +1,10 @@
+node_modules
+src
+public
+.git
+.DS_Store
+*.log
+.env*
+.vercel
+package.json
+package-lock.json

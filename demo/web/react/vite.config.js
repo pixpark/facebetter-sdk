@@ -2,17 +2,21 @@ import { fileURLToPath, URL } from 'node:url'
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
+const repoWeb = fileURLToPath(new URL('../../../../fb/src/engine/web', import.meta.url))
+
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
-      // 使用 package.json 中配置的本地 facebetter 包
-      // 'facebetter' 已通过 package.json 中的 "file:../../../src/engine/web/facebetter" 配置
-      // 如果需要使用源码进行开发，可以取消下面的注释
-      // 'facebetter': fileURLToPath(new URL('../../../src/engine/web/facebetter/src/esm/index.js', import.meta.url)),
+      // 直接走仓库源码，改 JS 不用先 rollup
+      facebetter: `${repoWeb}/facebetter/src/esm/index.js`,
+      'facebetter-core': `${repoWeb}/facebetter-core/dist/facebetter-core.js`,
     },
+  },
+  optimizeDeps: {
+    exclude: ['facebetter', 'facebetter-core'],
   },
   build: {
     // 调整 chunk 大小警告阈值（facebetter-core WASM 模块约 11MB）

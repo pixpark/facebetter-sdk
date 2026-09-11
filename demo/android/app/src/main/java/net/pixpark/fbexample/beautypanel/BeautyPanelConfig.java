@@ -53,12 +53,28 @@ public final class BeautyPanelConfig {
             new FunctionConfig("v_face", context.getString(R.string.reshape_v_face), R.drawable.meixing2, true, TYPE_SLIDER),
             new FunctionConfig("narrow_face", context.getString(R.string.reshape_narrow_face), R.drawable.meixing2, true, TYPE_SLIDER),
             new FunctionConfig("short_face", context.getString(R.string.reshape_short_face), R.drawable.meixing2, true, TYPE_SLIDER),
+            new FunctionConfig("face_small", context.getString(R.string.reshape_face_small), R.drawable.meixing2, true, TYPE_SLIDER),
             new FunctionConfig("cheekbone", context.getString(R.string.reshape_cheekbone), R.drawable.meixing2, true, TYPE_SLIDER),
             new FunctionConfig("jawbone", context.getString(R.string.reshape_jawbone), R.drawable.jawbone, true, TYPE_SLIDER),
             new FunctionConfig("chin", context.getString(R.string.reshape_chin), R.drawable.chin, true, TYPE_SLIDER),
+            new FunctionConfig("forehead", context.getString(R.string.reshape_forehead), R.drawable.meixing2, true, TYPE_SLIDER),
             new FunctionConfig("nose_slim", context.getString(R.string.reshape_nose_slim), R.drawable.nose, true, TYPE_SLIDER),
+            new FunctionConfig("nose_long", context.getString(R.string.reshape_nose_long), R.drawable.nose, true, TYPE_SLIDER),
+            new FunctionConfig("philtrum", context.getString(R.string.reshape_philtrum), R.drawable.meixing2, true, TYPE_SLIDER),
+            new FunctionConfig("mouth_size", context.getString(R.string.reshape_mouth_size), R.drawable.meixing2, true, TYPE_SLIDER),
+            new FunctionConfig("mouth_position", context.getString(R.string.reshape_mouth_position), R.drawable.meixing2, true, TYPE_SLIDER),
+            new FunctionConfig("mouth_smile", context.getString(R.string.reshape_mouth_smile), R.drawable.meixing2, true, TYPE_SLIDER),
+            new FunctionConfig("lip_thickness", context.getString(R.string.reshape_lip_thickness), R.drawable.meixing2, true, TYPE_SLIDER),
             new FunctionConfig("big_eye", context.getString(R.string.reshape_big_eye), R.drawable.eyes, true, TYPE_SLIDER),
+            new FunctionConfig("eye_round", context.getString(R.string.reshape_eye_round), R.drawable.eyes, true, TYPE_SLIDER),
             new FunctionConfig("eye_distance", context.getString(R.string.reshape_eye_distance), R.drawable.eyes, true, TYPE_SLIDER),
+            new FunctionConfig("eye_position", context.getString(R.string.reshape_eye_position), R.drawable.eyes, true, TYPE_SLIDER),
+            new FunctionConfig("eye_angle", context.getString(R.string.reshape_eye_angle), R.drawable.eyes, true, TYPE_SLIDER),
+            new FunctionConfig("eye_corner_open", context.getString(R.string.reshape_eye_corner_open), R.drawable.eyes, true, TYPE_SLIDER),
+            new FunctionConfig("lower_eyelid", context.getString(R.string.reshape_lower_eyelid), R.drawable.eyes, true, TYPE_SLIDER),
+            new FunctionConfig("brow_position", context.getString(R.string.reshape_brow_position), R.drawable.meixing2, true, TYPE_SLIDER),
+            new FunctionConfig("brow_distance", context.getString(R.string.reshape_brow_distance), R.drawable.meixing2, true, TYPE_SLIDER),
+            new FunctionConfig("brow_thickness", context.getString(R.string.reshape_brow_thickness), R.drawable.meixing2, true, TYPE_SLIDER),
         };
       case "makeup":
         return new FunctionConfig[] {
@@ -111,7 +127,7 @@ public final class BeautyPanelConfig {
         };
       case "sticker":
         return new FunctionConfig[] {
-            new FunctionConfig("rabbit", context.getString(R.string.sticker_rabbit), R.drawable.rabbit, true, TYPE_TOGGLE),
+            new FunctionConfig("black_glass", "Black Glass", R.drawable.tiezhi2, true, TYPE_TOGGLE),
         };
       case "body":
         return new FunctionConfig[] {

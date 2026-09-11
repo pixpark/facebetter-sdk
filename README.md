@@ -10,8 +10,8 @@
 
 ## Introduction
 
-This repository contains **Facebetter SDK** demo source code for all supported platforms.
- 
+This repository contains **Facebetter SDK** demo source code for all supported platforms. Place it next to the engine repo `fb` for local builds.
+
 ## Download SDK
 
 Before building the demo projects, you need to download the SDK libraries for the target platform(s). We provide a convenient script to automate this process:
@@ -33,8 +33,10 @@ Before building the demo projects, you need to download the SDK libraries for th
 
 The script will automatically download and extract the SDK files to the correct directories:
 - **Android**: `demo/android/app/src/main/libs`
-- **iOS**: `demo/ios/FBExampleObjc/libs`
+- **iOS**: `demo/ios2/libs`
 - **macOS**: `demo/macos/FBExampleObjc/libs`
+
+Demo source is synced from the engine repo (`fb/demo`). 2.0 samples live in `demo/android2`, `demo/ios2`, and `demo/web/react2`.
 
 ## Documentation
 

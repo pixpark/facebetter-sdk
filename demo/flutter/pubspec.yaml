@@ -25,7 +25,7 @@ dependencies:
   flutter:
     sdk: flutter
   facebetter_flutter:
-    path: ../../src/engine/flutter
+    path: ../../../fb/src/engine/flutter
 
 dev_dependencies:
   flutter_test:

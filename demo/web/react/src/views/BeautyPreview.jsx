@@ -3,18 +3,73 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import BeautyPanel from '../components/BeautyPanel'
 import { 
   BeautyEffectEngine, 
-  EngineConfig, 
-  BeautyType, 
-  BasicParam,
-  ReshapeParam,
-  MakeupParam,
-  ChromaKeyParam,
-  BackgroundMode,
-  VirtualBackgroundOptions,
+  EngineConfig,
+  createDirectAuthFetcher,
+  Reshape,
+  ChromaKeyColor,
   FrameType,
   MirrorMode 
 } from 'facebetter'
 import './BeautyPreview.css'
+
+const RESHAPE_PARAMS = {
+  thin_face: Reshape.FaceThin,
+  v_face: Reshape.FaceVShape,
+  narrow_face: Reshape.FaceNarrow,
+  short_face: Reshape.FaceShort,
+  face_small: Reshape.FaceSmall,
+  cheekbone: Reshape.Cheekbone,
+  jawbone: Reshape.Jawbone,
+  chin: Reshape.Chin,
+  forehead: Reshape.Forehead,
+  nose_slim: Reshape.NoseSlim,
+  nose_long: Reshape.NoseLong,
+  philtrum: Reshape.Philtrum,
+  mouth_size: Reshape.MouthSize,
+  mouth_position: Reshape.MouthPosition,
+  mouth_smile: Reshape.MouthSmile,
+  lip_thickness: Reshape.LipThickness,
+  big_eye: Reshape.EyeSize,
+  eye_round: Reshape.EyeRound,
+  eye_distance: Reshape.EyeDistance,
+  eye_position: Reshape.EyePosition,
+  eye_angle: Reshape.EyeAngle,
+  eye_corner: Reshape.EyeCornerOpen,
+  lower_eyelid: Reshape.LowerEyelid,
+  brow_position: Reshape.BrowPosition,
+  brow_distance: Reshape.BrowDistance,
+  brow_thickness: Reshape.BrowThickness
+}
+
+const STYLE_SETTERS = {
+  white_style: (engine, value) => engine.setWhiteningStyle(value),
+  smooth_style: (engine, value) => engine.setSmoothingStyle(value),
+  lipstick_style: (engine, value) => engine.setLipstickColor(value),
+  blush_style: (engine, value) => engine.setBlushStyle(value),
+  contour_style: (engine, value) => engine.setContourStyle(value),
+  eyeshadow_style: (engine, value) => engine.setEyeShadowStyle(value),
+  eyeliner_style: (engine, value) => engine.setEyeLinerStyle(value),
+  eyebrow_style: (engine, value) => engine.setEyebrowStyle(value),
+  eyelash_style: (engine, value) => engine.setEyelashStyle(value),
+  pupil_style: (engine, value) => engine.setPupilColor(value)
+}
+
+const MAKEUP_SETTERS = {
+  lipstick: (engine, value) => engine.setLipstick(value),
+  blush: (engine, value) => engine.setBlush(value),
+  contour: (engine, value) => engine.setContour(value),
+  eyebrow: (engine, value) => engine.setEyebrow(value),
+  eyeshadow: (engine, value) => engine.setEyeShadow(value),
+  eyeliner: (engine, value) => engine.setEyeLiner(value),
+  eyelash: (engine, value) => engine.setEyelash(value),
+  pupil: (engine, value) => engine.setPupil(value)
+}
+
+const CHROMA_COLORS = {
+  chroma_green: ChromaKeyColor.Green,
+  chroma_blue: ChromaKeyColor.Blue,
+  chroma_red: ChromaKeyColor.Red
+}
 
 // Filter IDs (same order as Mac demo: assets/filters/portrait/<id>/<id>.fbd)
 const FILTER_IDS = [
@@ -23,34 +78,37 @@ const FILTER_IDS = [
   'natural', 'rose', 'tender', 'tender_2', 'extraordinary'
 ]
 // Stickers: { id, path under assets/stickers/ }
-const STICKER_LIST = [{ id: 'rabbit', path: 'face/rabbit/rabbit.fbd' }]
+const STICKER_LIST = []
+const FILTER_BUFFERS = new Map()
+const STICKER_BUFFERS = new Map()
 
 /**
- * Register filter and sticker resources (same logic as Mac demo).
- * Fetches .fbd files from public/assets and registers with engine.
+ * Load filter and sticker .fbd buffers from public/assets.
  */
-async function registerFiltersAndStickers(engine) {
+async function loadFiltersAndStickers() {
   const base = typeof window !== 'undefined' && window.location ? window.location.origin : ''
+  FILTER_BUFFERS.clear()
   for (const id of FILTER_IDS) {
     try {
       const url = `${base}/assets/filters/portrait/${id}/${id}.fbd`
       const res = await fetch(url)
       if (!res.ok) continue
       const buf = await res.arrayBuffer()
-      engine.registerFilter(id, new Uint8Array(buf))
+      FILTER_BUFFERS.set(id, new Uint8Array(buf))
     } catch (e) {
-      console.warn(`[BeautyPreview] Failed to register filter: ${id}`, e)
+      console.warn(`[BeautyPreview] Failed to load filter: ${id}`, e)
     }
   }
+  STICKER_BUFFERS.clear()
   for (const { id, path } of STICKER_LIST) {
     try {
       const url = `${base}/assets/stickers/${path}`
       const res = await fetch(url)
       if (!res.ok) continue
       const buf = await res.arrayBuffer()
-      engine.registerSticker(id, new Uint8Array(buf))
+      STICKER_BUFFERS.set(id, new Uint8Array(buf))
     } catch (e) {
-      console.warn(`[BeautyPreview] Failed to register sticker: ${id}`, e)
+      console.warn(`[BeautyPreview] Failed to load sticker: ${id}`, e)
     }
   }
 }
@@ -155,7 +213,7 @@ function BeautyPreview() {
 
   /**
    * Initialize Facebetter engine
-   * Creates and configures the BeautyEffectEngine instance with app credentials
+   * Local demo: call Cloudflare directly. Do not ship appKey in a production frontend.
    */
   const initEngine = useCallback(async () => {
     const appId = 'dddb24155fd045ab9c2d8aad83ad3a4a'
@@ -168,10 +226,8 @@ function BeautyPreview() {
       return
     }
 
-    // Create engine configuration with app credentials
     const config = new EngineConfig({
-      appId: appId,
-      appKey: appKey
+      fetchAuthResponse: createDirectAuthFetcher({ appId, appKey }),
     })
 
     // Initialize BeautyEffectEngine instance
@@ -188,7 +244,7 @@ function BeautyPreview() {
     await engine.init()
 
     // Register filter and sticker resources (same as Mac demo)
-    await registerFiltersAndStickers(engine)
+    await loadFiltersAndStickers()
 
     // 不在初始化时注册 onFaceLandmarks 回调，避免无效的人脸检测开销。
     // 回调仅在用户 UI 上打开"人脸检测"功能时才按需注册（见 applyBeautyParam）。
@@ -395,127 +451,96 @@ function BeautyPreview() {
     if (!engine) return
 
     try {
-      // Clamp value to valid range [0.0, 1.0]
-      const paramValue = Math.max(0, Math.min(1, value))
+      const isStyleKey = functionKey.endsWith('_style')
+      const paramValue = isStyleKey ? Math.round(value) : Math.max(0, Math.min(1, value))
 
-      // Basic beauty parameters
-      if (tab === 'beauty') {
+      if (STYLE_SETTERS[functionKey]) {
+        STYLE_SETTERS[functionKey](engine, paramValue)
+      } else if (tab === 'beauty') {
         switch (functionKey) {
           case 'white':
-            engine.setBasicParam(BasicParam.Whitening, paramValue)
+            engine.setWhitening(paramValue)
             break
           case 'smooth':
-            engine.setBasicParam(BasicParam.Smoothing, paramValue)
+            engine.setSmoothing(paramValue)
             break
           case 'rosiness':
-            engine.setBasicParam(BasicParam.Rosiness, paramValue)
+            engine.setRosiness(paramValue)
             break
           case 'skin_only':
-            engine.setSkinOnlyBeauty(paramValue > 0)
+            engine.setBeautySkinOnly(paramValue > 0)
             break
         }
       } else if (tab === 'reshape') {
-        switch (functionKey) {
-          case 'thin_face':
-            engine.setReshapeParam(ReshapeParam.FaceThin, paramValue)
-            break
-          case 'v_face':
-            engine.setReshapeParam(ReshapeParam.FaceVShape, paramValue)
-            break
-          case 'narrow_face':
-            engine.setReshapeParam(ReshapeParam.FaceNarrow, paramValue)
-            break
-          case 'short_face':
-            engine.setReshapeParam(ReshapeParam.FaceShort, paramValue)
-            break
-          case 'cheekbone':
-            engine.setReshapeParam(ReshapeParam.Cheekbone, paramValue)
-            break
-          case 'jawbone':
-            engine.setReshapeParam(ReshapeParam.Jawbone, paramValue)
-            break
-          case 'chin':
-            engine.setReshapeParam(ReshapeParam.Chin, paramValue)
-            break
-          case 'nose_slim':
-            engine.setReshapeParam(ReshapeParam.NoseSlim, paramValue)
-            break
-          case 'big_eye':
-            engine.setReshapeParam(ReshapeParam.EyeSize, paramValue)
-            break
-          case 'eye_distance':
-            engine.setReshapeParam(ReshapeParam.EyeDistance, paramValue)
-            break
+        const reshapeParam = RESHAPE_PARAMS[functionKey]
+        if (reshapeParam !== undefined) {
+          engine.setReshape(reshapeParam, paramValue)
         }
       } else if (tab === 'makeup') {
-        switch (functionKey) {
-          case 'lipstick':
-            engine.setMakeupParam(MakeupParam.Lipstick, paramValue)
-            break
-          case 'blush':
-            engine.setMakeupParam(MakeupParam.Blush, paramValue)
-            break
+        const makeupSetter = MAKEUP_SETTERS[functionKey]
+        if (makeupSetter) {
+          makeupSetter(engine, paramValue)
+        }
+      } else if (tab === 'quality') {
+        if (functionKey === 'sharpen') {
+          engine.setSharpening(paramValue)
         }
       } else if (tab === 'virtual_bg') {
-        // Virtual background options
         if (functionKey === 'blur') {
-          const options = new VirtualBackgroundOptions({
-            mode: value > 0 ? BackgroundMode.Blur : BackgroundMode.None
-          })
-          engine.setVirtualBackground(options)
+          engine.setVirtualBackgroundBlur(paramValue)
         } else if (functionKey === 'preset') {
           if (value > 0) {
             loadPresetBackground()
           } else {
-            const options = new VirtualBackgroundOptions({
-              mode: BackgroundMode.None
-            })
-            engine.setVirtualBackground(options)
+            engine.clearVirtualBackground()
           }
         } else if (functionKey === 'image') {
           if (value <= 0) {
-            const options = new VirtualBackgroundOptions({
-              mode: BackgroundMode.None
-            })
-            engine.setVirtualBackground(options)
+            engine.clearVirtualBackground()
           }
         } else if (functionKey === 'none') {
-          const options = new VirtualBackgroundOptions({
-            mode: BackgroundMode.None
-          })
-          engine.setVirtualBackground(options)
+          engine.clearVirtualBackground()
+        } else if (CHROMA_COLORS[functionKey] !== undefined) {
+          if (paramValue > 0) {
+            engine.setChromaKey(CHROMA_COLORS[functionKey])
+          } else {
+            engine.clearChromaKey()
+          }
         }
       } else if (tab === 'sticker') {
         // Sticker: same logic as Mac demo
         if (functionKey === 'off' || paramValue <= 0) {
-          engine.setSticker('')
+          engine.clearSticker()
         } else {
-          engine.setSticker(functionKey)
+          const data = STICKER_BUFFERS.get(functionKey)
+          if (data) {
+            engine.setSticker(data)
+          } else {
+            console.warn(`[BeautyPreview] Sticker not loaded: ${functionKey}`)
+          }
         }
       } else if (tab === 'filter') {
-        // Filter: same logic as Mac demo
         if (functionKey === 'off' || paramValue <= 0) {
-          engine.setFilterIntensity(0)
+          engine.clearFilter()
         } else {
-          engine.setFilter(functionKey)
-          engine.setFilterIntensity(paramValue)
+          const data = FILTER_BUFFERS.get(functionKey)
+          if (data) {
+            engine.setFilter(data)
+            engine.setFilterIntensity(paramValue)
+          } else {
+            console.warn(`[BeautyPreview] Filter not loaded: ${functionKey}`)
+          }
         }
       } else if (tab === 'chroma_key') {
-        // Chroma key (green screen) parameters
-        
         if (functionKey === 'key_color') {
-          // Key color: 0=green, 1=blue, 2=red (value mapped from 0.0-1.0 to 0-2)
           const colorValue = Math.round(value * 2)
-          engine.setChromaKeyParam(ChromaKeyParam.KeyColor, colorValue / 2.0)
+          engine.setChromaKey(colorValue)
         } else if (functionKey === 'similarity') {
-          // Similarity: 0.0-1.0, default 0.72
-          engine.setChromaKeyParam(ChromaKeyParam.Similarity, paramValue)
+          engine.setChromaKeySimilarity(paramValue)
         } else if (functionKey === 'smoothness') {
-          // Smoothness: 0.0-1.0, default 0.18
-          engine.setChromaKeyParam(ChromaKeyParam.Smoothness, paramValue)
+          engine.setChromaKeySmoothness(paramValue)
         } else if (functionKey === 'desaturation') {
-          // Desaturation: 0.0-1.0, default 0.35
-          engine.setChromaKeyParam(ChromaKeyParam.Desaturation, paramValue)
+          engine.setChromaKeyDesaturation(paramValue)
         }
       } else if (tab === 'face_detection') {
         if (functionKey === 'enable') {
@@ -557,22 +582,13 @@ function BeautyPreview() {
     if (!engine) return
 
     try {
-      const img = new Image()
-      img.crossOrigin = 'anonymous'
-      
-      await new Promise((resolve, reject) => {
-        img.onload = resolve
-        img.onerror = () => reject(new Error('Failed to load preset background image'))
-        img.src = '/background.jpg'
-      })
-
-      // Set virtual background to image mode with the loaded image
-      const options = new VirtualBackgroundOptions({
-        mode: BackgroundMode.Image,
-        backgroundImage: img
-      })
-      engine.setVirtualBackground(options)
-      console.log('Preset background set successfully:', img.width, 'x', img.height)
+      const response = await fetch('/background.jpg')
+      if (!response.ok) {
+        throw new Error('Failed to fetch preset background image')
+      }
+      const bytes = new Uint8Array(await response.arrayBuffer())
+      engine.setVirtualBackground(bytes)
+      console.log('Preset background set successfully:', bytes.length, 'bytes')
     } catch (error) {
       console.error('Failed to load preset background:', error)
       setStatusMessage('Failed to load preset background')
@@ -655,37 +671,24 @@ function BeautyPreview() {
     if (!engine) return
 
     try {
-      // Reset basic beauty parameters
-      engine.setBasicParam(BasicParam.Whitening, 0)
-      engine.setBasicParam(BasicParam.Smoothing, 0)
-      engine.setBasicParam(BasicParam.Rosiness, 0)
-      engine.setSkinOnlyBeauty(false)
+      engine.setWhitening(0)
+      engine.setSmoothing(0)
+      engine.setRosiness(0)
+      engine.setSharpening(0)
+      engine.setBeautySkinOnly(false)
 
-      // Reset reshape parameters
-      engine.setReshapeParam(ReshapeParam.FaceThin, 0)
-      engine.setReshapeParam(ReshapeParam.FaceVShape, 0)
-      engine.setReshapeParam(ReshapeParam.FaceNarrow, 0)
-      engine.setReshapeParam(ReshapeParam.FaceShort, 0)
-      engine.setReshapeParam(ReshapeParam.Cheekbone, 0)
-      engine.setReshapeParam(ReshapeParam.Jawbone, 0)
-      engine.setReshapeParam(ReshapeParam.Chin, 0)
-      engine.setReshapeParam(ReshapeParam.NoseSlim, 0)
-      engine.setReshapeParam(ReshapeParam.EyeSize, 0)
-      engine.setReshapeParam(ReshapeParam.EyeDistance, 0)
+      for (const param of Object.values(RESHAPE_PARAMS)) {
+        engine.setReshape(param, 0)
+      }
 
-      // Reset makeup parameters
-      engine.setMakeupParam(MakeupParam.Lipstick, 0)
-      engine.setMakeupParam(MakeupParam.Blush, 0)
+      for (const setter of Object.values(MAKEUP_SETTERS)) {
+        setter(engine, 0)
+      }
 
-      // Reset sticker and filter (same as Mac beautyPanelDidReset)
-      engine.setSticker('')
-      engine.setFilterIntensity(0)
-
-      // Reset virtual background
-      const options = new VirtualBackgroundOptions({
-        mode: BackgroundMode.None
-      })
-      engine.setVirtualBackground(options)
+      engine.clearSticker()
+      engine.clearFilter()
+      engine.clearChromaKey()
+      engine.clearVirtualBackground()
     } catch (error) {
       console.error('Failed to reset all parameters:', error)
     }
@@ -701,38 +704,29 @@ function BeautyPreview() {
 
     try {
       if (tab === 'beauty') {
-        engine.setBasicParam(BasicParam.Whitening, 0)
-        engine.setBasicParam(BasicParam.Smoothing, 0)
-        engine.setBasicParam(BasicParam.Rosiness, 0)
-        engine.setSkinOnlyBeauty(false)
+        engine.setWhitening(0)
+        engine.setSmoothing(0)
+        engine.setRosiness(0)
+        engine.setBeautySkinOnly(false)
       } else if (tab === 'reshape') {
-        engine.setReshapeParam(ReshapeParam.FaceThin, 0)
-        engine.setReshapeParam(ReshapeParam.FaceVShape, 0)
-        engine.setReshapeParam(ReshapeParam.FaceNarrow, 0)
-        engine.setReshapeParam(ReshapeParam.FaceShort, 0)
-        engine.setReshapeParam(ReshapeParam.Cheekbone, 0)
-        engine.setReshapeParam(ReshapeParam.Jawbone, 0)
-        engine.setReshapeParam(ReshapeParam.Chin, 0)
-        engine.setReshapeParam(ReshapeParam.NoseSlim, 0)
-        engine.setReshapeParam(ReshapeParam.EyeSize, 0)
-        engine.setReshapeParam(ReshapeParam.EyeDistance, 0)
+        for (const param of Object.values(RESHAPE_PARAMS)) {
+          engine.setReshape(param, 0)
+        }
       } else if (tab === 'makeup') {
-        engine.setMakeupParam(MakeupParam.Lipstick, 0)
-        engine.setMakeupParam(MakeupParam.Blush, 0)
+        for (const setter of Object.values(MAKEUP_SETTERS)) {
+          setter(engine, 0)
+        }
+      } else if (tab === 'quality') {
+        engine.setSharpening(0)
       } else if (tab === 'virtual_bg') {
-        const options = new VirtualBackgroundOptions({
-          mode: BackgroundMode.None
-        })
-        engine.setVirtualBackground(options)
+        engine.clearChromaKey()
+        engine.clearVirtualBackground()
       } else if (tab === 'filter') {
-        engine.setFilterIntensity(0)
+        engine.clearFilter()
       } else if (tab === 'sticker') {
-        engine.setSticker('')
+        engine.clearSticker()
       } else if (tab === 'chroma_key') {
-        engine.setChromaKeyParam(ChromaKeyParam.KeyColor, 0)
-        engine.setChromaKeyParam(ChromaKeyParam.Similarity, 0)
-        engine.setChromaKeyParam(ChromaKeyParam.Smoothness, 0)
-        engine.setChromaKeyParam(ChromaKeyParam.Desaturation, 0)
+        engine.clearChromaKey()
       } else if (tab === 'face_detection') {
         setFaceDetectionEnabled(true)
         setShowKeyPointNumbers(true)

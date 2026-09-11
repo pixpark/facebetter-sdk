@@ -109,10 +109,10 @@ class _BeautyPageState extends State<BeautyPage> {
 
     try {
       // 设置美颜参数
-      await _engine!.setBasicParam(FBBasicParam.smoothing, _smoothing);
-      await _engine!.setBasicParam(FBBasicParam.whitening, _whitening);
-      await _engine!.setReshapeParam(FBReshapeParam.faceThin, _faceThin);
-      await _engine!.setMakeupParam(FBMakeupParam.lipstick, _lipstick);
+      await _engine!.setSmoothing(_smoothing);
+      await _engine!.setWhitening(_whitening);
+      await _engine!.setReshape(FBReshape.faceThin, _faceThin);
+      await _engine!.setLipstick(_lipstick);
 
       // 创建 RGBA ImageFrame 并处理
       final inputFrame = FBImageFrame(

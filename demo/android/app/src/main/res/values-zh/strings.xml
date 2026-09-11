@@ -52,12 +52,28 @@
     <string name="reshape_v_face">V脸</string>
     <string name="reshape_narrow_face">窄脸</string>
     <string name="reshape_short_face">短脸</string>
+    <string name="reshape_face_small">小脸</string>
     <string name="reshape_cheekbone">颧骨</string>
     <string name="reshape_jawbone">下颌</string>
     <string name="reshape_chin">下巴</string>
+    <string name="reshape_forehead">额头</string>
     <string name="reshape_nose_slim">瘦鼻</string>
+    <string name="reshape_nose_long">鼻长</string>
+    <string name="reshape_philtrum">人中</string>
+    <string name="reshape_mouth_size">嘴型</string>
+    <string name="reshape_mouth_position">嘴位</string>
+    <string name="reshape_mouth_smile">微笑</string>
+    <string name="reshape_lip_thickness">唇厚</string>
     <string name="reshape_big_eye">大眼</string>
+    <string name="reshape_eye_round">圆眼</string>
     <string name="reshape_eye_distance">眼距</string>
+    <string name="reshape_eye_position">眼位</string>
+    <string name="reshape_eye_angle">眼角</string>
+    <string name="reshape_eye_corner_open">开眼角</string>
+    <string name="reshape_lower_eyelid">眼睑</string>
+    <string name="reshape_brow_position">眉位</string>
+    <string name="reshape_brow_distance">眉距</string>
+    <string name="reshape_brow_thickness">眉粗</string>
     
     <!-- Makeup Functions -->
     <string name="makeup_lipstick">口红</string>
@@ -108,7 +124,6 @@
     <!-- Sticker Functions -->
     <string name="sticker_cute">可爱</string>
     <string name="sticker_funny">搞笑</string>
-    <string name="sticker_rabbit">兔子</string>
     
     <!-- Body Functions -->
     <string name="body_slim">瘦身</string>

@@ -571,12 +571,28 @@ static const CGFloat kSliderStripHeight = 40.0;
       @{@"key" : @"v_face", @"title" : NSLocalizedString(@"v_face", nil), @"icon" : @"meixing2"},
       @{@"key" : @"narrow_face", @"title" : NSLocalizedString(@"narrow_face", nil), @"icon" : @"meixing2"},
       @{@"key" : @"short_face", @"title" : NSLocalizedString(@"short_face", nil), @"icon" : @"meixing2"},
+      @{@"key" : @"face_small", @"title" : NSLocalizedString(@"face_small", nil), @"icon" : @"meixing2"},
       @{@"key" : @"cheekbone", @"title" : NSLocalizedString(@"cheekbone", nil), @"icon" : @"meixing2"},
       @{@"key" : @"jawbone", @"title" : NSLocalizedString(@"jawbone", nil), @"icon" : @"jawbone"},
       @{@"key" : @"chin", @"title" : NSLocalizedString(@"chin", nil), @"icon" : @"chin"},
+      @{@"key" : @"forehead", @"title" : NSLocalizedString(@"forehead", nil), @"icon" : @"meixing2"},
       @{@"key" : @"nose_slim", @"title" : NSLocalizedString(@"nose_slim", nil), @"icon" : @"nose"},
+      @{@"key" : @"nose_long", @"title" : NSLocalizedString(@"nose_long", nil), @"icon" : @"nose"},
+      @{@"key" : @"philtrum", @"title" : NSLocalizedString(@"philtrum", nil), @"icon" : @"meixing2"},
+      @{@"key" : @"mouth_size", @"title" : NSLocalizedString(@"mouth_size", nil), @"icon" : @"meixing2"},
+      @{@"key" : @"mouth_position", @"title" : NSLocalizedString(@"mouth_position", nil), @"icon" : @"meixing2"},
+      @{@"key" : @"mouth_smile", @"title" : NSLocalizedString(@"mouth_smile", nil), @"icon" : @"meixing2"},
+      @{@"key" : @"lip_thickness", @"title" : NSLocalizedString(@"lip_thickness", nil), @"icon" : @"meixing2"},
       @{@"key" : @"big_eye", @"title" : NSLocalizedString(@"big_eye", nil), @"icon" : @"eyes"},
-      @{@"key" : @"eye_distance", @"title" : NSLocalizedString(@"eye_distance", nil), @"icon" : @"eyes"}
+      @{@"key" : @"eye_round", @"title" : NSLocalizedString(@"eye_round", nil), @"icon" : @"eyes"},
+      @{@"key" : @"eye_distance", @"title" : NSLocalizedString(@"eye_distance", nil), @"icon" : @"eyes"},
+      @{@"key" : @"eye_position", @"title" : NSLocalizedString(@"eye_position", nil), @"icon" : @"eyes"},
+      @{@"key" : @"eye_angle", @"title" : NSLocalizedString(@"eye_angle", nil), @"icon" : @"eyes"},
+      @{@"key" : @"eye_corner_open", @"title" : NSLocalizedString(@"eye_corner_open", nil), @"icon" : @"eyes"},
+      @{@"key" : @"lower_eyelid", @"title" : NSLocalizedString(@"lower_eyelid", nil), @"icon" : @"eyes"},
+      @{@"key" : @"brow_position", @"title" : NSLocalizedString(@"brow_position", nil), @"icon" : @"meixing2"},
+      @{@"key" : @"brow_distance", @"title" : NSLocalizedString(@"brow_distance", nil), @"icon" : @"meixing2"},
+      @{@"key" : @"brow_thickness", @"title" : NSLocalizedString(@"brow_thickness", nil), @"icon" : @"meixing2"}
     ];
   } else if ([self.currentTab isEqualToString:@"makeup"]) {
     NSArray *lipstickSub = @[

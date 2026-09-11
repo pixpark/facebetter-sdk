@@ -5,9 +5,10 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
 import android.widget.Toast;
+import java.io.ByteArrayOutputStream;
 import net.pixpark.facebetter.BeautyEffectEngine;
 import net.pixpark.facebetter.BeautyParams.*;
-import net.pixpark.facebetter.ImageFrame;
+import net.pixpark.fbexample.BeautyResourceLoader;
 import net.pixpark.fbexample.R;
 
 /** Maps panel tab/function/value to engine API; applies params, reset, and virtual_bg preset. */
@@ -60,15 +61,15 @@ public class BeautyParamApplier {
   private void applyBeautyBasic(String function, float value) {
     switch (function) {
       case "white":
-        mEngine.setBeautyParam(BasicParam.WHITENING, value);
+        mEngine.setWhitening(value);
         Log.d(TAG, "Set WHITENING: " + value);
         break;
       case "smooth":
-        mEngine.setBeautyParam(BasicParam.SMOOTHING, value);
+        mEngine.setSmoothing(value);
         Log.d(TAG, "Set SMOOTHING: " + value);
         break;
       case "rosiness":
-        mEngine.setBeautyParam(BasicParam.ROSINESS, value);
+        mEngine.setRosiness(value);
         Log.d(TAG, "Set ROSINESS: " + value);
         break;
       default:
@@ -78,9 +79,9 @@ public class BeautyParamApplier {
   }
 
   private void applyReshape(String function, float value) {
-    ReshapeParam param = mapToReshapeParam(function);
+    Reshape param = mapToReshape(function);
     if (param != null) {
-      mEngine.setBeautyParam(param, value);
+      mEngine.setReshape(param, value);
       Log.d(TAG, "Set " + param + ": " + value);
     } else {
       Log.w(TAG, "Unknown reshape function: " + function);
@@ -88,36 +89,37 @@ public class BeautyParamApplier {
   }
 
   private void applyMakeup(String function, float value) {
-    MakeupParam param = mapToMakeupParam(function);
-    if (param != null) {
-      mEngine.setBeautyParam(param, value);
-      Log.d(TAG, "Set " + param + ": " + value);
-    } else {
-      Log.w(TAG, "Unknown makeup function: " + function);
+    switch (function) {
+      case "lipstick":
+        mEngine.setLipstick(value);
+        Log.d(TAG, "Set LIPSTICK: " + value);
+        break;
+      case "blush":
+        mEngine.setBlush(value);
+        Log.d(TAG, "Set BLUSH: " + value);
+        break;
+      default:
+        Log.w(TAG, "Unknown makeup function: " + function);
+        break;
     }
   }
 
   private void applyVirtualBackground(String function, float value) {
-    VirtualBackgroundOptions options = new VirtualBackgroundOptions();
     if ("none".equals(function)) {
-      options.mode = BackgroundMode.NONE;
-      mEngine.setVirtualBackground(options);
+      mEngine.clearVirtualBackground();
       Log.d(TAG, "Set virtual background: NONE");
     } else if ("blur".equals(function)) {
-      options.mode = BackgroundMode.BLUR;
-      mEngine.setVirtualBackground(options);
-      Log.d(TAG, "Set virtual background: BLUR");
+      mEngine.setVirtualBackgroundBlur(value);
+      Log.d(TAG, "Set virtual background: BLUR " + value);
     } else if ("preset".equals(function)) {
       Bitmap presetBitmap = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.back_mobile);
       if (presetBitmap != null) {
-        ImageFrame imageFrame = ImageFrame.createWithBitmap(presetBitmap);
-        if (imageFrame != null) {
-          options.mode = BackgroundMode.IMAGE;
-          options.backgroundImage = imageFrame;
-          mEngine.setVirtualBackground(options);
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        if (presetBitmap.compress(Bitmap.CompressFormat.JPEG, 90, stream)) {
+          mEngine.setVirtualBackground(stream.toByteArray());
           Log.d(TAG, "Preset background set: " + presetBitmap.getWidth() + "x" + presetBitmap.getHeight());
         } else {
-          Log.e(TAG, "Failed to create ImageFrame from bitmap");
+          Log.e(TAG, "Failed to encode preset background bitmap");
           Toast.makeText(mContext, mContext.getString(R.string.failed_to_load_preset_background), Toast.LENGTH_SHORT).show();
         }
       } else {
@@ -133,10 +135,15 @@ public class BeautyParamApplier {
 
   private void applyFilter(String function, float value) {
     if ("none".equals(function) || value == 0.0f) {
-      mEngine.setFilter("");
+      mEngine.clearFilter();
       Log.d(TAG, "Filter disabled");
     } else {
-      mEngine.setFilter(function);
+      byte[] data = BeautyResourceLoader.loadFilter(mContext, function);
+      if (data == null) {
+        Log.e(TAG, "Filter asset not found: " + function);
+        return;
+      }
+      mEngine.setFilter(data);
       mEngine.setFilterIntensity(value);
       Log.d(TAG, "Set filter: " + function + ", intensity: " + value);
     }
@@ -144,49 +151,81 @@ public class BeautyParamApplier {
 
   private void applySticker(String function, float value) {
     if ("none".equals(function) || value == 0.0f) {
-      mEngine.setSticker("");
+      mEngine.clearSticker();
       Log.d(TAG, "Sticker disabled");
     } else {
-      mEngine.setSticker(function);
+      byte[] data = BeautyResourceLoader.loadSticker(mContext, function);
+      if (data == null) {
+        Log.e(TAG, "Sticker asset not found: " + function);
+        return;
+      }
+      mEngine.setSticker(data);
       Log.d(TAG, "Set sticker: " + function);
     }
   }
 
-  private static ReshapeParam mapToReshapeParam(String function) {
+  private static Reshape mapToReshape(String function) {
     switch (function) {
       case "thin_face":
-        return ReshapeParam.FACE_THIN;
+        return Reshape.FACE_THIN;
       case "v_face":
-        return ReshapeParam.FACE_V_SHAPE;
+        return Reshape.FACE_V_SHAPE;
       case "narrow_face":
-        return ReshapeParam.FACE_NARROW;
+        return Reshape.FACE_NARROW;
       case "short_face":
-        return ReshapeParam.FACE_SHORT;
+        return Reshape.FACE_SHORT;
       case "cheekbone":
-        return ReshapeParam.CHEEKBONE;
+        return Reshape.CHEEKBONE;
       case "jawbone":
-        return ReshapeParam.JAWBONE;
+        return Reshape.JAWBONE;
       case "chin":
-        return ReshapeParam.CHIN;
+        return Reshape.CHIN;
       case "nose_slim":
-        return ReshapeParam.NOSE_SLIM;
+        return Reshape.NOSE_SLIM;
       case "big_eye":
-        return ReshapeParam.EYE_SIZE;
+        return Reshape.EYE_SIZE;
       case "eye_distance":
-        return ReshapeParam.EYE_DISTANCE;
+        return Reshape.EYE_DISTANCE;
+      case "face_small":
+        return Reshape.FACE_SMALL;
+      case "forehead":
+        return Reshape.FOREHEAD;
+      case "nose_long":
+        return Reshape.NOSE_LONG;
+      case "philtrum":
+        return Reshape.PHILTRUM;
+      case "mouth_size":
+        return Reshape.MOUTH_SIZE;
+      case "mouth_position":
+        return Reshape.MOUTH_POSITION;
+      case "mouth_smile":
+        return Reshape.MOUTH_SMILE;
+      case "lip_thickness":
+        return Reshape.LIP_THICKNESS;
+      case "eye_round":
+        return Reshape.EYE_ROUND;
+      case "eye_position":
+        return Reshape.EYE_POSITION;
+      case "eye_angle":
+        return Reshape.EYE_ANGLE;
+      case "eye_corner_open":
+        return Reshape.EYE_CORNER_OPEN;
+      case "lower_eyelid":
+        return Reshape.LOWER_EYELID;
+      case "brow_position":
+        return Reshape.BROW_POSITION;
+      case "brow_distance":
+        return Reshape.BROW_DISTANCE;
+      case "brow_thickness":
+        return Reshape.BROW_THICKNESS;
       default:
         return null;
     }
   }
 
-  private static MakeupParam mapToMakeupParam(String function) {
-    switch (function) {
-      case "lipstick":
-        return MakeupParam.LIPSTICK;
-      case "blush":
-        return MakeupParam.BLUSH;
-      default:
-        return null;
+  private void resetAllReshape() {
+    for (Reshape param : Reshape.values()) {
+      mEngine.setReshape(param, 0.0f);
     }
   }
 
@@ -196,30 +235,19 @@ public class BeautyParamApplier {
       return;
     }
     try {
-      mEngine.setBeautyParam(BasicParam.WHITENING, 0.0f);
-      mEngine.setBeautyParam(BasicParam.SMOOTHING, 0.0f);
-      mEngine.setBeautyParam(BasicParam.ROSINESS, 0.0f);
+      mEngine.setWhitening(0.0f);
+      mEngine.setSmoothing(0.0f);
+      mEngine.setRosiness(0.0f);
 
-      mEngine.setBeautyParam(ReshapeParam.FACE_THIN, 0.0f);
-      mEngine.setBeautyParam(ReshapeParam.FACE_V_SHAPE, 0.0f);
-      mEngine.setBeautyParam(ReshapeParam.FACE_NARROW, 0.0f);
-      mEngine.setBeautyParam(ReshapeParam.FACE_SHORT, 0.0f);
-      mEngine.setBeautyParam(ReshapeParam.CHEEKBONE, 0.0f);
-      mEngine.setBeautyParam(ReshapeParam.JAWBONE, 0.0f);
-      mEngine.setBeautyParam(ReshapeParam.CHIN, 0.0f);
-      mEngine.setBeautyParam(ReshapeParam.NOSE_SLIM, 0.0f);
-      mEngine.setBeautyParam(ReshapeParam.EYE_SIZE, 0.0f);
-      mEngine.setBeautyParam(ReshapeParam.EYE_DISTANCE, 0.0f);
+      resetAllReshape();
 
-      mEngine.setBeautyParam(MakeupParam.LIPSTICK, 0.0f);
-      mEngine.setBeautyParam(MakeupParam.BLUSH, 0.0f);
+      mEngine.setLipstick(0.0f);
+      mEngine.setBlush(0.0f);
 
-      VirtualBackgroundOptions options = new VirtualBackgroundOptions();
-      options.mode = BackgroundMode.NONE;
-      mEngine.setVirtualBackground(options);
+      mEngine.clearVirtualBackground();
 
-      mEngine.setFilter("");
-      mEngine.setFilterIntensity(0.0f);
+      mEngine.clearFilter();
+      mEngine.clearSticker();
 
       Log.d(TAG, "All beauty params reset to 0");
     } catch (Exception e) {
@@ -232,36 +260,26 @@ public class BeautyParamApplier {
     try {
       switch (tab) {
         case "beauty":
-          mEngine.setBeautyParam(BasicParam.WHITENING, 0.0f);
-          mEngine.setBeautyParam(BasicParam.SMOOTHING, 0.0f);
-          mEngine.setBeautyParam(BasicParam.ROSINESS, 0.0f);
+          mEngine.setWhitening(0.0f);
+          mEngine.setSmoothing(0.0f);
+          mEngine.setRosiness(0.0f);
           break;
         case "reshape":
-          mEngine.setBeautyParam(ReshapeParam.FACE_THIN, 0.0f);
-          mEngine.setBeautyParam(ReshapeParam.FACE_V_SHAPE, 0.0f);
-          mEngine.setBeautyParam(ReshapeParam.FACE_NARROW, 0.0f);
-          mEngine.setBeautyParam(ReshapeParam.FACE_SHORT, 0.0f);
-          mEngine.setBeautyParam(ReshapeParam.CHEEKBONE, 0.0f);
-          mEngine.setBeautyParam(ReshapeParam.JAWBONE, 0.0f);
-          mEngine.setBeautyParam(ReshapeParam.CHIN, 0.0f);
-          mEngine.setBeautyParam(ReshapeParam.NOSE_SLIM, 0.0f);
-          mEngine.setBeautyParam(ReshapeParam.EYE_SIZE, 0.0f);
-          mEngine.setBeautyParam(ReshapeParam.EYE_DISTANCE, 0.0f);
+          resetAllReshape();
           break;
         case "makeup":
-          mEngine.setBeautyParam(MakeupParam.LIPSTICK, 0.0f);
-          mEngine.setBeautyParam(MakeupParam.BLUSH, 0.0f);
+          mEngine.setLipstick(0.0f);
+          mEngine.setBlush(0.0f);
           break;
         case "virtual_bg":
-          VirtualBackgroundOptions options = new VirtualBackgroundOptions();
-          options.mode = BackgroundMode.NONE;
-          mEngine.setVirtualBackground(options);
+          mEngine.clearVirtualBackground();
           break;
         case "filter":
-          mEngine.setFilter("");
-          mEngine.setFilterIntensity(0.0f);
+          mEngine.clearFilter();
           break;
         case "sticker":
+          mEngine.clearSticker();
+          break;
         case "body":
         case "quality":
         default:

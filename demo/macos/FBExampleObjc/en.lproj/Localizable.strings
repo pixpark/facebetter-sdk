@@ -33,12 +33,28 @@
 "v_face" = "V Face";
 "narrow_face" = "Narrow Face";
 "short_face" = "Short Face";
+"face_small" = "Small Face";
 "cheekbone" = "Cheekbone";
 "jawbone" = "Jawbone";
 "chin" = "Chin";
+"forehead" = "Forehead";
 "nose_slim" = "Nose Slim";
+"nose_long" = "Nose Long";
+"philtrum" = "Philtrum";
+"mouth_size" = "Mouth Size";
+"mouth_position" = "Mouth Position";
+"mouth_smile" = "Smile";
+"lip_thickness" = "Lip Thickness";
 "big_eye" = "Big Eye";
+"eye_round" = "Round Eye";
 "eye_distance" = "Eye Distance";
+"eye_position" = "Eye Position";
+"eye_angle" = "Eye Angle";
+"eye_corner_open" = "Open Corner";
+"lower_eyelid" = "Lower Eyelid";
+"brow_position" = "Brow Position";
+"brow_distance" = "Brow Distance";
+"brow_thickness" = "Brow Thickness";
 
 /* Panel - Makeup */
 "lipstick" = "Lipstick";
