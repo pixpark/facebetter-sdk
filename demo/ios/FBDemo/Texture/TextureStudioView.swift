@@ -110,23 +110,28 @@ struct TextureStudioView: View {
   }
 
   private var hud: some View {
-    VStack(alignment: .leading, spacing: 4) {
+    HStack(spacing: 8) {
       Text(model.t("texture.title"))
-        .font(.caption.weight(.semibold))
-      Text(model.t("texture.subtitle"))
-        .font(.caption2)
-        .foregroundStyle(.white.opacity(0.7))
+        .font(.caption2.weight(.semibold))
+        .foregroundStyle(.white.opacity(0.9))
+      Button {
+        model.toggleApplyThread()
+      } label: {
+        Text(model.t(model.applyOnUIThread ? "texture.applyUI" : "texture.applyGL"))
+          .font(.caption2.weight(.semibold))
+          .foregroundStyle(.white.opacity(0.85))
+          .padding(.horizontal, 8)
+          .padding(.vertical, 3)
+          .background(.white.opacity(0.12), in: Capsule())
+      }
+      .buttonStyle(.plain)
+      Spacer(minLength: 0)
       if model.fps > 0 {
         Text(String(format: "%.0f FPS", model.fps))
           .font(.caption2.monospacedDigit())
           .foregroundStyle(.white.opacity(0.7))
       }
     }
-    .foregroundStyle(.white.opacity(0.9))
-    .padding(.horizontal, 10)
-    .padding(.vertical, 8)
-    .frame(maxWidth: .infinity, alignment: .leading)
-    .background(.black.opacity(0.35), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
     .padding(.horizontal, 12)
     .padding(.top, 6)
   }

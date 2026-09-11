@@ -24,6 +24,7 @@ final class StudioModel: BeautySession {
   @Published var faces: [FBFaceDetectionResult] = []
   @Published var frameSize: CGSize = .zero
   @Published var fps: Double = 0
+  @Published var processMs: Double = 0
 
   let preview = PreviewMTKView(frame: .zero, device: nil)
 
@@ -38,6 +39,7 @@ final class StudioModel: BeautySession {
   private var statusResetItem: DispatchWorkItem?
   private var lastFrameAt = CACurrentMediaTime()
   private var frameCount = 0
+  private var processMsAccum = 0.0
 
   override init(locale: AppLocale? = nil) {
     super.init(locale: locale)
@@ -168,7 +170,9 @@ final class StudioModel: BeautySession {
     }
     stateLock.unlock()
 
+    let started = CACurrentMediaTime()
     let processed = engine.process(buffer, asImage: false, bypass: bypass)
+    let costMs = (CACurrentMediaTime() - started) * 1000
     let shown = processed ?? buffer
     updateFrameSize(
       CGSize(
@@ -177,7 +181,7 @@ final class StudioModel: BeautySession {
       )
     )
     preview.display(pixelBuffer: shown)
-    updateFPS()
+    updateFPS(processMs: costMs)
 
     if shouldCapture {
       let photo = engine.snapshotImage(from: buffer, bypass: false)
@@ -204,16 +208,20 @@ final class StudioModel: BeautySession {
     }
   }
 
-  private func updateFPS() {
+  private func updateFPS(processMs costMs: Double) {
     frameCount += 1
+    processMsAccum += costMs
     let now = CACurrentMediaTime()
     let elapsed = now - lastFrameAt
     if elapsed >= 1 {
       let value = Double(frameCount) / elapsed
+      let avgMs = processMsAccum / Double(max(frameCount, 1))
       frameCount = 0
+      processMsAccum = 0
       lastFrameAt = now
       DispatchQueue.main.async {
         self.fps = value
+        self.processMs = avgMs
       }
     }
   }

@@ -13,6 +13,8 @@ final class TextureStudioModel: BeautySession {
   }
   @Published var statusKey = "status.initializing"
   @Published var fps: Double = 0
+  /// Default true: mimic customer UI-thread SetFilter/SetSticker while process stays on GL.
+  @Published var applyOnUIThread = true
 
   let preview = TexturePreviewView(frame: .zero)
 
@@ -86,8 +88,14 @@ final class TextureStudioModel: BeautySession {
     applying = true
     params = BeautyParams()
     applying = false
-    applyOnGL()
+    applyParams()
     flash("status.reset")
+  }
+
+  func toggleApplyThread() {
+    applyOnUIThread.toggle()
+    applyParams()
+    flash(applyOnUIThread ? "status.applyOnUI" : "status.applyOnGL")
   }
 
   func capture() {
@@ -97,14 +105,18 @@ final class TextureStudioModel: BeautySession {
   }
 
   override func paramsDidChange() {
-    applyOnGL()
+    applyParams()
   }
 
-  private func applyOnGL() {
+  private func applyParams() {
     guard !applying, started else { return }
     let snapshot = params
-    preview.runOnGL { [weak self] in
-      self?.engine.apply(snapshot)
+    if applyOnUIThread {
+      engine.apply(snapshot)
+    } else {
+      preview.runOnGL { [weak self] in
+        self?.engine.apply(snapshot)
+      }
     }
   }
 

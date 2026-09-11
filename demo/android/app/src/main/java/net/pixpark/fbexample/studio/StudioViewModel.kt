@@ -65,6 +65,8 @@ class StudioViewModel(application: Application) : AndroidViewModel(application),
         private set
     var fps by mutableDoubleStateOf(0.0)
         private set
+    var processMs by mutableDoubleStateOf(0.0)
+        private set
     override var panelExpanded by mutableStateOf(false)
     var previewBitmap by mutableStateOf<Bitmap?>(null)
         private set
@@ -76,6 +78,7 @@ class StudioViewModel(application: Application) : AndroidViewModel(application),
     private val mainHandler = Handler(Looper.getMainLooper())
     private var statusJob: Job? = null
     private var frameCount = 0
+    private var processMsAccum = 0.0
     private var lastFpsAt = SystemClock.elapsedRealtime()
 
     init {
@@ -190,9 +193,11 @@ class StudioViewModel(application: Application) : AndroidViewModel(application),
             val input = image.toImageFrame(frontFacing) ?: return
             try {
                 val bypass = compareFlag.get()
+                val started = SystemClock.elapsedRealtimeNanos()
                 val output = engine.process(input, asImage = false, bypass = bypass)
+                val costMs = (SystemClock.elapsedRealtimeNanos() - started) / 1_000_000.0
                 val displaySource = output ?: input
-                publishPreview(displaySource.toDisplayBitmap(previewBuffers[writeIndex]))
+                publishPreview(displaySource.toDisplayBitmap(previewBuffers[writeIndex]), costMs)
                 if (captureFlag.getAndSet(false)) {
                     val photoFrame = engine.process(input, asImage = true, bypass = false) ?: input
                     val photo = photoFrame.toDisplayBitmap(null)
@@ -226,7 +231,7 @@ class StudioViewModel(application: Application) : AndroidViewModel(application),
             if (output != null && output !== input) {
                 output.release()
             }
-            publishPreview(bitmap)
+            publishPreview(bitmap, processCostMs = null)
         } finally {
             input.release()
         }
@@ -241,13 +246,15 @@ class StudioViewModel(application: Application) : AndroidViewModel(application),
         }
     }
 
-    private fun publishPreview(bitmap: Bitmap?) {
+    private fun publishPreview(bitmap: Bitmap?, processCostMs: Double?) {
         if (bitmap == null) return
         previewBuffers[writeIndex] = bitmap
         writeIndex = 1 - writeIndex
         mainHandler.post {
             previewBitmap = bitmap
-            updateFps()
+            if (processCostMs != null) {
+                updateFps(processCostMs)
+            }
         }
     }
 
@@ -260,13 +267,16 @@ class StudioViewModel(application: Application) : AndroidViewModel(application),
         }
     }
 
-    private fun updateFps() {
+    private fun updateFps(processCostMs: Double) {
         frameCount += 1
+        processMsAccum += processCostMs
         val now = SystemClock.elapsedRealtime()
         val elapsed = now - lastFpsAt
         if (elapsed >= 1000) {
             fps = frameCount * 1000.0 / elapsed
+            processMs = processMsAccum / frameCount.coerceAtLeast(1)
             frameCount = 0
+            processMsAccum = 0.0
             lastFpsAt = now
         }
     }

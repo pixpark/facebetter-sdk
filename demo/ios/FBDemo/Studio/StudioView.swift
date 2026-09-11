@@ -164,21 +164,36 @@ struct StudioView: View {
     if studio.source == .camera && studio.fps > 0 {
       HStack {
         Spacer()
-        HStack(spacing: 5) {
-          Circle()
-            .fill(studio.fps > 25 ? Color.green : Color.orange)
-            .frame(width: 6, height: 6)
-          Text(String(format: "%.0f FPS", studio.fps))
-            .font(.caption2.monospacedDigit())
-            .foregroundStyle(.white.opacity(0.7))
+        VStack(alignment: .leading, spacing: 4) {
+          HStack(spacing: 5) {
+            Circle()
+              .fill(studio.fps > 25 ? Color.green : Color.orange)
+              .frame(width: 6, height: 6)
+            Text(String(format: "%.0f FPS", studio.fps))
+              .font(.caption2.monospacedDigit())
+              .foregroundStyle(.white.opacity(0.7))
+          }
+          if studio.processMs > 0 {
+            HStack(spacing: 5) {
+              Circle()
+                .fill(latencyColor(studio.processMs))
+                .frame(width: 6, height: 6)
+              Text(String(format: "%.0f ms", studio.processMs))
+                .font(.caption2.monospacedDigit())
+                .foregroundStyle(.white.opacity(0.7))
+            }
+          }
         }
-        .padding(.horizontal, 8)
-        .padding(.vertical, 4)
-        .background(.black.opacity(0.35), in: Capsule())
       }
       .padding(.horizontal, 12)
       .padding(.top, 6)
     }
+  }
+
+  private func latencyColor(_ ms: Double) -> Color {
+    if ms > 60 { return .red }
+    if ms < 30 { return .green }
+    return .orange
   }
 
   private var statusChip: some View {

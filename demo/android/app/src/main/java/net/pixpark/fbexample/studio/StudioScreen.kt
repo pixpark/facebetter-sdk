@@ -304,27 +304,52 @@ private fun FpsBadge(viewModel: StudioViewModel, modifier: Modifier = Modifier) 
     if (viewModel.source != StudioSource.CAMERA || viewModel.fps <= 0) {
         return
     }
-    Row(
-        modifier = modifier
-            .background(Color.Black.copy(0.35f), RoundedCornerShape(50))
-            .padding(horizontal = 8.dp, vertical = 4.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(5.dp),
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
-        Box(
-            modifier = Modifier
-                .size(6.dp)
-                .background(
-                    if (viewModel.fps > 25) Color(0xFF22C55E) else Color(0xFFF97316),
-                    RoundedCornerShape(50),
-                ),
-        )
-        Text(
-            text = "${viewModel.fps.roundToInt()} FPS",
-            color = Color.White.copy(0.7f),
-            fontSize = 11.sp,
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(5.dp),
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(6.dp)
+                    .background(
+                        if (viewModel.fps > 25) Color(0xFF22C55E) else Color(0xFFF97316),
+                        RoundedCornerShape(50),
+                    ),
+            )
+            Text(
+                text = "${viewModel.fps.roundToInt()} FPS",
+                color = Color.White.copy(0.7f),
+                fontSize = 11.sp,
+            )
+        }
+        if (viewModel.processMs > 0) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(5.dp),
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(6.dp)
+                        .background(latencyColor(viewModel.processMs), RoundedCornerShape(50)),
+                )
+                Text(
+                    text = "${viewModel.processMs.roundToInt()} ms",
+                    color = Color.White.copy(0.7f),
+                    fontSize = 11.sp,
+                )
+            }
+        }
     }
+}
+
+private fun latencyColor(ms: Double): Color = when {
+    ms > 60.0 -> Color(0xFFEF4444)
+    ms < 30.0 -> Color(0xFF22C55E)
+    else -> Color(0xFFF97316)
 }
 
 @Composable

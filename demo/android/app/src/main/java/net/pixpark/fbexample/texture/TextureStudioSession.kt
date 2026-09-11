@@ -63,6 +63,9 @@ class TextureStudioSession(
         private set
     var fps by mutableDoubleStateOf(0.0)
         private set
+    /** Default true: mimic customer UI-thread SetFilter/SetSticker while process stays on GL. */
+    var applyOnUIThread by mutableStateOf(true)
+        private set
 
     private var filterLabels: Map<String, Pair<String, String>> = emptyMap()
     private var preview: TexturePreviewView? = null
@@ -146,8 +149,14 @@ class TextureStudioSession(
         applying = true
         params = StudioParams()
         applying = false
-        applyOnGl()
+        applyParams()
         flash("status.reset")
+    }
+
+    fun toggleApplyThread() {
+        applyOnUIThread = !applyOnUIThread
+        applyParams()
+        flash(if (applyOnUIThread) "status.applyOnUI" else "status.applyOnGL")
     }
 
     fun capture() {
@@ -169,7 +178,7 @@ class TextureStudioSession(
 
     override fun updateParams(transform: StudioParams.() -> StudioParams) {
         params = params.transform()
-        applyOnGl()
+        applyParams()
     }
 
     override fun filterLabel(id: String): String {
@@ -177,13 +186,17 @@ class TextureStudioSession(
         return if (locale == AppLocale.ZH) row.first else row.second.replace('_', ' ')
     }
 
-    private fun applyOnGl() {
+    private fun applyParams() {
         if (applying || stopped) {
             return
         }
         val snapshot = params
-        preview?.runOnGl {
+        if (applyOnUIThread) {
             engine.apply(snapshot)
+        } else {
+            preview?.runOnGl {
+                engine.apply(snapshot)
+            }
         }
     }
 

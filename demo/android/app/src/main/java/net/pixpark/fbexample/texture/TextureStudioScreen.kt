@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -244,24 +245,32 @@ private fun TopIcon(
 
 @Composable
 private fun Hud(session: TextureStudioSession) {
-    Column(
+    Row(
         modifier = Modifier
-            .padding(horizontal = 12.dp, vertical = 6.dp)
             .fillMaxWidth()
-            .background(Color.Black.copy(0.35f), RoundedCornerShape(12.dp))
-            .padding(horizontal = 10.dp, vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp),
+            .padding(horizontal = 12.dp, vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Text(
             text = session.t("texture.title"),
             color = Color.White.copy(0.9f),
-            fontSize = 12.sp,
-        )
-        Text(
-            text = session.t("texture.subtitle"),
-            color = Color.White.copy(0.7f),
             fontSize = 11.sp,
         )
+        Surface(
+            onClick = { session.toggleApplyThread() },
+            shape = RoundedCornerShape(50),
+            color = Color.White.copy(0.12f),
+            contentColor = Color.White,
+        ) {
+            Text(
+                text = session.t(if (session.applyOnUIThread) "texture.applyUI" else "texture.applyGL"),
+                color = Color.White.copy(0.85f),
+                fontSize = 11.sp,
+                modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+            )
+        }
+        Spacer(modifier = Modifier.weight(1f))
         if (session.fps > 0) {
             Text(
                 text = "${session.fps.roundToInt()} FPS",
