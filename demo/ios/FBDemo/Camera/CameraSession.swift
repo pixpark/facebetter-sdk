@@ -12,39 +12,81 @@ final class CameraSession: NSObject, AVCaptureVideoDataOutputSampleBufferDelegat
   private let videoOutput = AVCaptureVideoDataOutput()
   private var videoInput: AVCaptureDeviceInput?
   private var configured = false
+  private var wantsRunning = false
+  private var observers: [NSObjectProtocol] = []
 
   private(set) var position: AVCaptureDevice.Position = .front
   private(set) var isRunning = false
 
+  override init() {
+    super.init()
+    let center = NotificationCenter.default
+    observers = [
+      center.addObserver(
+        forName: .AVCaptureSessionInterruptionEnded,
+        object: session,
+        queue: nil
+      ) { [weak self] _ in
+        self?.startRunningIfNeeded()
+      },
+      center.addObserver(
+        forName: .AVCaptureSessionRuntimeError,
+        object: session,
+        queue: nil
+      ) { [weak self] _ in
+        self?.startRunningIfNeeded()
+      },
+      center.addObserver(
+        forName: UIApplication.didBecomeActiveNotification,
+        object: nil,
+        queue: nil
+      ) { [weak self] _ in
+        self?.startRunningIfNeeded()
+      },
+    ]
+  }
+
+  deinit {
+    observers.forEach { NotificationCenter.default.removeObserver($0) }
+  }
+
   func start() {
+    wantsRunning = true
     requestPermission { [weak self] granted in
       guard let self else { return }
       guard granted else {
         self.onError?("status.permissionCamera")
         return
       }
-      self.sessionQueue.async {
-        do {
-          if !self.configured {
-            try self.configure()
-          }
-          if !self.session.isRunning {
-            self.session.startRunning()
-          }
-          self.isRunning = true
-        } catch {
-          self.onError?("status.permissionCamera")
-        }
-      }
+      self.startRunningIfNeeded()
     }
   }
 
   func stop() {
-    sessionQueue.async {
+    wantsRunning = false
+    sessionQueue.sync {
       if self.session.isRunning {
         self.session.stopRunning()
       }
       self.isRunning = false
+    }
+  }
+
+  private func startRunningIfNeeded() {
+    sessionQueue.async { [weak self] in
+      guard let self, self.wantsRunning else { return }
+      do {
+        if !self.configured {
+          try self.configure()
+        }
+        if !self.session.isRunning {
+          self.session.startRunning()
+        }
+        self.isRunning = self.session.isRunning
+      } catch {
+        self.isRunning = false
+        self.onError?("status.permissionCamera")
+      }
     }
   }
 

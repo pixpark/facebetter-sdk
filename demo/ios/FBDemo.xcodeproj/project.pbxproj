@@ -19,13 +19,17 @@
 		5D7DD9803C4742CC84614861 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2885136DD713B1DD109E342C /* Accelerate.framework */; };
 		600C3947DE4634D749E9BDBE /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C8C8DC27B1855AF48ECC1F48 /* UIKit.framework */; };
 		7398CDA3241ACA965774759A /* StudioModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F2565B52D7BCD2DDD87579B /* StudioModel.swift */; };
+		843986790AF1E27B2A49DD22 /* TextureStudioModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37858D4FAA9F1C277CE23CBD /* TextureStudioModel.swift */; };
 		8C0EBA74EE7966606EB5D27F /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2CB58B594CF78F4D9791151E /* AVFoundation.framework */; };
 		8E1011FD30903BE09D460E75 /* BeautyCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36E705950AFF53114DFE923D /* BeautyCatalog.swift */; };
 		A869EC72D28757821F7C9A52 /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 61654C9F515F4CF323F507BD /* CoreVideo.framework */; };
+		A8D4027E24C065A42C4673C5 /* BeautySession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08074B51F5DD3C8D9B87073D /* BeautySession.swift */; };
 		A9B631C7BA2839879C088CBB /* FacebetterConfig.plist in Resources */ = {isa = PBXBuildFile; fileRef = 912E8F17AD32C2F46B1848AC /* FacebetterConfig.plist */; };
 		ADCC81A794E3BCDBEBBC488B /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DF3B9CC4489CD20F9B3A2BD7 /* Foundation.framework */; };
 		B763B16798FB4D41F31B66F3 /* Metal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 000986C1552106CCD84A3274 /* Metal.framework */; };
+		BE30D8DC4DB497BACD944A76 /* TexturePreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78017802BEC5922D8CCB576C /* TexturePreviewView.swift */; };
 		C59543AD5B2EC9723676E6A3 /* BeautyPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 561504B0719FB5E9F1E75284 /* BeautyPanel.swift */; };
+		C7968E97B18D49E13558F27D /* TextureStudioView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 698E20FF68642B6365BCEEAD /* TextureStudioView.swift */; };
 		CD1974C0838B732C5AF01D49 /* Pods_FBDemo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1FD2EE6D51C86D8909AF016C /* Pods_FBDemo.framework */; };
 		D11E2C554383A123DAAEA229 /* BeautyParams.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DCEE155A5CC79C21C5755F4 /* BeautyParams.swift */; };
 		D42F1F7F648073DEE131B6F6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = ACFBD7783FDB26A9946BA94F /* Assets.xcassets */; };
@@ -35,18 +39,22 @@
 
 /* Begin PBXFileReference section */
 		000986C1552106CCD84A3274 /* Metal.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Metal.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Metal.framework; sourceTree = DEVELOPER_DIR; };
+		08074B51F5DD3C8D9B87073D /* BeautySession.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BeautySession.swift; sourceTree = "<group>"; };
 		0A8DC462E5F8E028F0A9595B /* FBDemoApp.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FBDemoApp.swift; sourceTree = "<group>"; };
 		0BEDD5FFFD6A3B821ADAE8E3 /* FBDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FBDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1FD2EE6D51C86D8909AF016C /* Pods_FBDemo.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_FBDemo.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		2885136DD713B1DD109E342C /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Accelerate.framework; sourceTree = DEVELOPER_DIR; };
 		2CB58B594CF78F4D9791151E /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/AVFoundation.framework; sourceTree = DEVELOPER_DIR; };
 		36E705950AFF53114DFE923D /* BeautyCatalog.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BeautyCatalog.swift; sourceTree = "<group>"; };
+		37858D4FAA9F1C277CE23CBD /* TextureStudioModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TextureStudioModel.swift; sourceTree = "<group>"; };
 		4078D286F71FAC535B3773DE /* L10n.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = L10n.swift; sourceTree = "<group>"; };
 		4BBAA688F30FB0B92F94FD15 /* background.jpg */ = {isa = PBXFileReference; includeInIndex = 1; path = background.jpg; sourceTree = "<group>"; };
 		5348F734C19FE61C38DF6A7D /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/OpenGLES.framework; sourceTree = DEVELOPER_DIR; };
 		561504B0719FB5E9F1E75284 /* BeautyPanel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BeautyPanel.swift; sourceTree = "<group>"; };
 		61654C9F515F4CF323F507BD /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/CoreVideo.framework; sourceTree = DEVELOPER_DIR; };
+		698E20FF68642B6365BCEEAD /* TextureStudioView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TextureStudioView.swift; sourceTree = "<group>"; };
 		757FA2E9192B7EC2E224ED14 /* Pods-FBDemo.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-FBDemo.release.xcconfig"; path = "Target Support Files/Pods-FBDemo/Pods-FBDemo.release.xcconfig"; sourceTree = "<group>"; };
+		78017802BEC5922D8CCB576C /* TexturePreviewView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TexturePreviewView.swift; sourceTree = "<group>"; };
 		7F2565B52D7BCD2DDD87579B /* StudioModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StudioModel.swift; sourceTree = "<group>"; };
 		8A96E44AC7D994288D7393ED /* BeautyEngine.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BeautyEngine.swift; sourceTree = "<group>"; };
 		8C48CD4E32DE450CB2E0A84D /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -153,6 +161,17 @@
 			);
 			sourceTree = "<group>";
 		};
+		8B207C13C122916228888EAD /* Texture */ = {
+			isa = PBXGroup;
+			children = (
+				78017802BEC5922D8CCB576C /* TexturePreviewView.swift */,
+				37858D4FAA9F1C277CE23CBD /* TextureStudioModel.swift */,
+				698E20FF68642B6365BCEEAD /* TextureStudioView.swift */,
+			);
+			name = Texture;
+			path = Texture;
+			sourceTree = "<group>";
+		};
 		97AD490E832090BA4AC42AA7 /* Pods */ = {
 			isa = PBXGroup;
 			children = (
@@ -193,6 +212,7 @@
 				8C48CD4E32DE450CB2E0A84D /* Info.plist */,
 				ACFBD7783FDB26A9946BA94F /* Assets.xcassets */,
 				55C2266368C888973D94C1FA /* Resources */,
+				8B207C13C122916228888EAD /* Texture */,
 			);
 			name = FBDemo;
 			path = FBDemo;
@@ -213,6 +233,7 @@
 				36E705950AFF53114DFE923D /* BeautyCatalog.swift */,
 				561504B0719FB5E9F1E75284 /* BeautyPanel.swift */,
 				9DCEE155A5CC79C21C5755F4 /* BeautyParams.swift */,
+				08074B51F5DD3C8D9B87073D /* BeautySession.swift */,
 			);
 			name = Beauty;
 			path = Beauty;
@@ -360,6 +381,10 @@
 				FF8F43B0868FB935FAC2B9AD /* PreviewView.swift in Sources */,
 				7398CDA3241ACA965774759A /* StudioModel.swift in Sources */,
 				270D8C4B993852E198EBD8C6 /* StudioView.swift in Sources */,
+				A8D4027E24C065A42C4673C5 /* BeautySession.swift in Sources */,
+				BE30D8DC4DB497BACD944A76 /* TexturePreviewView.swift in Sources */,
+				843986790AF1E27B2A49DD22 /* TextureStudioModel.swift in Sources */,
+				C7968E97B18D49E13558F27D /* TextureStudioView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

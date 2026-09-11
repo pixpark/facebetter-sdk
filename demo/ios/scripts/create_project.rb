@@ -21,7 +21,8 @@ SOURCE_DIRS = {
   "Beauty" => File.join(root, "FBDemo", "Beauty"),
   "Engine" => File.join(root, "FBDemo", "Engine"),
   "Camera" => File.join(root, "FBDemo", "Camera"),
-  "Studio" => File.join(root, "FBDemo", "Studio")
+  "Studio" => File.join(root, "FBDemo", "Studio"),
+  "Texture" => File.join(root, "FBDemo", "Texture")
 }.freeze
 
 def add_sources(project_group, target, absolute_directory, relative_directory)

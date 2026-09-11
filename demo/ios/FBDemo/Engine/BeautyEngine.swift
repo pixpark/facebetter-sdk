@@ -4,6 +4,7 @@ import UIKit
 
 final class BeautyEngine {
   private let lock = NSLock()
+  private let externalContext: Bool
   private var engine: FBBeautyEffectEngine?
   private var previous = BeautyParams()
   private var resourceRoot: URL
@@ -15,10 +16,13 @@ final class BeautyEngine {
   var onEvent: ((String) -> Void)?
   var onFaces: (([FBFaceDetectionResult]) -> Void)?
 
-  init() {
+  init(externalContext: Bool = false, startImmediately: Bool = true) {
+    self.externalContext = externalContext
     resourceRoot = Bundle.main.resourceURL?.appendingPathComponent("Facebetter", isDirectory: true)
       ?? Bundle.main.bundleURL
-    start()
+    if startImmediately {
+      start()
+    }
   }
 
   func apply(_ params: BeautyParams) {
@@ -56,7 +60,46 @@ final class BeautyEngine {
     return UIImage(pixelBuffer: pixelBuffer)
   }
 
-  private func start() {
+  func processTexture(
+    _ texture: UInt32,
+    width: Int32,
+    height: Int32,
+    bypass: Bool
+  ) -> UInt32? {
+    lock.lock()
+    defer { lock.unlock() }
+    guard !bypass, let engine, isReady, texture != 0 else { return nil }
+    guard let input = FBImageFrame.create(
+      withTexture: texture,
+      width: width,
+      height: height,
+      stride: width * 4
+    ) else {
+      return nil
+    }
+    input.type = .video
+    guard let output = engine.processImage(input) else { return nil }
+    let out = output.texture()
+    return out == 0 ? nil : out
+  }
+
+  func start() {
+    lock.lock()
+    defer { lock.unlock() }
+    startLocked()
+  }
+
+  func shutdown() {
+    lock.lock()
+    engine = nil
+    isReady = false
+    previous = BeautyParams()
+    statusKey = "status.initializing"
+    lock.unlock()
+  }
+
+  private func startLocked() {
+    guard engine == nil else { return }
     let log = FBLogConfig()
     log.consoleEnabled = true
     log.fileEnabled = false
@@ -72,7 +115,7 @@ final class BeautyEngine {
       engineConfig.appId = configValues["APP_ID"] ?? ""
       engineConfig.appKey = configValues["APP_KEY"] ?? ""
     }
-    engineConfig.externalContext = false
+    engineConfig.externalContext = externalContext
 
     let created = FBBeautyEffectEngine.createEngine(with: engineConfig)
     engine = created

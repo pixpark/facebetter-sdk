@@ -9,18 +9,9 @@ enum StudioSource {
   case image
 }
 
-final class StudioModel: ObservableObject {
-  @Published var params = BeautyParams() {
-    didSet { applyParams() }
-  }
-  @Published var tab: BeautyTab = .skin
-  @Published var selectedSkin: SkinItem = .smoothing
-  @Published var selectedReshape: FBReshape = .faceThin
-  @Published var selectedMakeup: MakeupItem = .lipstick
-  @Published var locale: AppLocale
+final class StudioModel: BeautySession {
   @Published var source: StudioSource = .camera
   @Published var showLandmarks = false
-  @Published var panelExpanded = false
   @Published var isComparing = false {
     didSet {
       stateLock.lock()
@@ -33,7 +24,6 @@ final class StudioModel: ObservableObject {
   @Published var faces: [FBFaceDetectionResult] = []
   @Published var frameSize: CGSize = .zero
   @Published var fps: Double = 0
-  @Published var filterLabels: [String: (zh: String, en: String)] = [:]
 
   let preview = PreviewMTKView(frame: .zero, device: nil)
 
@@ -49,15 +39,8 @@ final class StudioModel: ObservableObject {
   private var lastFrameAt = CACurrentMediaTime()
   private var frameCount = 0
 
-  init() {
-    if let saved = UserDefaults.standard.string(forKey: "fb.studio.locale"),
-       let locale = AppLocale(rawValue: saved) {
-      self.locale = locale
-    } else {
-      let language = Locale.current.language.languageCode?.identifier ?? "en"
-      self.locale = language.hasPrefix("zh") ? .zh : .en
-    }
-
+  override init(locale: AppLocale? = nil) {
+    super.init(locale: locale)
     engine.onEvent = { [weak self] key in
       DispatchQueue.main.async {
         self?.flash(key)
@@ -77,18 +60,8 @@ final class StudioModel: ObservableObject {
       }
     }
 
-    loadFilterLabels()
     applyParams()
     startCamera()
-  }
-
-  func t(_ key: String) -> String {
-    L10n.text(key, locale: locale)
-  }
-
-  func setLocale(_ next: AppLocale) {
-    locale = next
-    UserDefaults.standard.set(next.rawValue, forKey: "fb.studio.locale")
   }
 
   func startCamera() {
@@ -97,6 +70,7 @@ final class StudioModel: ObservableObject {
     processedImage = nil
     frameSize = .zero
     camera.start()
+    preview.recoverAfterCover()
     flash("status.cameraOn")
   }
 
@@ -125,6 +99,37 @@ final class StudioModel: ObservableObject {
     flash("status.reset")
   }
 
+  func suspendForExternalTexture() {
+    camera.stop()
+    engine.shutdown()
+  }
+
+  func resumeAfterExternalTexture() {
+    syncLocaleFromDefaults()
+    engine.start()
+    applyParams()
+    if source == .camera {
+      startCamera()
+    } else {
+      reprocessStill()
+    }
+    preview.recoverAfterCover()
+    DispatchQueue.main.async { [weak self] in
+      self?.preview.recoverAfterCover()
+    }
+    DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) { [weak self] in
+      guard let self else { return }
+      if self.source == .camera {
+        self.camera.start()
+      }
+      self.preview.recoverAfterCover()
+    }
+  }
+
+  override func paramsDidChange() {
+    applyParams()
+  }
+
   func capture() {
     if source == .image {
       save(image: isComparing ? originalImage : processedImage)
@@ -133,13 +138,6 @@ final class StudioModel: ObservableObject {
     stateLock.lock()
     captureFlag = true
     stateLock.unlock()
-  }
-
-  func filterLabel(_ id: String) -> String {
-    guard let row = filterLabels[id] else {
-      return id.replacingOccurrences(of: "_", with: " ")
-    }
-    return locale == .zh ? row.zh : row.en.replacingOccurrences(of: "_", with: " ")
   }
 
   private func applyParams() {
@@ -248,26 +246,5 @@ final class StudioModel: ObservableObject {
     }
     statusResetItem = work
     DispatchQueue.main.asyncAfter(deadline: .now() + 2.0, execute: work)
-  }
-
-  private func loadFilterLabels() {
-    let candidates = [
-      Bundle.main.url(forResource: "filter_mapping", withExtension: "json", subdirectory: "Facebetter"),
-      Bundle.main.url(forResource: "filter_mapping", withExtension: "json", subdirectory: "Facebetter/filters"),
-    ]
-    guard let url = candidates.compactMap({ $0 }).first,
-          let data = try? Data(contentsOf: url),
-          let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-          let filters = json["filters"] as? [String: [String: Any]] else {
-      return
-    }
-    var labels: [String: (zh: String, en: String)] = [:]
-    for (id, row) in filters {
-      labels[id] = (
-        zh: row["zh"] as? String ?? id,
-        en: row["en"] as? String ?? id
-      )
-    }
-    filterLabels = labels
   }
 }

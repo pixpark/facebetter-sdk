@@ -1,4 +1,9 @@
+#define GLES_SILENCE_DEPRECATION
 #import <Facebetter/FBBeautyEffectEngine.h>
 #import <Facebetter/FBBeautyParams.h>
 #import <Facebetter/FBImageFrame.h>
 #import <Facebetter/FBTypeDefines.h>
+#import <OpenGLES/EAGL.h>
+#import <OpenGLES/ES3/gl.h>
+#import <OpenGLES/ES3/glext.h>
+#import <CoreVideo/CVOpenGLESTextureCache.h>

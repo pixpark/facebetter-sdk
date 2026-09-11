@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct BeautyPanel: View {
-  @EnvironmentObject private var studio: StudioModel
+  @ObservedObject var studio: BeautySession
 
   var body: some View {
     VStack(spacing: 8) {
@@ -24,6 +24,7 @@ struct BeautyPanel: View {
     .padding(.horizontal, 8)
     .padding(.bottom, 6)
     .animation(.easeInOut(duration: 0.22), value: studio.panelExpanded)
+    .environmentObject(studio)
   }
 
   @ViewBuilder
@@ -82,7 +83,7 @@ struct BeautyPanel: View {
 }
 
 private struct SkinSection: View {
-  @EnvironmentObject private var studio: StudioModel
+  @EnvironmentObject private var studio: BeautySession
 
   var body: some View {
     VStack(alignment: .leading, spacing: 10) {
@@ -151,7 +152,7 @@ private struct SkinSection: View {
 }
 
 private struct ReshapeSection: View {
-  @EnvironmentObject private var studio: StudioModel
+  @EnvironmentObject private var studio: BeautySession
 
   var body: some View {
     VStack(spacing: 10) {
@@ -188,7 +189,7 @@ private struct ReshapeSection: View {
 }
 
 private struct MakeupSection: View {
-  @EnvironmentObject private var studio: StudioModel
+  @EnvironmentObject private var studio: BeautySession
 
   var body: some View {
     VStack(alignment: .leading, spacing: 10) {
@@ -323,7 +324,7 @@ private struct MakeupSection: View {
 }
 
 private struct FilterSection: View {
-  @EnvironmentObject private var studio: StudioModel
+  @EnvironmentObject private var studio: BeautySession
 
   var body: some View {
     VStack(spacing: 10) {
@@ -349,7 +350,7 @@ private struct FilterSection: View {
 }
 
 private struct StickerSection: View {
-  @EnvironmentObject private var studio: StudioModel
+  @EnvironmentObject private var studio: BeautySession
 
   var body: some View {
     ScrollView(.horizontal, showsIndicators: false) {
@@ -372,7 +373,7 @@ private struct StickerSection: View {
 }
 
 private struct BackgroundSection: View {
-  @EnvironmentObject private var studio: StudioModel
+  @EnvironmentObject private var studio: BeautySession
 
   var body: some View {
     VStack(alignment: .leading, spacing: 10) {
@@ -438,7 +439,7 @@ private struct SwatchItem: Identifiable {
 }
 
 private struct ChipRow<Value: Hashable>: View {
-  @EnvironmentObject private var studio: StudioModel
+  @EnvironmentObject private var studio: BeautySession
   let items: [(Value, String)]
   let selection: Value
   let onSelect: (Value) -> Void
@@ -457,7 +458,7 @@ private struct ChipRow<Value: Hashable>: View {
 }
 
 private struct ChipWrap: View {
-  @EnvironmentObject private var studio: StudioModel
+  @EnvironmentObject private var studio: BeautySession
   let items: [ChoiceItem]
   @Binding var selection: Int
 
@@ -476,7 +477,7 @@ private struct ChipWrap: View {
 }
 
 private struct SwatchRow: View {
-  @EnvironmentObject private var studio: StudioModel
+  @EnvironmentObject private var studio: BeautySession
   let items: [SwatchItem]
   @Binding var selection: Int
 

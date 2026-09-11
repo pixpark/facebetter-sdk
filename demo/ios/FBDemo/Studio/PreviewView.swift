@@ -52,6 +52,19 @@ final class PreviewMTKView: MTKView {
     }
   }
 
+  func recoverAfterCover() {
+    setNeedsLayout()
+    layoutIfNeeded()
+    if let metal = layer as? CAMetalLayer {
+      let scale = window?.screen.scale ?? contentScaleFactor
+      let pixels = CGSize(width: bounds.width * scale, height: bounds.height * scale)
+      if pixels.width > 1, pixels.height > 1 {
+        metal.drawableSize = pixels
+      }
+    }
+    setNeedsDisplay()
+  }
+
   override func draw(_ rect: CGRect) {
     autoreleasepool {
       frameLock.lock()

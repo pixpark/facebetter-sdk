@@ -4,6 +4,7 @@ import SwiftUI
 struct StudioView: View {
   @EnvironmentObject private var studio: StudioModel
   @State private var pickerItem: PhotosPickerItem?
+  @State private var showTextureDemo = false
 
   var body: some View {
     ZStack {
@@ -45,7 +46,7 @@ struct StudioView: View {
           .padding(.bottom, 8)
           .allowsHitTesting(false)
         }
-        BeautyPanel()
+        BeautyPanel(studio: studio)
       }
     }
     .onChange(of: pickerItem) { item in
@@ -58,6 +59,13 @@ struct StudioView: View {
           }
         }
       }
+    }
+    .fullScreenCover(isPresented: $showTextureDemo) {
+      TextureStudioView(locale: studio.locale) {
+        studio.resumeAfterExternalTexture()
+      }
+      .preferredColorScheme(.dark)
+      .statusBarHidden(true)
     }
   }
 
@@ -83,7 +91,7 @@ struct StudioView: View {
   }
 
   private var topBar: some View {
-    HStack(spacing: 8) {
+    HStack(spacing: 6) {
       PhotosPicker(selection: $pickerItem, matching: .images) {
         TopIcon(symbol: "photo", title: studio.t("nav.gallery"))
       }
@@ -114,8 +122,6 @@ struct StudioView: View {
         TopIcon(symbol: "square.and.arrow.up", title: studio.t("nav.export"))
       }
 
-      Spacer(minLength: 4)
-
       Button {
         studio.showLandmarks.toggle()
       } label: {
@@ -124,6 +130,13 @@ struct StudioView: View {
           title: studio.t("nav.landmarks"),
           active: studio.showLandmarks
         )
+      }
+
+      Button {
+        studio.suspendForExternalTexture()
+        showTextureDemo = true
+      } label: {
+        TopIcon(symbol: "square.stack.3d.up", title: studio.t("nav.texture"))
       }
 
       Menu {
@@ -142,7 +155,7 @@ struct StudioView: View {
         TopIcon(symbol: "globe", title: studio.locale.shortLabel, active: true)
       }
     }
-    .padding(.horizontal, 10)
+    .padding(.horizontal, 12)
     .padding(.top, 8)
   }
 
@@ -184,7 +197,7 @@ struct StudioView: View {
   }
 }
 
-private struct TopIcon: View {
+struct TopIcon: View {
   let symbol: String
   let title: String
   var active = false
@@ -195,9 +208,12 @@ private struct TopIcon: View {
         .font(.system(size: 15, weight: .semibold))
       Text(title)
         .font(.caption2)
+        .lineLimit(1)
+        .minimumScaleFactor(0.75)
     }
     .foregroundStyle(active ? .black : .white)
-    .frame(width: 48, height: 46)
+    .frame(maxWidth: .infinity)
+    .frame(height: 46)
     .background(
       active ? Color.white : Color.white.opacity(0.10),
       in: RoundedRectangle(cornerRadius: 12, style: .continuous)
