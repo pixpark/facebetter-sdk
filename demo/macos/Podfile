@@ -1,8 +1,66 @@
-platform :macos, '10.13'
- 
-target 'FBExampleObjc' do
-  use_frameworks!
- 
-  pod 'Facebetter', '2.0.0'
+# frozen_string_literal: true
+
+require "fileutils"
+
+platform :osx, "13.0"
+use_frameworks!
+
+FACEBETTER_POD_VERSION = "2.0.0"
+DEFAULT_LOCAL_XCFRAMEWORK = File.expand_path("../../../fb/build/macos/Facebetter.xcframework", __dir__)
+
+target "FBDemoMac" do
+  if File.exist?(File.join(__dir__, "Podfile.local"))
+    local_xcframework = ENV["FACEBETTER_LOCAL_XCFRAMEWORK"] || DEFAULT_LOCAL_XCFRAMEWORK
+    unless File.directory?(local_xcframework)
+      raise <<~MSG
+        Local Facebetter.xcframework not found:
+          #{local_xcframework}
+        Build it first:
+          cd #{File.expand_path("../../../fb", __dir__)} && ./scripts/build_macos.sh
+      MSG
+    end
+
+    local_sdk = File.join(__dir__, "local-sdk")
+    FileUtils.mkdir_p(local_sdk)
+    link = File.join(local_sdk, "Facebetter.xcframework")
+    FileUtils.rm_f(link)
+    File.symlink(File.expand_path(local_xcframework), link)
+
+    podspec = File.join(local_sdk, "Facebetter.podspec")
+    unless File.exist?(podspec)
+      File.write(podspec, <<~PODSPEC)
+        # frozen_string_literal: true
+        Pod::Spec.new do |spec|
+          spec.name = "Facebetter"
+          spec.version = "0.0.1-local"
+          spec.summary = "Local Facebetter.xcframework from the sibling fb repo."
+          spec.homepage = "https://github.com/pixpark/facebetter-sdk"
+          spec.license = { :type => "Apache License, Version 2.0" }
+          spec.author = { "PixPark Team" => "hello@pixpark.net" }
+          spec.platform = :osx, "10.13"
+          spec.source = { :path => "." }
+          spec.vendored_frameworks = "Facebetter.xcframework"
+          spec.libraries = "c++", "z"
+          spec.frameworks = "AVFoundation", "AppKit", "CoreMedia", "CoreVideo", "OpenGL", "QuartzCore", "Metal", "CoreML", "Accelerate"
+          spec.pod_target_xcconfig = {
+            "CLANG_CXX_LANGUAGE_STANDARD" => "c++17",
+            "CLANG_CXX_LIBRARY" => "libc++",
+          }
+        end
+      PODSPEC
+    end
+
+    pod "Facebetter", :path => "local-sdk"
+  else
+    pod "Facebetter", FACEBETTER_POD_VERSION
+  end
 end
- 
+
+post_install do |installer|
+  installer.pods_project.targets.each do |pods_target|
+    pods_target.build_configurations.each do |config|
+      config.build_settings["ENABLE_USER_SCRIPT_SANDBOXING"] = "NO"
+      config.build_settings["MACOSX_DEPLOYMENT_TARGET"] = "13.0"
+    end
+  end
+end

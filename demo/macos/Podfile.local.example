@@ -1,0 +1,10 @@
+# Copy this file to Podfile.local (gitignored), then run:
+#   pod install
+#
+# Demo will link the sibling engine binary:
+#   ../../../fb/build/macos/Facebetter.xcframework
+# Build it with:
+#   cd ../../../fb && ./scripts/build_macos.sh
+#
+# Optional override:
+#   FACEBETTER_LOCAL_XCFRAMEWORK=/absolute/path/Facebetter.xcframework pod install
