@@ -1,2 +1,6 @@
 xcuserdata/
 .DS_Store
+Pods/
+Podfile.lock
+Podfile.local
+local-sdk/Facebetter.xcframework

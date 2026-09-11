@@ -64,7 +64,7 @@ copy_assets = target.new_shell_script_build_phase("Copy Facebetter Demo Assets")
 copy_assets.shell_script = <<~SCRIPT
   set -e
   DEST="${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/Facebetter"
-  SRC="${SRCROOT}/../web/react2/public"
+  SRC="${SRCROOT}/../web/react/public"
   mkdir -p "${DEST}/filters" "${DEST}/stickers"
   rsync -a "${SRC}/assets/filters/" "${DEST}/filters/"
   rsync -a "${SRC}/stickers/" "${DEST}/stickers/"
@@ -80,21 +80,6 @@ copy_assets.always_out_of_date = "1"
 target.build_phases.delete(copy_assets)
 target.build_phases.unshift(copy_assets)
 
-engine_root = File.expand_path("../../../fb", root)
-xcframework = File.join(engine_root, "build/ios/Facebetter.xcframework")
-unless File.directory?(xcframework)
-  warn "Missing #{xcframework}. Build it with: ./scripts/build_ios.sh"
-end
-
-vendor_group = project.main_group.new_group("Vendor")
-xcframework_ref = vendor_group.new_file(xcframework)
-target.frameworks_build_phase.add_file_reference(xcframework_ref)
-
-embed_phase = target.new_copy_files_build_phase("Embed Frameworks")
-embed_phase.dst_subfolder_spec = "10"
-embed_file = embed_phase.add_file_reference(xcframework_ref)
-embed_file.settings = { "ATTRIBUTES" => ["CodeSignOnCopy", "RemoveHeadersOnCopy"] }
-
 %w[AVFoundation UIKit CoreMedia CoreVideo OpenGLES QuartzCore Metal CoreML Accelerate].each do |name|
   target.add_system_framework(name)
 end
@@ -108,15 +93,12 @@ target.build_configurations.each do |configuration|
   settings["CURRENT_PROJECT_VERSION"] = "1"
   settings["DEVELOPMENT_TEAM"] = "QFCE3TAQXQ"
   settings["ENABLE_USER_SCRIPT_SANDBOXING"] = "NO"
-  settings["FRAMEWORK_SEARCH_PATHS"] = ["$(SRCROOT)/../../../fb/build/ios", "$(inherited)"]
   settings["GENERATE_INFOPLIST_FILE"] = "NO"
-  settings["HEADER_SEARCH_PATHS"] = ["$(SRCROOT)/../../../fb/src/engine/objc", "$(inherited)"]
   settings["INFOPLIST_FILE"] = "FBDemo/Info.plist"
   settings["IPHONEOS_DEPLOYMENT_TARGET"] = "16.0"
   settings["LD_RUNPATH_SEARCH_PATHS"] = "$(inherited) @executable_path/Frameworks"
-  settings["LIBRARY_SEARCH_PATHS"] = ["$(inherited)"]
   settings["MARKETING_VERSION"] = "2.0"
-  settings["OTHER_LDFLAGS"] = "$(inherited) -ObjC -lc++ -lz"
+  settings["OTHER_LDFLAGS"] = "$(inherited) -ObjC"
   settings["PRODUCT_BUNDLE_IDENTIFIER"] = "com.pixpark.fbdemo"
   settings["PRODUCT_NAME"] = "$(TARGET_NAME)"
   settings["SUPPORTED_PLATFORMS"] = "iphoneos iphonesimulator"
@@ -144,3 +126,11 @@ scheme.set_launch_target(target)
 scheme.save_as(project_path, "FBDemo", true)
 
 puts "Generated #{project_path}"
+
+Dir.chdir(root) do
+  if system("pod", "install")
+    puts "pod install completed. Open FBDemo.xcworkspace"
+  else
+    warn "pod install failed. Install CocoaPods and run it from #{root}"
+  end
+end

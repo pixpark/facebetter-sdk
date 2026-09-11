@@ -4,17 +4,19 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "predev": "node ./scripts/link-local-sdk.mjs",
+    "prebuild": "node ./scripts/link-local-sdk.mjs",
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "deploy": "npm run build && vercel deploy --prod"
+    "deploy": "npm run build && vercel deploy --prod",
+    "sdk:local": "node ./scripts/install-local-sdk.mjs"
   },
   "engines": {
     "node": ">=20"
   },
   "dependencies": {
-    "facebetter": "file:../../../../fb/src/engine/web/facebetter",
-    "facebetter-core": "file:../../../../fb/src/engine/web/facebetter-core",
+    "facebetter": "2.0.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },

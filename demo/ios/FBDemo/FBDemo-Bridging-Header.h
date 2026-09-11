@@ -1,4 +1,4 @@
-#import "FBBeautyEffectEngine.h"
-#import "FBBeautyParams.h"
-#import "FBImageFrame.h"
-#import "FBTypeDefines.h"
+#import <Facebetter/FBBeautyEffectEngine.h>
+#import <Facebetter/FBBeautyParams.h>
+#import <Facebetter/FBImageFrame.h>
+#import <Facebetter/FBTypeDefines.h>

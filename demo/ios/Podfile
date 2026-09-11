@@ -1,0 +1,40 @@
+# frozen_string_literal: true
+
+require "fileutils"
+
+platform :ios, "16.0"
+use_frameworks!
+
+FACEBETTER_POD_VERSION = "2.0.0"
+DEFAULT_LOCAL_XCFRAMEWORK = File.expand_path("../../../fb/build/ios/Facebetter.xcframework", __dir__)
+
+target "FBDemo" do
+  if File.exist?(File.join(__dir__, "Podfile.local"))
+    local_xcframework = ENV["FACEBETTER_LOCAL_XCFRAMEWORK"] || DEFAULT_LOCAL_XCFRAMEWORK
+    unless File.directory?(local_xcframework)
+      raise <<~MSG
+        Local Facebetter.xcframework not found:
+          #{local_xcframework}
+        Build it first:
+          cd #{File.expand_path("../../../fb", __dir__)} && ./scripts/build_ios.sh
+      MSG
+    end
+
+    local_sdk = File.join(__dir__, "local-sdk")
+    FileUtils.mkdir_p(local_sdk)
+    link = File.join(local_sdk, "Facebetter.xcframework")
+    FileUtils.rm_f(link)
+    File.symlink(File.expand_path(local_xcframework), link)
+    pod "Facebetter", :path => "local-sdk"
+  else
+    pod "Facebetter", FACEBETTER_POD_VERSION
+  end
+end
+
+post_install do |installer|
+  installer.pods_project.targets.each do |pods_target|
+    pods_target.build_configurations.each do |config|
+      config.build_settings["ENABLE_USER_SCRIPT_SANDBOXING"] = "NO"
+    end
+  end
+end

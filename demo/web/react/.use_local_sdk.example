@@ -1,0 +1,12 @@
+# Copy this file to .use_local_sdk (gitignored), then:
+#   npm run sdk:local
+#   npm run dev
+#
+# Demo will link the sibling engine packages:
+#   ../../../../fb/src/engine/web/facebetter
+#   ../../../../fb/src/engine/web/facebetter-core
+#
+# Build them first if needed:
+#   cd ../../../../fb/src/engine/web/facebetter && npm run build
+#
+# Optional: FACEBETTER_LOCAL=1 npm run dev

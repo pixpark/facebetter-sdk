@@ -410,12 +410,12 @@ int main(int argc, char* argv[]) {
       "Off", "vivid", "natural", "japanese", "milk_tea", "rose", "fair"};
   const std::vector<std::string> kFilterPaths = {
       "",
-      filter_dir + "/vivid.fbd",
-      filter_dir + "/natural.fbd",
-      filter_dir + "/japanese.fbd",
-      filter_dir + "/milk_tea.fbd",
-      filter_dir + "/rose.fbd",
-      filter_dir + "/fair.fbd",
+      filter_dir + "/vivid/vivid.fbd",
+      filter_dir + "/natural/natural.fbd",
+      filter_dir + "/japanese/japanese.fbd",
+      filter_dir + "/milk_tea/milk_tea.fbd",
+      filter_dir + "/rose/rose.fbd",
+      filter_dir + "/fair/fair.fbd",
   };
   int filter_index_ = 0;
   float filter_intensity_ = 0.8f;

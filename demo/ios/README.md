@@ -1,40 +1,24 @@
 # Facebetter 2.0 — iOS Demo
 
-SwiftUI 相机 Demo，对应 Web 端 `demo/web/react2` 的 2.0 能力目录。全屏预览 + 底部调参。
+SwiftUI 相机 Demo。通过 **CocoaPods** 安装 `Facebetter` **2.0.0**。打开 **`FBDemo.xcworkspace`**，不要打开 `.xcodeproj`。
 
-本仓库与引擎仓 `fb` 并列。本地联调链 `../fb/build/ios/Facebetter.xcframework`。
-
-**不使用 CocoaPods。**
+滤镜和贴纸与 `demo/web/react` 共用，请保留完整仓库再编译。
 
 ## 打开工程
 
-1. 在引擎仓编出 **2.0** iOS SDK：
-
 ```bash
-cd ../fb
-./scripts/build_ios.sh          # 默认只编真机 arm64
-./scripts/build_ios.sh --full   # 含模拟器，发版或跑模拟器用
+cd demo/ios
+pod install
+open FBDemo.xcworkspace
 ```
 
-完成后应存在：`../fb/build/ios/Facebetter.xcframework`。
+选真机运行。模拟器没有相机，相册静图仍可测。
 
-2. 生成并打开 Xcode 工程：
-
-```bash
-cd demo/ios2
-ruby scripts/create_project.rb
-open FBDemo.xcodeproj
-```
-
-3. 选真机运行。模拟器没有相机，相册静图仍可测。
-
-头文件走 `../fb/src/engine/objc`（2.0 API），二进制走上面的 xcframework。改完引擎后重新跑 `../fb/scripts/build_ios.sh`，再编译 Demo。
-
-客户集成请用 `scripts/download_sdk.sh` 把官方包解到 `demo/ios2/libs`。
+Xcode 15+ 若遇到 `Sandbox: rsync.samba deny(1)`，把 Build Setting **`ENABLE_USER_SCRIPT_SANDBOXING`** 设为 **No**（本工程已默认关掉）。
 
 ## 授权
 
-默认 Bundle ID 是 `com.pixpark.fbdemo`。凭证在 `FBDemo/Resources/FacebetterConfig.plist`。
+Demo Bundle ID 是 `com.pixpark.fbdemo`。在[控制台](https://facebetter.net)绑定该 Bundle ID，或改成你自己的应用 ID，并把 `FBDemo/Resources/FacebetterConfig.plist` 里的 AppID / AppKey（或 license token）换成你的凭证。说明见 [License & Auth](https://facebetter.net/docs/intro/license)。
 
 ## 功能
 
@@ -42,5 +26,3 @@ open FBDemo.xcodeproj
 - 长按预览看原图
 - 美肤、美型、美妆、滤镜、贴纸、虚拟背景（含色键）
 - 关键点开关、中英切换、拍照导出到相册
-
-滤镜和贴纸在编译时从 `demo/web/react2/public` 拷入，与 Web Demo 共用同一套资源。

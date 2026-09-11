@@ -3,6 +3,7 @@ dist
 .DS_Store
 *.log
 .env*.local
+.use_local_sdk
 
 # Vercel CLI
 .vercel

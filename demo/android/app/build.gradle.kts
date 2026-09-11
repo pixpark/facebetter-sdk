@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -48,13 +50,29 @@ android {
     }
 }
 
+val localProps = Properties()
+rootProject.file("local.properties").takeIf { it.exists() }?.reader()?.use { localProps.load(it) }
+
+fun sdkProp(name: String): String? =
+    (findProperty(name) as String?) ?: localProps.getProperty(name)
+
+val useLocalSdk = sdkProp("facebetter.local").equals("true", ignoreCase = true)
 val engineRoot = rootProject.file("../../../fb")
-val facebetterAar = engineRoot.resolve("src/engine/android/facebetter/build/outputs/aar/facebetter.aar")
-val facebetterJava = engineRoot.resolve("src/engine/android/facebetter/src/main/java")
-println("[fb] android2 dep: ${if (facebetterAar.exists()) "local aar + 2.0 java sources" else "missing local aar — run ./scripts/build_android.sh"}")
+val defaultLocalAar = engineRoot.resolve("src/engine/android/facebetter/build/outputs/aar/facebetter.aar")
+val localAar = sdkProp("facebetter.localAar")?.let { rootProject.file(it) } ?: defaultLocalAar
+
+if (useLocalSdk) {
+    require(localAar.isFile) {
+        "facebetter.local=true but AAR not found:\n  ${localAar.absolutePath}\n" +
+            "Build it with: cd ${engineRoot.absolutePath} && ./scripts/build_android.sh"
+    }
+    println("[fb] android demo: local AAR ${localAar.absolutePath}")
+} else {
+    println("[fb] android demo: Maven net.pixpark:facebetter:${libs.versions.facebetter.get()}")
+}
 
 val copyFacebetterAssets by tasks.registering(Copy::class) {
-    val publicDir = rootProject.file("../web/react2/public")
+    val publicDir = rootProject.file("../web/react/public")
     into(layout.buildDirectory.dir("generated/facebetterAssets"))
     from(publicDir.resolve("assets/filters")) {
         into("facebetter/filters")
@@ -70,26 +88,22 @@ val copyFacebetterAssets by tasks.registering(Copy::class) {
     }
 }
 
-val extractFacebetterAar by tasks.registering(Copy::class) {
-    onlyIf { facebetterAar.exists() }
-    from(zipTree(facebetterAar)) {
-        include("jni/**", "assets/**")
-    }
-    into(layout.buildDirectory.dir("extractedFacebetter"))
-}
-
 android.sourceSets.getByName("main").apply {
-    java.srcDir(facebetterJava)
     assets.srcDir(layout.buildDirectory.dir("generated/facebetterAssets"))
-    assets.srcDir(layout.buildDirectory.dir("extractedFacebetter/assets"))
-    jniLibs.srcDir(layout.buildDirectory.dir("extractedFacebetter/jni"))
 }
 
 tasks.named("preBuild").configure {
-    dependsOn(copyFacebetterAssets, extractFacebetterAar)
+    dependsOn(copyFacebetterAssets)
 }
 
 dependencies {
+    if (useLocalSdk) {
+        implementation(files(localAar))
+        implementation(libs.appcompat)
+        implementation(libs.material)
+    } else {
+        implementation(libs.facebetter)
+    }
     implementation(libs.core.ktx)
     implementation(libs.activity.compose)
     implementation(libs.lifecycle.runtime.ktx)

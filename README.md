@@ -10,62 +10,44 @@
 
 ## Introduction
 
-This repository contains **Facebetter SDK** demo source code for all supported platforms. Place it next to the engine repo `fb` for local builds.
+Sample apps for the **Facebetter SDK**. Clone this repository, then open the demo for your platform. iOS and Android share filter / sticker assets with the Web demo, so keep the repo intact when you build those apps.
 
-## Download SDK
-
-Before building the demo projects, you need to download the SDK libraries for the target platform(s). We provide a convenient script to automate this process:
+| Platform | Sample | Install |
+| --- | --- | --- |
+| iOS | `demo/ios` | `pod install` — CocoaPods `Facebetter` **2.0.0**. Open `FBDemo.xcworkspace` |
+| Android | `demo/android` | Maven Central `net.pixpark:facebetter:2.0.0`. Open the folder in Android Studio |
+| Web | `demo/web/react` | `npm install` — npm `facebetter@2.0.0` |
+| macOS | `demo/macos` | `pod install` — CocoaPods `Facebetter` **1.5.1**. Open the `.xcworkspace` |
+| Desktop C++ | `demo/cpp` | Unzip the C++ SDK into `demo/cpp/sdk/`, then `cmake -B build`. See the [Windows](https://facebetter.net/docs/windows/quick-start) / [Linux](https://facebetter.net/docs/linux/quick-start) guides |
 
 ```bash
-# Download all platform SDKs with default version
-./scripts/download_sdk.sh
+# iOS
+cd demo/ios && pod install && open FBDemo.xcworkspace
 
-# Download SDKs with specific version
-./scripts/download_sdk.sh -v 1.1.3
+# Android — open demo/android in Android Studio, or:
+cd demo/android && ./gradlew :app:installDebug
 
-# Download SDK for specific platform(s)
-./scripts/download_sdk.sh -p android
-./scripts/download_sdk.sh -p android,ios
+# Web
+cd demo/web/react && npm install && npm run dev
 
-# Show help
-./scripts/download_sdk.sh --help
+# macOS
+cd demo/macos && pod install
 ```
 
-The script will automatically download and extract the SDK files to the correct directories:
-- **Android**: `demo/android/app/src/main/libs`
-- **iOS**: `demo/ios2/libs`
-- **macOS**: `demo/macos/FBExampleObjc/libs`
-
-Demo source is synced from the engine repo (`fb/demo`). 2.0 samples live in `demo/android2`, `demo/ios2`, and `demo/web/react2`.
+Replace the demo AppID / AppKey (or license token) with credentials from the [console](https://facebetter.net), and bind the sample’s bundle ID / package name. Details: [License & Auth](https://facebetter.net/docs/intro/license).
 
 ## Documentation
 
-For complete development documentation, API reference, and best practices, please visit:
+**[Facebetter documentation](https://facebetter.net/docs)** — quick start, API reference, and platform guides:
 
-**🌐 [Facebetter Official Documentation](https://facebetter.net/docs)**
+- [Android](https://facebetter.net/docs/android/quick-start)
+- [iOS](https://facebetter.net/docs/ios/quick-start)
+- [macOS](https://facebetter.net/docs/macos/quick-start)
+- [Windows](https://facebetter.net/docs/windows/quick-start)
+- [Linux](https://facebetter.net/docs/linux/quick-start)
+- [Web](https://facebetter.net/docs/web/quick-start)
 
-### Platform-Specific Documentation
+## Related links
 
-- **📱 [Android Documentation](https://facebetter.net/docs/android/quick-start)** - Android platform integration guide
-- **🍎 [iOS Documentation](https://facebetter.net/docs/ios/quick-start)** - iOS platform integration guide
-- **💻 [macOS Documentation](https://facebetter.net/docs/macos/quick-start)** - macOS platform integration guide
-- **🪟 [Windows Documentation](https://facebetter.net/docs/windows/quick-start)** - Windows platform integration guide
-- **🌐 [Web Documentation](https://facebetter.net/docs/web/quick-start)** - Web platform integration guide (React/Vue)
-
-The documentation includes:
-- 📖 Quick Start Guide
-- 🔧 API Reference
-- 💡 Best Practices
-- ❓ FAQ
-- 🐛 Error Handling Guide
-- 📱 Platform Integration Examples
-
-## Related Links
-
-- **Official Website**: [https://facebetter.net](https://facebetter.net)
-- **Documentation**: [https://facebetter.net/docs](https://facebetter.net/docs)
-- **SDK and Resource Download**: [https://facebetter.net/download](https://facebetter.net/download)
- 
----
-
-**Facebetter** - Making beauty effects simpler and more powerful ✨
+- Website: [https://facebetter.net](https://facebetter.net)
+- SDK download: [https://facebetter.net/download](https://facebetter.net/download)
