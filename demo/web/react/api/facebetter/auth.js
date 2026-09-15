@@ -4,11 +4,11 @@
  * Keep FB_APP_ID / FB_APP_KEY in server env only. Docs:
  * https://facebetter.net/docs/intro/license
  */
-const { createHmac, randomBytes } = require('node:crypto')
+import { createHmac, randomBytes } from 'node:crypto'
 
 const AUTH_URL = 'https://facebetter.pixpark.net/facebetter/v2/auth'
 
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
   if (req.method !== 'GET' && req.method !== 'POST') {
     res.setHeader('Allow', 'GET, POST')
     res.status(405).json({ error: 'Method not allowed' })

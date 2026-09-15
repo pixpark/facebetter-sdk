@@ -26,9 +26,10 @@ npm run dev
 ## 部署
 
 ```bash
-npm run build
-vercel deploy --prod
+npm run deploy
 ```
+
+Vercel 上执行 `npm install` + `npm run build`，产物目录为 `dist`。
 
 密钥写入 Vercel 环境变量（勿提交仓库）：
 
