@@ -55,8 +55,31 @@ export default function App() {
         }}
       />
 
-      {statusText ? (
+      {statusText && studio.ready ? (
         <div className="fixed left-6 bottom-6 z-50 px-3 py-1.5 rounded-lg bg-[#181a20]/90 border border-white/10 text-label-sm text-gray-200">
+          {statusText}
+        </div>
+      ) : null}
+
+      {!studio.ready && studio.statusKey !== 'status.initFailed' ? (
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-[#0b0c10]/80">
+          <div className="w-72 px-4 py-3 rounded-xl bg-[#181a20] border border-white/10">
+            <div className="text-label-sm text-gray-200 mb-2">
+              {t('status.loadingEngine')}
+              {typeof studio.loadPercent === 'number' ? ` ${studio.loadPercent}%` : ''}
+            </div>
+            <div className="h-1.5 rounded-full bg-white/10 overflow-hidden">
+              <div
+                className="h-full bg-white transition-[width] duration-150"
+                style={{ width: `${Math.min(100, studio.loadPercent || 0)}%` }}
+              />
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {!studio.ready && studio.statusKey === 'status.initFailed' ? (
+        <div className="fixed left-6 bottom-6 z-50 px-3 py-1.5 rounded-lg bg-[#181a20]/90 border border-white/10 text-label-sm text-red-300">
           {statusText}
         </div>
       ) : null}

@@ -7,6 +7,7 @@ import {
   applyParams,
   createDefaultParams,
 } from './catalog.js'
+import { fetchDemoLicenseToken } from './fetchLicenseToken.js'
 
 const MAX_EDGE = 1280
 
@@ -61,8 +62,9 @@ export function useStudioEngine() {
   const busyRef = useRef(false)
   const sourceRef = useRef('image')
 
-  const [statusKey, setStatusKey] = useState('status.initializing')
+  const [statusKey, setStatusKey] = useState('status.loadingEngine')
   const [statusExtra, setStatusExtra] = useState('')
+  const [loadPercent, setLoadPercent] = useState(0)
   const [ready, setReady] = useState(false)
   const [params, setParams] = useState(() => createDefaultParams())
   const [faces, setFaces] = useState([])
@@ -250,11 +252,19 @@ export function useStudioEngine() {
     let cancelled = false
     const boot = async () => {
       try {
+        const licenseToken = await fetchDemoLicenseToken()
         const engine = new BeautyEffectEngine(new EngineConfig({
-          authProxyUrl: '/api/fb-auth',
+          licenseToken,
         }))
         await engine.setLogConfig({ consoleEnabled: true, fileEnabled: false, level: 2 })
-        await engine.init()
+        await engine.init({
+          onProgress: ({ percent }) => {
+            if (cancelled) return
+            setLoadPercent(percent)
+            setStatusKey('status.loadingEngine')
+            setStatusExtra(`${percent}%`)
+          },
+        })
         const resources = await loadResources()
         if (cancelled) {
           engine.destroy()
@@ -269,6 +279,7 @@ export function useStudioEngine() {
         setReady(true)
         setStatusKey('')
         setStatusExtra('')
+        setLoadPercent(100)
         const image = new Image()
         image.src = '/face.jpg'
         await image.decode()
@@ -298,6 +309,7 @@ export function useStudioEngine() {
   return {
     statusKey,
     statusExtra,
+    loadPercent,
     ready,
     params,
     setParams,

@@ -5,5 +5,7 @@ dist
 .env*.local
 .use_local_sdk
 
-# Vercel CLI
+# Personal Vercel hosting (keep locally, do not commit)
 .vercel
+vercel.json
+.vercelignore
