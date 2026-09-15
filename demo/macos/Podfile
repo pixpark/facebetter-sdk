@@ -5,7 +5,7 @@ require "fileutils"
 platform :osx, "13.0"
 use_frameworks!
 
-FACEBETTER_POD_VERSION = "2.0.0"
+FACEBETTER_POD_VERSION = "2.0.1"
 DEFAULT_LOCAL_XCFRAMEWORK = File.expand_path("../../../fb/build/macos/Facebetter.xcframework", __dir__)
 
 target "FBDemoMac" do

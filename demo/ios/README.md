@@ -1,6 +1,6 @@
 # Facebetter 2.0 — iOS Demo
 
-SwiftUI 相机 Demo。通过 **CocoaPods** 安装 `Facebetter` **2.0.0**。打开 **`FBDemo.xcworkspace`**，不要打开 `.xcodeproj`。
+SwiftUI 相机 Demo。通过 **CocoaPods** 安装 `Facebetter` **2.0.1**。打开 **`FBDemo.xcworkspace`**，不要打开 `.xcodeproj`。
 
 滤镜和贴纸与 `demo/web/react` 共用，请保留完整仓库再编译。
 

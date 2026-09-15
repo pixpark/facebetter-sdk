@@ -2,7 +2,7 @@
 
 SwiftUI 桌面 Demo，UI 对齐 `demo/web/react`（顶栏 + 预览 + 右侧精修控制台），引擎/相机逻辑参考 `demo/ios`。
 
-通过 **CocoaPods** 安装 `Facebetter` **2.0.0**。打开 **`.xcworkspace`**，不要打开 `.xcodeproj`。
+通过 **CocoaPods** 安装 `Facebetter` **2.0.1**。打开 **`.xcworkspace`**，不要打开 `.xcodeproj`。
 
 ```bash
 cd demo/macos2

@@ -1,6 +1,6 @@
 # Facebetter 2.0 — Android Demo
 
-Kotlin + Jetpack Compose 相机 Demo。通过 **Maven Central** 安装 `net.pixpark:facebetter` **2.0.0**。
+Kotlin + Jetpack Compose 相机 Demo。通过 **Maven Central** 安装 `net.pixpark:facebetter` **2.0.1**。
 
 滤镜 / 贴纸 / 背景图与 `demo/web/react` 共用，请保留完整仓库再编译。
 
