@@ -10,6 +10,7 @@ import net.pixpark.facebetter.FaceDetectionResult
 import net.pixpark.facebetter.ImageFrame
 import net.pixpark.fbexample.beauty.BackgroundFill
 import net.pixpark.fbexample.beauty.BeautyCatalog
+import net.pixpark.fbexample.beauty.StickerKind
 import net.pixpark.fbexample.beauty.StudioParams
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
@@ -60,6 +61,7 @@ class BeautyEngine(
                 engine = created
                 isReady = true
                 statusKey = "status.ready"
+                assetBytes("facebetter/resource_3d.fbd")?.let { created.addResourcePack(it) }
 
                 val callbacks = EngineCallbacks()
                 callbacks.onEngineEvent = EngineCallbacks.OnEngineEventCallback { code, _ ->
@@ -201,11 +203,26 @@ class BeautyEngine(
         }
 
         if (prev.stickerId != params.stickerId) {
-            val bytes = params.stickerId?.let { assetBytes("facebetter/stickers/face/$it.fbd") }
-            if (bytes != null) {
-                current.setSticker(bytes)
+            val id = params.stickerId
+            if (id != null) {
+                val item = BeautyCatalog.sticker(id)
+                val folder = item?.kind?.folder ?: "face"
+                val bytes = assetBytes("facebetter/stickers/$folder/$id.fbd")
+                if (bytes != null) {
+                    if (item?.kind == StickerKind.THREE_D) {
+                        current.clearSticker()
+                        current.set3DSticker(bytes)
+                    } else {
+                        current.clear3DSticker()
+                        current.setSticker(bytes)
+                    }
+                } else {
+                    current.clearSticker()
+                    current.clear3DSticker()
+                }
             } else {
                 current.clearSticker()
+                current.clear3DSticker()
             }
         }
 

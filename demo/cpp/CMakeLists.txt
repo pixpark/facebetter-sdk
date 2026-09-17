@@ -24,6 +24,8 @@ if(NOT EXISTS "${FB_DEMO_WEB_PUBLIC}/background.jpg")
     "background.jpg live under demo/web/react/public.")
 endif()
 set(FB_DEMO_STICKER_DIR "${FB_DEMO_WEB_PUBLIC}/stickers/face")
+set(FB_DEMO_STICKER_SCREEN_DIR "${FB_DEMO_WEB_PUBLIC}/stickers/screen")
+set(FB_DEMO_STICKER3D_DIR "${FB_DEMO_WEB_PUBLIC}/stickers/3d")
 set(FB_DEMO_FILTER_DIR "${FB_DEMO_WEB_PUBLIC}/assets/filters/portrait")
 set(FB_DEMO_BACKGROUND_PATH "${FB_DEMO_WEB_PUBLIC}/background.jpg")
 
@@ -183,6 +185,8 @@ endif()
 # 资源路径：引擎 fopen 直接打开 resource.fbd 文件
 file(TO_CMAKE_PATH "${FB_DEMO_RESOURCE_FILE}" _fb_res)
 file(TO_CMAKE_PATH "${FB_DEMO_STICKER_DIR}" _fb_sticker)
+file(TO_CMAKE_PATH "${FB_DEMO_STICKER_SCREEN_DIR}" _fb_sticker_screen)
+file(TO_CMAKE_PATH "${FB_DEMO_STICKER3D_DIR}" _fb_sticker3d)
 file(TO_CMAKE_PATH "${FB_DEMO_FILTER_DIR}" _fb_filter)
 file(TO_CMAKE_PATH "${FB_DEMO_BACKGROUND_PATH}" _fb_bg)
 set(FB_DEMO_FACE_PATH "${FB_DEMO_WEB_PUBLIC}/face.jpg")
@@ -193,6 +197,8 @@ file(TO_CMAKE_PATH "${FB_DEMO_ICON_FONT}" _fb_icon_font)
 target_compile_definitions(facebetter_demo PRIVATE
   FB_DEMO_RESOURCE_DIR="${_fb_res}"
   FB_DEMO_STICKER_DIR="${_fb_sticker}"
+  FB_DEMO_STICKER_SCREEN_DIR="${_fb_sticker_screen}"
+  FB_DEMO_STICKER3D_DIR="${_fb_sticker3d}"
   FB_DEMO_FILTER_DIR="${_fb_filter}"
   FB_DEMO_BACKGROUND_PATH="${_fb_bg}"
   FB_DEMO_FACE_PATH="${_fb_face}"

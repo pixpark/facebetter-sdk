@@ -151,6 +151,11 @@ final class BeautyEngine {
     }
     created.setCallbacks(callbacks)
 
+    let pack = resourceRoot.appendingPathComponent("resource_3d.fbd")
+    if FileManager.default.fileExists(atPath: pack.path) {
+      _ = created.addResourcePack(pack.path)
+    }
+
     backgroundImageData = try? Data(contentsOf: resourceRoot.appendingPathComponent("background.jpg"))
     if created.responds(to: NSSelectorFromString("setSmoothing:")) {
       applyLocked(BeautyParams())
@@ -214,9 +219,16 @@ final class BeautyEngine {
 
     if prev.stickerID != params.stickerID {
       if let stickerID = params.stickerID, let path = stickerPath(stickerID) {
-        engine.setSticker(path)
+        if BeautyCatalog.sticker(id: stickerID)?.kind == .threeD {
+          engine.clearSticker()
+          engine.set3DSticker(path)
+        } else {
+          engine.clear3DSticker()
+          engine.setSticker(path)
+        }
       } else {
         engine.clearSticker()
+        engine.clear3DSticker()
       }
     }
 
@@ -255,7 +267,8 @@ final class BeautyEngine {
   }
 
   private func stickerPath(_ id: String) -> String? {
-    let url = resourceRoot.appendingPathComponent("stickers/face/\(id).fbd")
+    guard let item = BeautyCatalog.sticker(id: id) else { return nil }
+    let url = resourceRoot.appendingPathComponent("\(item.kind.folder)/\(id).fbd")
     return FileManager.default.fileExists(atPath: url.path) ? url.path : nil
   }
 

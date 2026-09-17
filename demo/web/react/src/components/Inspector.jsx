@@ -1,4 +1,4 @@
-import { FILTER_IDS, STICKERS, TABS, pickFilterLabel } from '../catalog.js'
+import { FILTER_IDS, STICKERS, STICKER_GROUPS, TABS, pickFilterLabel } from '../catalog.js'
 import {
   BLUSH_COLORS,
   BLUSH_STYLES,
@@ -411,12 +411,28 @@ function StickerPanel({ params, setParams }) {
     <Card title={t('sticker.title')}>
       <div className="grid grid-cols-3 gap-1.5">
         <Chip active={!params.stickerId} onClick={() => setParams((p) => ({ ...p, stickerId: null }))}>{t('sticker.none')}</Chip>
-        {STICKERS.map((item) => (
-          <Chip key={item.id} active={params.stickerId === item.id} onClick={() => setParams((p) => ({ ...p, stickerId: item.id }))}>
-            {t(`sticker.${item.id}`)}
-          </Chip>
-        ))}
       </div>
+      {STICKER_GROUPS.map((group) => {
+        const items = STICKERS.filter((item) => item.kind === group.kind)
+        if (!items.length) return null
+        return (
+          <div key={group.kind} className="space-y-1.5">
+            <div className="text-telemetry-xs text-gray-400">{t(group.titleKey)}</div>
+            <div className="grid grid-cols-3 gap-1.5">
+              {items.map((item) => (
+                <Chip
+                  key={item.id}
+                  active={params.stickerId === item.id}
+                  badge={item.animated ? t('sticker.tag.animated') : undefined}
+                  onClick={() => setParams((p) => ({ ...p, stickerId: item.id }))}
+                >
+                  {t(`sticker.${item.id}`)}
+                </Chip>
+              ))}
+            </div>
+          </div>
+        )
+      })}
     </Card>
   )
 }

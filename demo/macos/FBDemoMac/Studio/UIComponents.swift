@@ -45,6 +45,7 @@ struct ChipButton: View {
   let title: String
   let active: Bool
   var color: Color?
+  var badge: String? = nil
   var fillWidth = false
   let action: () -> Void
 
@@ -69,6 +70,17 @@ struct ChipButton: View {
           .stroke(active ? Color.white.opacity(0.22) : Color.white.opacity(0.06), lineWidth: 1)
       )
       .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+      .overlay(alignment: .topTrailing) {
+        if let badge {
+          Text(badge)
+            .font(.system(size: 8, weight: .bold))
+            .padding(.horizontal, 4)
+            .padding(.vertical, 1)
+            .foregroundStyle(.black)
+            .background(Color.yellow, in: Capsule())
+            .offset(x: 3, y: -3)
+        }
+      }
     }
     .quietButton()
   }
@@ -240,9 +252,11 @@ struct PillButton: View {
   var symbol: String?
   var active = false
   var emphasis = false
+  var disabled = false
   let action: () -> Void
 
   var body: some View {
+    let lit = (active || emphasis) && !disabled
     Button(action: action) {
       HStack(spacing: 6) {
         if let symbol {
@@ -254,17 +268,18 @@ struct PillButton: View {
       }
       .padding(.horizontal, emphasis ? 16 : 12)
       .padding(.vertical, emphasis ? 7 : 5)
-      .foregroundStyle(active || emphasis ? Color(hex: 0x0A0A0A) : Color(hex: 0xD1D5DB))
-      .background(active || emphasis ? Color.white : Color(hex: 0x181A20))
+      .foregroundStyle(lit ? Color(hex: 0x0A0A0A) : Color(hex: 0xD1D5DB).opacity(disabled ? 0.45 : 1))
+      .background(lit ? Color.white : (emphasis && disabled ? Color.white.opacity(0.20) : Color(hex: 0x181A20)))
       .overlay(
         Capsule().stroke(
-          active || emphasis ? Color.white : Color.white.opacity(0.10),
+          lit ? Color.white : Color.white.opacity(disabled ? 0.06 : 0.10),
           lineWidth: 1
         )
       )
       .clipShape(Capsule())
       .contentShape(Capsule())
     }
+    .disabled(disabled)
     .quietButton()
   }
 }

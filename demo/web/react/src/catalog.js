@@ -25,18 +25,32 @@ export const FILTER_IDS = [
 ]
 
 export const STICKERS = [
-  { id: 'black_glass' },
-  { id: 'pixel_glass' },
-  { id: 'fox' },
-  { id: 'antler' },
-  { id: 'crown' },
-  { id: 'hat' },
-  { id: 'hat3' },
-  { id: 'kiss' },
-  { id: 'kiss2' },
-  { id: 'mustache' },
-  { id: 'mustache2' },
+  { id: 'black_glass', kind: 'face' },
+  { id: 'fox', kind: 'face' },
+  { id: 'kiss2', kind: 'face' },
+  { id: 'mustache', kind: 'face' },
+  { id: 'fan_club', kind: 'face' },
+  { id: 'braids_glasses', kind: 'face', animated: true },
+  { id: 'falling_sakura', kind: 'face', animated: true },
+  { id: 'falling_pigs', kind: 'face', animated: true },
+  { id: 'butterfly', kind: 'screen', animated: true },
+  { id: 'rain', kind: 'screen', animated: true },
+  { id: 'petals', kind: 'screen', animated: true },
+  { id: 'oculos', kind: '3d' },
+  { id: 'red_glasses', kind: '3d' },
 ]
+
+export const STICKER_GROUPS = [
+  { kind: 'face', titleKey: 'sticker.group.face' },
+  { kind: 'screen', titleKey: 'sticker.group.screen' },
+  { kind: '3d', titleKey: 'sticker.group.3d' },
+]
+
+export function stickerFolder(kind) {
+  if (kind === '3d') return '3d'
+  if (kind === 'screen') return 'screen'
+  return 'face'
+}
 
 export const TABS = [
   { id: 'skin', icon: 'face' },
@@ -365,10 +379,17 @@ export function applyParams(engine, params, resources, prev = null) {
   }
 
   if (!prev || prev.stickerId !== params.stickerId) {
-    if (params.stickerId && resources.stickers.get(params.stickerId)) {
-      engine.setSticker(resources.stickers.get(params.stickerId))
+    const item = STICKERS.find((s) => s.id === params.stickerId)
+    const data = params.stickerId ? resources.stickers.get(params.stickerId) : null
+    if (item?.kind === '3d' && data) {
+      engine.clearSticker()
+      engine.set3DSticker(data)
+    } else if (data) {
+      engine.clear3DSticker()
+      engine.setSticker(data)
     } else {
       engine.clearSticker()
+      engine.clear3DSticker()
     }
   }
 

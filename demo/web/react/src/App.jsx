@@ -31,6 +31,9 @@ export default function App() {
           faces={studio.faces}
           faceOverlay={studio.params.faceOverlay}
           onToggleFaceOverlay={() => studio.setParams((p) => ({ ...p, faceOverlay: !p.faceOverlay }))}
+          onPickImage={() => fileRef.current?.click()}
+          onStartCamera={() => studio.startCamera().catch((error) => window.alert(error.message))}
+          onLoadSample={() => studio.loadSampleImage().catch((error) => window.alert(error.message))}
         />
         <Inspector
           tab={tab}
@@ -65,7 +68,7 @@ export default function App() {
         <div className="fixed inset-0 z-40 flex items-center justify-center bg-[#0b0c10]/80">
           <div className="w-72 px-4 py-3 rounded-xl bg-[#181a20] border border-white/10">
             <div className="text-label-sm text-gray-200 mb-2">
-              {t('status.loadingEngine')}
+              {t(studio.statusKey || 'status.loadingEngine')}
               {typeof studio.loadPercent === 'number' ? ` ${studio.loadPercent}%` : ''}
             </div>
             <div className="h-1.5 rounded-full bg-white/10 overflow-hidden">

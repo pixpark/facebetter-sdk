@@ -35,6 +35,12 @@ constexpr int kMaxEdge = 1280;
 #ifndef FB_DEMO_STICKER_DIR
 #define FB_DEMO_STICKER_DIR "./assets/stickers/face"
 #endif
+#ifndef FB_DEMO_STICKER_SCREEN_DIR
+#define FB_DEMO_STICKER_SCREEN_DIR "./assets/stickers/screen"
+#endif
+#ifndef FB_DEMO_STICKER3D_DIR
+#define FB_DEMO_STICKER3D_DIR "./assets/stickers/3d"
+#endif
 #ifndef FB_DEMO_FILTER_DIR
 #define FB_DEMO_FILTER_DIR "./assets/filters"
 #endif
@@ -55,10 +61,26 @@ const char* kFilterIds[] = {
     "rose",          "tender",     "tender_2",     "extraordinary",
 };
 
-const char* kStickerIds[] = {
-    "black_glass", "pixel_glass", "fox",     "antler",    "crown",
-    "hat",         "hat3",        "kiss",    "kiss2",     "mustache",
-    "mustache2",
+struct StickerSpec {
+  const char* id;
+  StickerKind kind;
+  bool animated;
+};
+
+const StickerSpec kStickerCatalog[] = {
+    {"black_glass", StickerKind::Face, false},
+    {"fox", StickerKind::Face, false},
+    {"kiss2", StickerKind::Face, false},
+    {"mustache", StickerKind::Face, false},
+    {"fan_club", StickerKind::Face, false},
+    {"braids_glasses", StickerKind::Face, true},
+    {"falling_sakura", StickerKind::Face, true},
+    {"falling_pigs", StickerKind::Face, true},
+    {"butterfly", StickerKind::Screen, true},
+    {"rain", StickerKind::Screen, true},
+    {"petals", StickerKind::Screen, true},
+    {"oculos", StickerKind::ThreeD, false},
+    {"red_glasses", StickerKind::ThreeD, false},
 };
 
 RgbaBuffer FromBgr(const cv::Mat& bgr) {
@@ -138,6 +160,8 @@ bool Studio::Init(GLFWwindow* window) {
   window_ = window;
   filter_dir_ = FB_DEMO_FILTER_DIR;
   sticker_dir_ = FB_DEMO_STICKER_DIR;
+  sticker_screen_dir_ = FB_DEMO_STICKER_SCREEN_DIR;
+  sticker3d_dir_ = FB_DEMO_STICKER3D_DIR;
   background_path_ = FB_DEMO_BACKGROUND_PATH;
   ScanAssets();
 
@@ -166,6 +190,7 @@ bool Studio::Init(GLFWwindow* window) {
   };
   engine_->SetCallbacks(callbacks);
   engine_->ClearSticker();
+  engine_->Clear3DSticker();
   engine_->ClearFilter();
   engine_->ClearVirtualBackground();
   engine_->ClearChromaKey();
@@ -173,8 +198,6 @@ bool Studio::Init(GLFWwindow* window) {
   shared_params_ = params_;
   running_ = true;
   worker_ = std::thread(&Studio::WorkerLoop, this);
-
-  LoadImageFile(FB_DEMO_FACE_PATH);
   return true;
 }
 
@@ -208,10 +231,17 @@ void Studio::ScanAssets() {
       filters_.push_back(std::move(item));
   }
   stickers_.clear();
-  for (const char* id : kStickerIds) {
+  for (const StickerSpec& spec : kStickerCatalog) {
     Asset item;
-    item.id = id;
-    item.path = sticker_dir_ + "/" + item.id + ".fbd";
+    item.id = spec.id;
+    item.kind = spec.kind;
+    item.animated = spec.animated;
+    const std::string& dir = spec.kind == StickerKind::ThreeD
+                                 ? sticker3d_dir_
+                                 : spec.kind == StickerKind::Screen
+                                       ? sticker_screen_dir_
+                                       : sticker_dir_;
+    item.path = dir + "/" + item.id + ".fbd";
     if (fs::exists(item.path))
       stickers_.push_back(std::move(item));
   }
@@ -234,6 +264,10 @@ void Studio::LoadImageFile(const std::string& path) {
   }
   cv_.notify_one();
   SetStatus("status.imageLoaded");
+}
+
+void Studio::LoadSampleImage() {
+  LoadImageFile(FB_DEMO_FACE_PATH);
 }
 
 void Studio::StartCamera() {
@@ -314,6 +348,11 @@ void Studio::UploadGpu() {
   stats_ = stats;
 }
 
+bool Studio::IsIdle() const {
+  std::lock_guard<std::mutex> lock(mu_);
+  return source_ == Source::None;
+}
+
 bool Studio::IsCamera() const {
   std::lock_guard<std::mutex> lock(mu_);
   return source_ == Source::Camera;
@@ -392,10 +431,28 @@ void Studio::ApplyToEngine(const Params& p, const Params* prev) {
     engine_->SetFilterIntensity(p.filter_intensity);
 
   if (!prev || prev->sticker_id != p.sticker_id) {
-    if (p.sticker_id.empty())
+    if (p.sticker_id.empty()) {
       engine_->ClearSticker();
-    else
-      engine_->SetSticker(sticker_dir_ + "/" + p.sticker_id + ".fbd");
+      engine_->Clear3DSticker();
+    } else {
+      const Asset* picked = nullptr;
+      for (const auto& a : stickers_) {
+        if (a.id == p.sticker_id) {
+          picked = &a;
+          break;
+        }
+      }
+      if (picked && picked->kind == StickerKind::ThreeD) {
+        engine_->ClearSticker();
+        engine_->Set3DSticker(picked->path);
+      } else if (picked) {
+        engine_->Clear3DSticker();
+        engine_->SetSticker(picked->path);
+      } else {
+        engine_->ClearSticker();
+        engine_->Clear3DSticker();
+      }
+    }
   }
 
   const bool chroma_changed =

@@ -353,21 +353,35 @@ private struct StickerSection: View {
   @EnvironmentObject private var studio: BeautySession
 
   var body: some View {
-    ScrollView(.horizontal, showsIndicators: false) {
-      HStack(spacing: 8) {
-        ChoiceChip(title: studio.t("sticker.none"), selected: studio.params.stickerID == nil) {
-          studio.params.stickerID = nil
-        }
-        ForEach(BeautyCatalog.stickerIDs, id: \.self) { id in
-          ChoiceChip(
-            title: studio.t("sticker.\(id)"),
-            selected: studio.params.stickerID == id
-          ) {
-            studio.params.stickerID = id
+    VStack(alignment: .leading, spacing: 10) {
+      ScrollView(.horizontal, showsIndicators: false) {
+        HStack(spacing: 8) {
+          ChoiceChip(title: studio.t("sticker.none"), selected: studio.params.stickerID == nil) {
+            studio.params.stickerID = nil
           }
         }
+        .padding(.horizontal, 14)
       }
-      .padding(.horizontal, 14)
+      ForEach(StickerKind.allCases.filter { !BeautyCatalog.stickers(of: $0).isEmpty }) { kind in
+        Text(studio.t(kind.titleKey))
+          .font(.caption2)
+          .foregroundStyle(.white.opacity(0.55))
+          .padding(.horizontal, 14)
+        ScrollView(.horizontal, showsIndicators: false) {
+          HStack(spacing: 8) {
+            ForEach(BeautyCatalog.stickers(of: kind)) { item in
+              ChoiceChip(
+                title: studio.t("sticker.\(item.id)"),
+                selected: studio.params.stickerID == item.id,
+                badge: item.animated ? studio.t("sticker.tag.animated") : nil
+              ) {
+                studio.params.stickerID = item.id
+              }
+            }
+          }
+          .padding(.horizontal, 14)
+        }
+      }
     }
   }
 }
@@ -511,6 +525,7 @@ private struct ChoiceChip: View {
   let title: String
   let selected: Bool
   var color: Color?
+  var badge: String? = nil
   let action: () -> Void
 
   var body: some View {
@@ -527,6 +542,17 @@ private struct ChoiceChip: View {
       .padding(.vertical, 9)
       .foregroundStyle(selected ? .black : .white)
       .background(selected ? Color.white : Color.white.opacity(0.12), in: Capsule())
+      .overlay(alignment: .topTrailing) {
+        if let badge {
+          Text(badge)
+            .font(.system(size: 8, weight: .bold))
+            .padding(.horizontal, 4)
+            .padding(.vertical, 1)
+            .foregroundStyle(.black)
+            .background(Color.yellow, in: Capsule())
+            .offset(x: 4, y: -4)
+        }
+      }
     }
     .buttonStyle(.plain)
   }

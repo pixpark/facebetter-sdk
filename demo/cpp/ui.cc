@@ -31,6 +31,8 @@ constexpr const char kIconMakeup[] = "\xEE\x8E\xAE";      // U+E3AE brush
 constexpr const char kIconFilter[] = "\xEE\x90\x8A";      // U+E40A palette
 constexpr const char kIconSticker[] = "\xEE\x99\x9F";     // U+E65F auto_awesome
 constexpr const char kIconBackground[] = "\xEE\x8E\xA5";  // U+E3A5 blur_on
+constexpr const char kIconAddPhoto[] = "\xEE\x90\xB9";    // U+E439 add_photo_alternate
+constexpr const char kIconCamera[] = "\xEE\x90\x92";      // U+E412 photo_camera
 
 namespace {
 
@@ -120,7 +122,64 @@ bool IconTab(const char* icon, const char* label, bool active, const ImVec2& siz
   return hit;
 }
 
-bool Chip(const char* label, bool active, const ImVec2& size) {
+bool IdleCard(const char* id, const char* icon, const char* label,
+              const ImVec2& size) {
+  const bool hit = ImGui::InvisibleButton(id, size);
+  const bool hovered = ImGui::IsItemHovered();
+  const ImVec2 rmin = ImGui::GetItemRectMin();
+  const ImVec2 rmax = ImGui::GetItemRectMax();
+  ImDrawList* dl = ImGui::GetWindowDrawList();
+  dl->AddRectFilled(rmin, rmax,
+                    hovered ? IM_COL32(24, 26, 32, 255) : IM_COL32(20, 22, 28, 255),
+                    16.f);
+  dl->AddRect(rmin, rmax,
+              hovered ? IM_COL32(255, 255, 255, 51) : IM_COL32(35, 39, 49, 255),
+              16.f);
+
+  ImFont* label_font = g_btn_font ? g_btn_font : ImGui::GetFont();
+  const float label_px = LogicalPx(label_font);
+  const ImVec2 label_ts =
+      label_font->CalcTextSizeA(label_px, size.x, 0.f, label);
+
+  float icon_px = 0.f;
+  ImVec2 icon_ts(0, 0);
+  if (g_icon_font && icon && icon[0]) {
+    icon_px = LogicalPx(g_icon_font) * 1.35f;
+    icon_ts = g_icon_font->CalcTextSizeA(icon_px, 1e9f, 0.f, icon);
+  }
+
+  const float circle_d = 44.f;
+  const float gap = 12.f;
+  const float block_h = circle_d + gap + label_ts.y;
+  float y = rmin.y + (size.y - block_h) * 0.5f;
+  const float cx = (rmin.x + rmax.x) * 0.5f;
+  dl->AddCircleFilled(ImVec2(cx, y + circle_d * 0.5f), circle_d * 0.5f,
+                      IM_COL32(24, 26, 32, 255));
+  dl->AddCircle(ImVec2(cx, y + circle_d * 0.5f), circle_d * 0.5f,
+                IM_COL32(255, 255, 255, 26), 0, 1.f);
+  if (icon_ts.x > 0.f) {
+    dl->AddText(g_icon_font, icon_px,
+                ImVec2(cx - icon_ts.x * 0.5f,
+                       y + (circle_d - icon_ts.y) * 0.5f),
+                IM_COL32(229, 231, 235, 255), icon);
+  }
+  y += circle_d + gap;
+  dl->AddText(label_font, label_px,
+              ImVec2(cx - label_ts.x * 0.5f, y),
+              IM_COL32(229, 231, 235, 255), label);
+  return hit;
+}
+
+void PickImage(Studio& studio) {
+  const std::string path = OpenImageDialog();
+  if (path.empty())
+    return;
+  studio.StopCamera();
+  studio.LoadImageFile(path);
+}
+
+bool Chip(const char* label, bool active, const ImVec2& size,
+          const char* badge = nullptr) {
   const ImVec2 sz = LockedButtonSize(label, size);
   ImGui::PushStyleColor(ImGuiCol_Button,
                         active ? ImVec4(1, 1, 1, 0.10f) : kChip);
@@ -133,6 +192,16 @@ bool Chip(const char* label, bool active, const ImVec2& size) {
   PushBtnFont();
   const bool hit = ImGui::Button(label, sz);
   PopBtnFont();
+  if (badge && badge[0]) {
+    const ImVec2 rmin = ImGui::GetItemRectMin();
+    const ImVec2 rmax = ImGui::GetItemRectMax();
+    const float fs = 9.f;
+    const ImVec2 ts = ImGui::GetFont()->CalcTextSizeA(fs, 1e9f, 0.f, badge);
+    ImGui::GetWindowDrawList()->AddText(
+        ImGui::GetFont(), fs,
+        ImVec2(rmax.x - ts.x - 3.f, rmin.y + 1.f),
+        IM_COL32(251, 191, 36, 255), badge);
+  }
   ImGui::PopStyleColor(5);
   ImGui::PopStyleVar();
   return hit;
@@ -368,13 +437,9 @@ void DrawTopBar(Studio& studio) {
   ImGui::SameLine();
   ImGui::Dummy(ImVec2(8, 0));
   ImGui::SameLine();
-  if (Pill(T("nav.replaceImage"), false)) {
-    const std::string path = OpenImageDialog();
-    if (!path.empty()) {
-      studio.StopCamera();
-      studio.LoadImageFile(path);
-    }
-  }
+  const bool idle = studio.IsIdle();
+  if (Pill(idle ? T("nav.openImage") : T("nav.replaceImage"), false))
+    PickImage(studio);
   ImGui::SameLine();
   if (Pill(T("nav.camera"), studio.IsCamera())) {
     if (studio.IsCamera())
@@ -414,21 +479,29 @@ void DrawTopBar(Studio& studio) {
   ImGui::PopStyleVar(3);
 
   ImGui::SameLine(0, gap);
-  ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 1));
-  ImGui::PushStyleColor(ImGuiCol_ButtonHovered, Rgba(229, 231, 235));
-  ImGui::PushStyleColor(ImGuiCol_Text, Rgba(10, 10, 10));
+  if (idle) {
+    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0.20f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1, 1, 1, 0.20f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(1, 1, 1, 0.20f));
+    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 1, 1, 0.40f));
+  } else {
+    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 1));
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, Rgba(229, 231, 235));
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, Rgba(229, 231, 235));
+    ImGui::PushStyleColor(ImGuiCol_Text, Rgba(10, 10, 10));
+  }
   ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 14.f);
   const ImVec2 export_sz = LockedButtonSize(T("nav.export"), ImVec2(0, 0));
   PushBtnFont();
   const bool export_clicked = ImGui::Button(T("nav.export"), export_sz);
   PopBtnFont();
-  if (export_clicked) {
+  if (export_clicked && !idle) {
     const std::string path = SavePngDialog();
     if (!path.empty())
       studio.ExportPng(path);
   }
   ImGui::PopStyleVar();
-  ImGui::PopStyleColor(3);
+  ImGui::PopStyleColor(4);
 
   ImGui::EndChild();
   ImGui::PopStyleColor(2);
@@ -444,9 +517,54 @@ void DrawViewport(Studio& studio) {
   Params& p = studio.params();
 
   if (!studio.HasFrame()) {
-    const ImVec2 ts = ImGui::CalcTextSize(T("preview.empty"));
-    ImGui::SetCursorPos(ImVec2((avail.x - ts.x) * 0.5f, avail.y * 0.5f));
-    ImGui::TextColored(kMuted, "%s", T("preview.empty"));
+    if (studio.IsIdle()) {
+      const float card_w = 176.f;
+      const float card_h = 144.f;
+      const float card_gap = 16.f;
+      const float stack_gap = 20.f;
+      const char* hint = T("idle.hint");
+      const char* sample = T("idle.sample");
+      const ImVec2 hint_ts = ImGui::CalcTextSize(hint);
+      const ImVec2 sample_ts = ImGui::CalcTextSize(sample);
+      const float block_w = card_w * 2.f + card_gap;
+      const float block_h =
+          hint_ts.y + stack_gap + card_h + stack_gap + sample_ts.y;
+      const float ox = (avail.x - block_w) * 0.5f;
+      const float oy = (avail.y - block_h) * 0.5f;
+      const ImVec2 origin = ImGui::GetCursorPos();
+
+      ImGui::SetCursorPos(ImVec2(origin.x + ox + (block_w - hint_ts.x) * 0.5f,
+                                 origin.y + oy));
+      ImGui::TextColored(Rgba(107, 114, 128), "%s", hint);
+
+      ImGui::SetCursorPos(
+          ImVec2(origin.x + ox, origin.y + oy + hint_ts.y + stack_gap));
+      if (IdleCard("##idle_image", kIconAddPhoto, T("idle.openImage"),
+                   ImVec2(card_w, card_h)))
+        PickImage(studio);
+      ImGui::SameLine(0, card_gap);
+      if (IdleCard("##idle_camera", kIconCamera, T("idle.openCamera"),
+                   ImVec2(card_w, card_h)))
+        studio.StartCamera();
+
+      ImGui::SetCursorPos(ImVec2(
+          origin.x + ox + (block_w - sample_ts.x) * 0.5f,
+          origin.y + oy + hint_ts.y + stack_gap + card_h + stack_gap));
+      const ImVec2 sample_pos = ImGui::GetCursorScreenPos();
+      if (ImGui::InvisibleButton("##idle_sample", sample_ts))
+        studio.LoadSampleImage();
+      const bool sample_hov = ImGui::IsItemHovered();
+      ImDrawList* dl = ImGui::GetWindowDrawList();
+      dl->AddText(sample_pos,
+                  sample_hov ? IM_COL32(229, 231, 235, 255)
+                             : IM_COL32(107, 114, 128, 255),
+                  sample);
+      dl->AddLine(ImVec2(sample_pos.x, sample_pos.y + sample_ts.y + 2.f),
+                  ImVec2(sample_pos.x + sample_ts.x,
+                         sample_pos.y + sample_ts.y + 2.f),
+                  sample_hov ? IM_COL32(255, 255, 255, 102)
+                             : IM_COL32(255, 255, 255, 51));
+    }
     ImGui::EndChild();
     ImGui::PopStyleColor();
     return;
@@ -814,26 +932,41 @@ void DrawFilter(Studio& studio) {
   EndCard();
 }
 
-void DrawSticker(Studio& studio) {
+void DrawStickerGroup(Studio& studio, StickerKind kind, const char* title_key) {
   Params& p = studio.params();
-  const auto& stickers = studio.Stickers();
-  BeginCard("sticker");
-  CardTitle(T("sticker.title"));
-  const int n = static_cast<int>(stickers.size()) + 1;
-  ChipGrid(3, n, [&](int i, ImVec2 size) {
-    if (i == 0) {
-      if (Chip(T("sticker.none"), p.sticker_id.empty(), size)) {
-        p.sticker_id.clear();
-        studio.NotifyParamsChanged();
-      }
-      return;
-    }
-    const Asset& a = stickers[static_cast<size_t>(i - 1)];
-    if (Chip(StickerLabel(a.id), p.sticker_id == a.id, size)) {
+  std::vector<const Asset*> items;
+  for (const auto& a : studio.Stickers()) {
+    if (a.kind == kind)
+      items.push_back(&a);
+  }
+  if (items.empty())
+    return;
+  ImGui::PushID(title_key);
+  ImGui::TextColored(kMuted, "%s", T(title_key));
+  ChipGrid(3, static_cast<int>(items.size()), [&](int i, ImVec2 size) {
+    const Asset& a = *items[static_cast<size_t>(i)];
+    const char* badge = a.animated ? T("sticker.tag.animated") : nullptr;
+    if (Chip(StickerLabel(a.id), p.sticker_id == a.id, size, badge)) {
       p.sticker_id = a.id;
       studio.NotifyParamsChanged();
     }
   });
+  ImGui::PopID();
+}
+
+void DrawSticker(Studio& studio) {
+  Params& p = studio.params();
+  BeginCard("sticker");
+  CardTitle(T("sticker.title"));
+  ChipGrid(3, 1, [&](int, ImVec2 size) {
+    if (Chip(T("sticker.none"), p.sticker_id.empty(), size)) {
+      p.sticker_id.clear();
+      studio.NotifyParamsChanged();
+    }
+  });
+  DrawStickerGroup(studio, StickerKind::Face, "sticker.group.face");
+  DrawStickerGroup(studio, StickerKind::Screen, "sticker.group.screen");
+  DrawStickerGroup(studio, StickerKind::ThreeD, "sticker.group.3d");
   EndCard();
 }
 

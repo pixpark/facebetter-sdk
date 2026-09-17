@@ -8,6 +8,7 @@ export default function TopBar({
   onExport,
 }) {
   const { t, locale, setLocale } = useI18n()
+  const idle = source === 'idle'
 
   return (
     <header className="h-12 px-6 flex items-center justify-between w-full border-b border-[#222630] bg-[#0e1014] z-50 shrink-0">
@@ -28,7 +29,7 @@ export default function TopBar({
           className="px-3 py-1 rounded-full bg-[#181a20] hover:bg-[#222630] border border-white/10 text-body-sm text-gray-300 hover:text-white flex items-center gap-1.5 transition-colors"
         >
           <Icon name="add_photo_alternate" className="text-sm text-gray-400" />
-          {t('nav.replaceImage')}
+          {idle ? t('nav.openImage') : t('nav.replaceImage')}
         </button>
         <button
           type="button"
@@ -85,7 +86,12 @@ export default function TopBar({
         <button
           type="button"
           onClick={onExport}
-          className="px-4 py-1.5 rounded-full bg-white text-neutral-950 hover:bg-gray-200 font-medium text-body-sm shadow-sm flex items-center gap-1.5 transition-all"
+          disabled={idle}
+          className={`px-4 py-1.5 rounded-full font-medium text-body-sm shadow-sm flex items-center gap-1.5 transition-all ${
+            idle
+              ? 'bg-white/20 text-white/40 cursor-not-allowed'
+              : 'bg-white text-neutral-950 hover:bg-gray-200'
+          }`}
         >
           <Icon name="download" fill className="text-sm" />
           {t('nav.export')}

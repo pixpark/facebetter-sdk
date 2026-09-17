@@ -1,6 +1,6 @@
 # Facebetter Desktop C++ Demo
 
-GLFW + Dear ImGui 的 Facebetter Demo 界面，演示 C++ API。默认加载示例图，也可开摄像头、拖入图片或导出 PNG。滤镜和贴纸与 `demo/web/react` 共用，请保留完整仓库再编译。
+GLFW + Dear ImGui 的 Facebetter Demo 界面，演示 C++ API。启动后先进入空态，从预览区打开图片或相机，也可打开示例图片或拖入图片后导出 PNG。滤镜和贴纸与 `demo/web/react` 共用，请保留完整仓库再编译。
 
 主线程用 vsync + `glfwWaitEventsTimeout`，处理线程用条件变量背压，静止画面时 CPU 接近空闲。
 
@@ -13,7 +13,8 @@ demo/cpp/sdk/
 ├── include/facebetter/   # 头文件
 ├── lib/                  # facebetter.dll + .lib  /  libfacebetter.so  /  libfacebetter.dylib
 └── resource/
-    └── resource.fbd      # 必须指向这个文件，不能填目录
+    ├── resource.fbd       # 必须指向这个文件，不能填目录
+    └── resource_3d.fbd    # 可选；与 resource.fbd 同目录时 Demo 会自动加载（3D 贴纸）
 ```
 
 也可把包放到别处，配置时加 `-DFACEBETTER_SDK_DIR=/path/to/sdk`。

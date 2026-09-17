@@ -401,17 +401,27 @@ private struct StickerPanel: View {
 
   var body: some View {
     InspectorCard(title: studio.t("sticker.title"), symbol: "sparkles") {
-      ChipGrid(columns: 3, spacing: 6) {
-        ChipButton(title: studio.t("sticker.none"), active: studio.params.stickerID == nil, fillWidth: true) {
-          studio.params.stickerID = nil
+      VStack(alignment: .leading, spacing: 8) {
+        ChipGrid(columns: 3, spacing: 6) {
+          ChipButton(title: studio.t("sticker.none"), active: studio.params.stickerID == nil, fillWidth: true) {
+            studio.params.stickerID = nil
+          }
         }
-        ForEach(BeautyCatalog.stickerIDs, id: \.self) { id in
-          ChipButton(
-            title: studio.t("sticker.\(id)"),
-            active: studio.params.stickerID == id,
-            fillWidth: true
-          ) {
-            studio.params.stickerID = id
+        ForEach(StickerKind.allCases.filter { !BeautyCatalog.stickers(of: $0).isEmpty }) { kind in
+          Text(studio.t(kind.titleKey))
+            .font(.system(size: 10))
+            .foregroundStyle(StudioColors.muted)
+          ChipGrid(columns: 3, spacing: 6) {
+            ForEach(BeautyCatalog.stickers(of: kind)) { item in
+              ChipButton(
+                title: studio.t("sticker.\(item.id)"),
+                active: studio.params.stickerID == item.id,
+                badge: item.animated ? studio.t("sticker.tag.animated") : nil,
+                fillWidth: true
+              ) {
+                studio.params.stickerID = item.id
+              }
+            }
           }
         }
       }

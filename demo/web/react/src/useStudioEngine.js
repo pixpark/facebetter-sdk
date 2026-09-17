@@ -3,6 +3,7 @@ import { BeautyEffectEngine, EngineConfig, FrameType, MirrorMode } from 'facebet
 import {
   FILTER_IDS,
   STICKERS,
+  stickerFolder,
   STUDIO_LOOK,
   applyParams,
   createDefaultParams,
@@ -10,6 +11,44 @@ import {
 import { fetchDemoLicenseToken } from './fetchLicenseToken.js'
 
 const MAX_EDGE = 1280
+
+async function fetchBinaryProgress(url, onProgress) {
+  const response = await fetch(url)
+  if (!response.ok) return null
+  const totalHeader = Number(response.headers.get('content-length'))
+  const total = Number.isFinite(totalHeader) && totalHeader > 0 ? totalHeader : 0
+  const emit = (loaded, knownTotal) => {
+    const safeTotal = knownTotal > 0 ? knownTotal : loaded
+    const percent =
+      safeTotal > 0 ? Math.min(100, Math.round((loaded / safeTotal) * 100)) : 0
+    onProgress?.({ loaded, total: safeTotal, percent })
+  }
+
+  if (!response.body || typeof response.body.getReader !== 'function') {
+    const bytes = new Uint8Array(await response.arrayBuffer())
+    emit(bytes.byteLength, total || bytes.byteLength)
+    return bytes
+  }
+
+  const reader = response.body.getReader()
+  const chunks = []
+  let loaded = 0
+  while (true) {
+    const { done, value } = await reader.read()
+    if (done) break
+    chunks.push(value)
+    loaded += value.byteLength
+    emit(loaded, total)
+  }
+  const bytes = new Uint8Array(loaded)
+  let offset = 0
+  for (const chunk of chunks) {
+    bytes.set(chunk, offset)
+    offset += chunk.byteLength
+  }
+  emit(loaded, total || loaded)
+  return bytes
+}
 
 async function loadBuffer(url) {
   const res = await fetch(url)
@@ -28,7 +67,8 @@ async function loadResources() {
   const stickers = new Map()
   await Promise.all(
     STICKERS.map(async (item) => {
-      const data = await loadBuffer(`/stickers/face/${item.id}.fbd`)
+      const folder = stickerFolder(item.kind)
+      const data = await loadBuffer(`/stickers/${folder}/${item.id}.fbd`)
       if (data) stickers.set(item.id, data)
     })
   )
@@ -60,7 +100,7 @@ export function useStudioEngine() {
   const streamRef = useRef(null)
   const rafRef = useRef(0)
   const busyRef = useRef(false)
-  const sourceRef = useRef('image')
+  const sourceRef = useRef('idle')
 
   const [statusKey, setStatusKey] = useState('status.loadingEngine')
   const [statusExtra, setStatusExtra] = useState('')
@@ -68,7 +108,7 @@ export function useStudioEngine() {
   const [ready, setReady] = useState(false)
   const [params, setParams] = useState(() => createDefaultParams())
   const [faces, setFaces] = useState([])
-  const [source, setSource] = useState('image')
+  const [source, setSource] = useState('idle')
   const [frameId, setFrameId] = useState(0)
   const [filterMap, setFilterMap] = useState({})
   const [stats, setStats] = useState({ fps: 0, avgProcessTimeMs: 0 })
@@ -174,6 +214,14 @@ export function useStudioEngine() {
     }
   }, [flash, loadImageElement])
 
+  const loadSampleImage = useCallback(async () => {
+    const image = new Image()
+    image.src = '/face.jpg'
+    await image.decode()
+    loadImageElement(image)
+    flash('status.imageLoaded')
+  }, [flash, loadImageElement])
+
   const startCamera = useCallback(async () => {
     const stream = await navigator.mediaDevices.getUserMedia({
       video: { width: { ideal: 1280 }, height: { ideal: 720 } },
@@ -265,6 +313,19 @@ export function useStudioEngine() {
             setStatusExtra(`${percent}%`)
           },
         })
+        try {
+          const pack = await fetchBinaryProgress('/resource_3d.fbd', ({ percent }) => {
+            if (cancelled) return
+            setLoadPercent(percent)
+            setStatusKey('status.loading3dPack')
+            setStatusExtra(`${percent}%`)
+          })
+          if (pack) {
+            engine.addResourcePack(pack)
+          }
+        } catch (error) {
+          console.warn('Optional resource_3d.fbd not loaded', error)
+        }
         const resources = await loadResources()
         if (cancelled) {
           engine.destroy()
@@ -280,10 +341,6 @@ export function useStudioEngine() {
         setStatusKey('')
         setStatusExtra('')
         setLoadPercent(100)
-        const image = new Image()
-        image.src = '/face.jpg'
-        await image.decode()
-        if (!cancelled) loadImageElement(image)
       } catch (error) {
         console.error(error)
         setStatusKey('status.initFailed')
@@ -304,7 +361,7 @@ export function useStudioEngine() {
       engineRef.current?.destroy()
       engineRef.current = null
     }
-  }, [loadImageElement, stopCamera])
+  }, [stopCamera])
 
   return {
     statusKey,
@@ -321,6 +378,7 @@ export function useStudioEngine() {
     original: originalRef.current,
     processed: processedRef.current,
     loadImageFile,
+    loadSampleImage,
     startCamera,
     stopCamera,
     resetParams,

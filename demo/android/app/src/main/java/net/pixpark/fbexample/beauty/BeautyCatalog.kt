@@ -63,6 +63,18 @@ data class ReshapeItem(
     val labelKey: String,
 )
 
+enum class StickerKind(val titleKey: String, val folder: String) {
+    FACE("sticker.group.face", "face"),
+    SCREEN("sticker.group.screen", "screen"),
+    THREE_D("sticker.group.3d", "3d"),
+}
+
+data class StickerItem(
+    val id: String,
+    val kind: StickerKind,
+    val animated: Boolean = false,
+)
+
 object BeautyCatalog {
     val smoothingStyles = listOf(
         CatalogOption(SmoothingStyle.TEXTURE, "smoothing.texture"),
@@ -234,8 +246,21 @@ object BeautyCatalog {
         "natural", "rose", "tender", "tender_2", "extraordinary",
     )
 
-    val stickerIds = listOf(
-        "black_glass", "pixel_glass", "fox", "antler", "crown", "hat", "hat3",
-        "kiss", "kiss2", "mustache", "mustache2",
+    val stickers = listOf(
+        StickerItem("black_glass", StickerKind.FACE),
+        StickerItem("fox", StickerKind.FACE),
+        StickerItem("kiss2", StickerKind.FACE),
+        StickerItem("mustache", StickerKind.FACE),
+        StickerItem("fan_club", StickerKind.FACE),
+        StickerItem("braids_glasses", StickerKind.FACE, animated = true),
+        StickerItem("falling_sakura", StickerKind.FACE, animated = true),
+        StickerItem("falling_pigs", StickerKind.FACE, animated = true),
+        StickerItem("butterfly", StickerKind.SCREEN, animated = true),
+        StickerItem("rain", StickerKind.SCREEN, animated = true),
+        StickerItem("petals", StickerKind.SCREEN, animated = true),
+        StickerItem("oculos", StickerKind.THREE_D),
+        StickerItem("red_glasses", StickerKind.THREE_D),
     )
+
+    fun sticker(id: String) = stickers.find { it.id == id }
 }

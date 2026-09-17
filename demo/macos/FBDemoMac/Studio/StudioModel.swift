@@ -6,12 +6,13 @@ import QuartzCore
 import UniformTypeIdentifiers
 
 enum StudioSource {
+  case idle
   case camera
   case image
 }
 
 final class StudioModel: BeautySession {
-  @Published var source: StudioSource = .image
+  @Published var source: StudioSource = .idle
   @Published var isComparing = false {
     didSet {
       stateLock.lock()
@@ -20,7 +21,7 @@ final class StudioModel: BeautySession {
       reprocessStillIfNeeded()
     }
   }
-  @Published var statusKey = "status.initializing"
+  @Published var statusKey = ""
   @Published var faces: [FBFaceDetectionResult] = []
   @Published var frameSize: CGSize = .zero
   @Published var fps: Double = 0
@@ -58,12 +59,14 @@ final class StudioModel: BeautySession {
     }
     camera.onError = { [weak self] key in
       DispatchQueue.main.async {
+        self?.camera.stop()
+        self?.source = .idle
+        self?.frameSize = .zero
         self?.flash(key)
       }
     }
 
     applyParams()
-    loadDefaultImage()
   }
 
   func startCamera() {
@@ -85,6 +88,19 @@ final class StudioModel: BeautySession {
       return
     }
     loadImage(image)
+  }
+
+  func loadSampleImage() {
+    let candidates = [
+      Bundle.main.url(forResource: "face", withExtension: "jpg"),
+      Bundle.main.url(forResource: "face", withExtension: "jpg", subdirectory: "Facebetter"),
+    ]
+    if let url = candidates.compactMap({ $0 }).first,
+       let image = NSImage(contentsOf: url) {
+      loadImage(image)
+    } else {
+      flash("status.captureFailed")
+    }
   }
 
   func loadImage(_ image: NSImage) {
@@ -116,6 +132,7 @@ final class StudioModel: BeautySession {
   }
 
   func exportImage() {
+    guard source != .idle else { return }
     let buffer: CVPixelBuffer?
     if source == .image {
       buffer = isComparing ? originalPixelBuffer : (processedPixelBuffer ?? originalPixelBuffer)
@@ -148,20 +165,6 @@ final class StudioModel: BeautySession {
 
   override func paramsDidChange() {
     applyParams()
-  }
-
-  private func loadDefaultImage() {
-    let candidates = [
-      Bundle.main.url(forResource: "face", withExtension: "jpg"),
-      Bundle.main.url(forResource: "face", withExtension: "jpg", subdirectory: "Facebetter"),
-    ]
-    if let url = candidates.compactMap({ $0 }).first,
-       let image = NSImage(contentsOf: url) {
-      loadImage(image)
-      statusKey = ""
-    } else {
-      flash("status.ready")
-    }
   }
 
   private func applyParams() {

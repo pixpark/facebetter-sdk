@@ -88,6 +88,22 @@ struct ReshapeGroup: Identifiable {
   let items: [ReshapeItem]
 }
 
+enum StickerKind: String, CaseIterable, Identifiable {
+  case face
+  case screen
+  case threeD = "3d"
+
+  var id: String { rawValue }
+  var titleKey: String { "sticker.group.\(rawValue)" }
+  var folder: String { "stickers/\(rawValue)" }
+}
+
+struct StickerItem: Identifiable, Hashable {
+  let id: String
+  let kind: StickerKind
+  var animated = false
+}
+
 enum BeautyCatalog {
   static let smoothingStyles: [CatalogOption<FBSmoothingStyle>] = [
     .init(id: .texture, labelKey: "smoothing.texture"),
@@ -271,10 +287,29 @@ enum BeautyCatalog {
     "natural", "rose", "tender", "tender_2", "extraordinary",
   ]
 
-  static let stickerIDs: [String] = [
-    "black_glass", "pixel_glass", "fox", "antler", "crown", "hat", "hat3",
-    "kiss", "kiss2", "mustache", "mustache2",
+  static let stickers: [StickerItem] = [
+    .init(id: "black_glass", kind: .face),
+    .init(id: "fox", kind: .face),
+    .init(id: "kiss2", kind: .face),
+    .init(id: "mustache", kind: .face),
+    .init(id: "fan_club", kind: .face),
+    .init(id: "braids_glasses", kind: .face, animated: true),
+    .init(id: "falling_sakura", kind: .face, animated: true),
+    .init(id: "falling_pigs", kind: .face, animated: true),
+    .init(id: "butterfly", kind: .screen, animated: true),
+    .init(id: "rain", kind: .screen, animated: true),
+    .init(id: "petals", kind: .screen, animated: true),
+    .init(id: "oculos", kind: .threeD),
+    .init(id: "red_glasses", kind: .threeD),
   ]
+
+  static func stickers(of kind: StickerKind) -> [StickerItem] {
+    stickers.filter { $0.kind == kind }
+  }
+
+  static func sticker(id: String) -> StickerItem? {
+    stickers.first { $0.id == id }
+  }
 }
 
 extension Color {

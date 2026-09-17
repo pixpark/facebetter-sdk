@@ -27,7 +27,7 @@ struct TopBar: View {
         .frame(width: 1, height: 16)
 
       PillButton(
-        title: studio.t("nav.replaceImage"),
+        title: studio.t(studio.source == .idle ? "nav.openImage" : "nav.replaceImage"),
         symbol: "photo.on.rectangle"
       ) {
         studio.pickImage()
@@ -66,7 +66,8 @@ struct TopBar: View {
       PillButton(
         title: studio.t("nav.export"),
         symbol: "square.and.arrow.down",
-        emphasis: true
+        emphasis: true,
+        disabled: studio.source == .idle
       ) {
         studio.exportImage()
       }

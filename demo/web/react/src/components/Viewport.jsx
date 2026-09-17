@@ -88,6 +88,9 @@ export default function Viewport({
   faces,
   faceOverlay,
   onToggleFaceOverlay,
+  onPickImage,
+  onStartCamera,
+  onLoadSample,
 }) {
   const afterRef = useRef(null)
   const beforeRef = useRef(null)
@@ -188,7 +191,40 @@ export default function Viewport({
             </div>
           </div>
         </div>
-        ) : null}
+        ) : (
+        <div className="flex flex-col items-center gap-5">
+          <p className="text-body-sm text-gray-500">{t('idle.hint')}</p>
+          <div className="flex items-center gap-4">
+            <button
+              type="button"
+              onClick={onPickImage}
+              className="w-44 h-36 rounded-2xl bg-[#14161c] border border-[#232731] hover:border-white/20 hover:bg-[#181a20] flex flex-col items-center justify-center gap-3 transition-colors"
+            >
+              <span className="w-11 h-11 rounded-full bg-[#181a20] border border-white/10 flex items-center justify-center">
+                <Icon name="add_photo_alternate" className="text-2xl text-gray-200" />
+              </span>
+              <span className="text-body-sm font-medium text-gray-200">{t('idle.openImage')}</span>
+            </button>
+            <button
+              type="button"
+              onClick={onStartCamera}
+              className="w-44 h-36 rounded-2xl bg-[#14161c] border border-[#232731] hover:border-white/20 hover:bg-[#181a20] flex flex-col items-center justify-center gap-3 transition-colors"
+            >
+              <span className="w-11 h-11 rounded-full bg-[#181a20] border border-white/10 flex items-center justify-center">
+                <Icon name="photo_camera" className="text-2xl text-gray-200" />
+              </span>
+              <span className="text-body-sm font-medium text-gray-200">{t('idle.openCamera')}</span>
+            </button>
+          </div>
+          <button
+            type="button"
+            onClick={onLoadSample}
+            className="text-label-sm text-gray-500 hover:text-gray-200 underline underline-offset-4 decoration-white/20 hover:decoration-white/40 transition-colors"
+          >
+            {t('idle.sample')}
+          </button>
+        </div>
+        )}
         </div>
         <a
           href={siteHomeUrl(locale)}

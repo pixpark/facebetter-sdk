@@ -10,7 +10,10 @@ struct Viewport: View {
         .opacity(0.15)
         .allowsHitTesting(false)
 
-      GeometryReader { proxy in
+      if studio.source == .idle {
+        IdleEmptyState(studio: studio)
+      } else {
+        GeometryReader { proxy in
         let fitted = aspectFit(imageSize: studio.frameSize, in: proxy.size)
         ZStack {
           PreviewView(preview: studio.preview)
@@ -91,6 +94,7 @@ struct Viewport: View {
       }
       .padding(.horizontal, 48)
       .padding(.vertical, 32)
+      }
 
       VStack {
         Spacer()
@@ -113,6 +117,83 @@ struct Viewport: View {
       .onEnded { _ in
         studio.isComparing = false
       }
+  }
+}
+
+private struct IdleEmptyState: View {
+  @ObservedObject var studio: StudioModel
+  @State private var sampleHovering = false
+
+  var body: some View {
+    VStack(spacing: 20) {
+      Text(studio.t("idle.hint"))
+        .font(.system(size: 13))
+        .foregroundStyle(Color(hex: 0x6B7280))
+
+      HStack(spacing: 16) {
+        IdleCard(
+          title: studio.t("idle.openImage"),
+          symbol: "photo.on.rectangle"
+        ) {
+          studio.pickImage()
+        }
+        IdleCard(
+          title: studio.t("idle.openCamera"),
+          symbol: "camera"
+        ) {
+          studio.startCamera()
+        }
+      }
+
+      Button {
+        studio.loadSampleImage()
+      } label: {
+        Text(studio.t("idle.sample"))
+          .font(.system(size: 12))
+          .foregroundStyle(sampleHovering ? Color(hex: 0xE5E7EB) : Color(hex: 0x6B7280))
+          .underline(true, color: sampleHovering ? Color.white.opacity(0.40) : Color.white.opacity(0.20))
+      }
+      .buttonStyle(.plain)
+      .onHover { sampleHovering = $0 }
+      .withoutFocusRing()
+    }
+    .frame(maxWidth: .infinity, maxHeight: .infinity)
+  }
+}
+
+private struct IdleCard: View {
+  let title: String
+  let symbol: String
+  let action: () -> Void
+  @State private var hovering = false
+
+  var body: some View {
+    Button(action: action) {
+      VStack(spacing: 12) {
+        ZStack {
+          Circle()
+            .fill(Color(hex: 0x181A20))
+            .overlay(Circle().stroke(Color.white.opacity(0.10), lineWidth: 1))
+            .frame(width: 44, height: 44)
+          Image(systemName: symbol)
+            .font(.system(size: 18))
+            .foregroundStyle(Color(hex: 0xE5E7EB))
+        }
+        Text(title)
+          .font(.system(size: 13, weight: .medium))
+          .foregroundStyle(Color(hex: 0xE5E7EB))
+      }
+      .frame(width: 176, height: 144)
+      .background(hovering ? Color(hex: 0x181A20) : Color(hex: 0x14161C))
+      .overlay(
+        RoundedRectangle(cornerRadius: 16, style: .continuous)
+          .stroke(hovering ? Color.white.opacity(0.20) : Color(hex: 0x232731), lineWidth: 1)
+      )
+      .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+    }
+    .buttonStyle(.plain)
+    .onHover { hovering = $0 }
+    .withoutFocusRing()
   }
 }
 

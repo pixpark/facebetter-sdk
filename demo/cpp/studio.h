@@ -93,9 +93,13 @@ struct Params {
   bool face_overlay = false;
 };
 
+enum class StickerKind { Face, Screen, ThreeD };
+
 struct Asset {
   std::string id;
   std::string path;
+  StickerKind kind = StickerKind::Face;
+  bool animated = false;
 };
 
 struct GpuFrame {
@@ -123,6 +127,7 @@ class Studio {
   void Shutdown();
 
   void LoadImageFile(const std::string& path);
+  void LoadSampleImage();
   void StartCamera();
   void StopCamera();
   bool ExportPng(const std::string& path);
@@ -134,6 +139,7 @@ class Studio {
   // Main thread: copy a published CPU frame into GL textures.
   void UploadGpu();
 
+  bool IsIdle() const;
   bool IsCamera() const;
   bool HasFrame() const;
   const GpuFrame& OriginalGpu() const { return original_gpu_; }
@@ -163,6 +169,8 @@ class Studio {
   std::vector<Asset> stickers_;
   std::string filter_dir_;
   std::string sticker_dir_;
+  std::string sticker_screen_dir_;
+  std::string sticker3d_dir_;
   std::string background_path_;
 
   std::thread worker_;

@@ -60,19 +60,24 @@ export function Pill({ active, onClick, children }) {
   )
 }
 
-export function Chip({ active, onClick, children, className = '' }) {
+export function Chip({ active, onClick, children, className = '', badge }) {
   return (
     <button
       type="button"
       onClick={onClick}
       className={
-        `${className} py-1.5 px-2.5 rounded-lg text-center text-label-sm transition-colors ` +
+        `${className} relative py-1.5 px-2.5 rounded-lg text-center text-label-sm transition-colors ` +
         (active
           ? 'bg-white/10 border border-white/20 text-white'
           : 'bg-[#20232b] border border-white/5 hover:border-white/20 text-gray-400 hover:text-gray-200')
       }
     >
       {children}
+      {badge ? (
+        <span className="absolute top-0.5 right-0.5 text-[9px] leading-none px-1 py-px rounded-full bg-amber-400 text-black font-semibold">
+          {badge}
+        </span>
+      ) : null}
     </button>
   )
 }

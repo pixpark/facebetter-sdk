@@ -27,7 +27,7 @@ Demo Bundle ID 是 `com.pixpark.FBDemoMac`。在[控制台](https://facebetter.n
 
 ## 功能
 
-- 默认加载与 Web Demo 相同的 `face.jpg`
+- 启动后进入空态：打开图片 / 打开相机，也可打开与 Web Demo 相同的示例图 `face.jpg`
 - 更换图片 / 摄像头 / 导出 PNG
 - 按住预览对比原图；关键点叠加
 - 美肤 / 美型 / 美妆 / 滤镜 / 贴纸 / 背景（参数面与 React 对齐）

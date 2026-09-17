@@ -70,6 +70,9 @@ copy_assets.shell_script = <<~SCRIPT
   rsync -a "${SRC}/assets/filters/" "${DEST}/filters/"
   rsync -a "${SRC}/stickers/" "${DEST}/stickers/"
   cp "${SRC}/background.jpg" "${DEST}/background.jpg"
+  if [ -f "${SRC}/resource_3d.fbd" ]; then
+    cp "${SRC}/resource_3d.fbd" "${DEST}/resource_3d.fbd"
+  fi
   if [ -f "${SRC}/assets/filters/filter_mapping.json" ]; then
     cp "${SRC}/assets/filters/filter_mapping.json" "${DEST}/filter_mapping.json"
   fi

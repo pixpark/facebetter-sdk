@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -348,18 +349,33 @@ private fun FilterSection(viewModel: BeautySession) {
 
 @Composable
 private fun StickerSection(viewModel: BeautySession) {
-    ChipRow {
-        ChoiceChip(
-            title = viewModel.t("sticker.none"),
-            selected = viewModel.params.stickerId == null,
-            onClick = { viewModel.updateParams { copy(stickerId = null) } },
-        )
-        BeautyCatalog.stickerIds.forEach { id ->
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        ChipRow {
             ChoiceChip(
-                title = viewModel.t("sticker.$id"),
-                selected = viewModel.params.stickerId == id,
-                onClick = { viewModel.updateParams { copy(stickerId = id) } },
+                title = viewModel.t("sticker.none"),
+                selected = viewModel.params.stickerId == null,
+                onClick = { viewModel.updateParams { copy(stickerId = null) } },
             )
+        }
+        StickerKind.entries.forEach { kind ->
+            val items = BeautyCatalog.stickers.filter { it.kind == kind }
+            if (items.isEmpty()) return@forEach
+            Text(
+                viewModel.t(kind.titleKey),
+                color = Color.White.copy(0.55f),
+                fontSize = 11.sp,
+                modifier = Modifier.padding(horizontal = 14.dp),
+            )
+            ChipRow {
+                items.forEach { item ->
+                    ChoiceChip(
+                        title = viewModel.t("sticker.${item.id}"),
+                        selected = viewModel.params.stickerId == item.id,
+                        badge = if (item.animated) viewModel.t("sticker.tag.animated") else null,
+                        onClick = { viewModel.updateParams { copy(stickerId = item.id) } },
+                    )
+                }
+            }
         }
     }
 }
@@ -444,27 +460,43 @@ private fun ChoiceChip(
     title: String,
     selected: Boolean,
     color: Color? = null,
+    badge: String? = null,
     onClick: () -> Unit,
 ) {
-    Surface(
-        onClick = onClick,
-        shape = RoundedCornerShape(50),
-        color = if (selected) Color.White else Color.White.copy(0.12f),
-        contentColor = if (selected) Color.Black else Color.White,
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 10.dp, vertical = 9.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
+    Box {
+        Surface(
+            onClick = onClick,
+            shape = RoundedCornerShape(50),
+            color = if (selected) Color.White else Color.White.copy(0.12f),
+            contentColor = if (selected) Color.Black else Color.White,
         ) {
-            if (color != null) {
-                Box(
-                    modifier = Modifier
-                        .size(8.dp)
-                        .background(color, CircleShape),
-                )
+            Row(
+                modifier = Modifier.padding(horizontal = 10.dp, vertical = 9.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                if (color != null) {
+                    Box(
+                        modifier = Modifier
+                            .size(8.dp)
+                            .background(color, CircleShape),
+                    )
+                }
+                Text(title, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, maxLines = 1)
             }
-            Text(title, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, maxLines = 1)
+        }
+        if (badge != null) {
+            Text(
+                badge,
+                color = Color.Black,
+                fontSize = 8.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .offset(x = 4.dp, y = (-4).dp)
+                    .background(Color(0xFFFBBF24), RoundedCornerShape(50))
+                    .padding(horizontal = 4.dp, vertical = 1.dp),
+            )
         }
     }
 }
