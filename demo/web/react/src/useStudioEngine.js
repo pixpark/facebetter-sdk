@@ -326,6 +326,19 @@ export function useStudioEngine() {
         } catch (error) {
           console.warn('Optional resource_3d.fbd not loaded', error)
         }
+        try {
+          const pack = await fetchBinaryProgress('/resource_body.fbd', ({ percent }) => {
+            if (cancelled) return
+            setLoadPercent(percent)
+            setStatusKey('status.loadingBodyPack')
+            setStatusExtra(`${percent}%`)
+          })
+          if (pack) {
+            engine.addResourcePack(pack)
+          }
+        } catch (error) {
+          console.warn('Optional resource_body.fbd not loaded', error)
+        }
         const resources = await loadResources()
         if (cancelled) {
           engine.destroy()

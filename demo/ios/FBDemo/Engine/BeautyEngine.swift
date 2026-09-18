@@ -151,9 +151,12 @@ final class BeautyEngine {
     }
     created.setCallbacks(callbacks)
 
-    let pack = resourceRoot.appendingPathComponent("resource_3d.fbd")
-    if FileManager.default.fileExists(atPath: pack.path) {
-      _ = created.addResourcePack(pack.path)
+    let packNames = ["resource_3d.fbd", "resource_body.fbd"]
+    for name in packNames {
+      let pack = resourceRoot.appendingPathComponent(name)
+      if FileManager.default.fileExists(atPath: pack.path) {
+        _ = created.addResourcePack(pack.path)
+      }
     }
 
     backgroundImageData = try? Data(contentsOf: resourceRoot.appendingPathComponent("background.jpg"))
@@ -182,6 +185,9 @@ final class BeautyEngine {
 
     for item in BeautyCatalog.reshapeItems {
       engine.setReshape(item.key, intensity: params.reshape[item.key] ?? 0)
+    }
+    for item in BeautyCatalog.bodyItems {
+      engine.setBodyReshape(item.key, intensity: params.bodyReshape[item.key] ?? 0)
     }
 
     engine.setLipstick(params.lipstick)

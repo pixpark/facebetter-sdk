@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
@@ -26,7 +25,36 @@ class MyApp extends StatelessWidget {
   }
 }
 
-/// 美颜演示页面：加载图片 → 调整参数 → 实时处理并显示
+class _BodyItem {
+  const _BodyItem(this.param, this.label);
+  final FBBodyReshape param;
+  final String label;
+}
+
+class _BodyGroup {
+  const _BodyGroup(this.title, this.items);
+  final String title;
+  final List<_BodyItem> items;
+}
+
+const _bodyGroups = [
+  _BodyGroup('身形', [
+    _BodyItem(FBBodyReshape.bodySlim, '瘦身'),
+    _BodyItem(FBBodyReshape.torsoLong, '修长'),
+    _BodyItem(FBBodyReshape.waistSlim, '瘦腰'),
+    _BodyItem(FBBodyReshape.bustEnhance, '美胸'),
+  ]),
+  _BodyGroup('肩臂', [
+    _BodyItem(FBBodyReshape.shoulderSlim, '瘦肩'),
+    _BodyItem(FBBodyReshape.armSlim, '瘦胳膊'),
+  ]),
+  _BodyGroup('腿部', [
+    _BodyItem(FBBodyReshape.legSlim, '瘦腿'),
+    _BodyItem(FBBodyReshape.legLong, '长腿'),
+    _BodyItem(FBBodyReshape.legStretch, '拉伸长腿'),
+  ]),
+];
+
 class BeautyPage extends StatefulWidget {
   const BeautyPage({super.key});
 
@@ -35,21 +63,18 @@ class BeautyPage extends StatefulWidget {
 }
 
 class _BeautyPageState extends State<BeautyPage> {
-  FBBeautyEffectEngine? _engine;
-
-  /// 原始图片 RGBA 像素数据
-  Uint8List? _originalRgba;
-  int _imageWidth = 0;
-  int _imageHeight = 0;
-
-  /// 处理后的 ui.Image 用于渲染
+  FBEngine? _engine;
+  Uint8List? _jpegBytes;
   ui.Image? _processedImage;
 
-  /// 美颜参数
   double _smoothing = 0.0;
   double _whitening = 0.0;
   double _faceThin = 0.0;
   double _lipstick = 0.0;
+  final Map<FBBodyReshape, double> _body = {
+    for (final group in _bodyGroups)
+      for (final item in group.items) item.param: 0.0,
+  };
 
   bool _isProcessing = false;
   String _statusText = '初始化中...';
@@ -60,78 +85,59 @@ class _BeautyPageState extends State<BeautyPage> {
     _initEngine();
   }
 
-  /// 初始化引擎并加载图片
   Future<void> _initEngine() async {
     try {
-      // 初始化美颜引擎
-      await FBBeautyEffectEngine.init(
-        const FBEngineConfig(appId: '06badf4873d72dd335b2f8a922d58ae2', appKey: '--HvaY_jZ538D1AxYkj7SgbxtlG7BzYC3WaJLDN2eT0'),
+      FBEngine.setLogConfig(console: true, level: FBLogLevel.debug);
+      _engine = await FBEngine.create(
+        const FBEngineConfig(
+          appId: '06badf4873d72dd335b2f8a922d58ae2',
+          appKey: '--HvaY_jZ538D1AxYkj7SgbxtlG7BzYC3WaJLDN2eT0',
+          externalContext: false,
+          enableLandmarks: true,
+        ),
       );
-      _engine = FBBeautyEffectEngine.sharedInstance;
 
-      // 开启控制台日志
-      await FBBeautyEffectEngine.setLogConfig(
-        const FBLogConfig(consoleEnabled: true, level: FBLogLevel.debug),
-      );
-
-      // 加载 JPEG 图片并解码为 RGBA
       final byteData = await rootBundle.load('assets/demo.jpg');
-      final jpegBytes = byteData.buffer.asUint8List();
-      final codec = await ui.instantiateImageCodec(jpegBytes);
-      final frame = await codec.getNextFrame();
-      final image = frame.image;
-
-      _imageWidth = image.width;
-      _imageHeight = image.height;
-
-      final rgbaData =
-          await image.toByteData(format: ui.ImageByteFormat.rawRgba);
-      if (rgbaData == null) {
-        setState(() => _statusText = '图片解码失败');
-        return;
-      }
-
-      _originalRgba = rgbaData.buffer.asUint8List();
-
-      // 显示原图
-      await _updateProcessedImage(_originalRgba!);
+      _jpegBytes = byteData.buffer.asUint8List();
+      await _showOriginal();
       setState(() => _statusText = '就绪 - 拖动滑块调整美颜参数');
     } catch (e) {
       setState(() => _statusText = '初始化失败: $e');
     }
   }
 
-  /// 根据当前参数处理图像
+  Future<void> _showOriginal() async {
+    final bytes = _jpegBytes;
+    if (bytes == null) {
+      return;
+    }
+    final codec = await ui.instantiateImageCodec(bytes);
+    final frame = await codec.getNextFrame();
+    setState(() => _processedImage = frame.image);
+  }
+
   Future<void> _processImage() async {
-    if (_engine == null || _originalRgba == null || _isProcessing) return;
+    final engine = _engine;
+    final bytes = _jpegBytes;
+    if (engine == null || bytes == null || _isProcessing) {
+      return;
+    }
 
     setState(() => _isProcessing = true);
-
     try {
-      // 设置美颜参数
-      await _engine!.setSmoothing(_smoothing);
-      await _engine!.setWhitening(_whitening);
-      await _engine!.setReshape(FBReshape.faceThin, _faceThin);
-      await _engine!.setLipstick(_lipstick);
-
-      // 创建 RGBA ImageFrame 并处理
-      final inputFrame = FBImageFrame(
-        width: _imageWidth,
-        height: _imageHeight,
-        stride: _imageWidth * 4,
-        data: _originalRgba!,
-        format: FBImageFormat.rgba,
-        frameType: FBFrameType.image,
-      );
-
-      final outputFrame = await _engine!.processImage(inputFrame);
-
-      if (outputFrame != null && outputFrame.data != null) {
-        await _updateProcessedImage(outputFrame.data!);
-        setState(() => _statusText = '处理完成');
-      } else {
-        setState(() => _statusText = '处理失败');
+      engine.setSmoothing(_smoothing);
+      engine.setWhitening(_whitening);
+      engine.setReshape(FBReshape.faceThin, _faceThin);
+      engine.setLipstick(_lipstick);
+      for (final entry in _body.entries) {
+        engine.setBodyReshape(entry.key, entry.value);
       }
+
+      final image = await engine.processImageToUiImage(bytes);
+      setState(() {
+        _processedImage = image;
+        _statusText = '处理完成';
+      });
     } catch (e) {
       setState(() => _statusText = '处理出错: $e');
     } finally {
@@ -139,23 +145,9 @@ class _BeautyPageState extends State<BeautyPage> {
     }
   }
 
-  /// 将 RGBA 数据转为 ui.Image 并刷新界面
-  Future<void> _updateProcessedImage(Uint8List rgbaData) async {
-    final completer = Completer<ui.Image>();
-    ui.decodeImageFromPixels(
-      rgbaData,
-      _imageWidth,
-      _imageHeight,
-      ui.PixelFormat.rgba8888,
-      (image) => completer.complete(image),
-    );
-    final image = await completer.future;
-    setState(() => _processedImage = image);
-  }
-
   @override
   void dispose() {
-    _engine?.release();
+    _engine?.dispose();
     super.dispose();
   }
 
@@ -165,26 +157,14 @@ class _BeautyPageState extends State<BeautyPage> {
       appBar: AppBar(title: const Text('Facebetter Demo')),
       body: Column(
         children: [
-          // 图片展示区域
           Expanded(
             flex: 3,
             child: Center(
               child: _processedImage != null
-                  ? FittedBox(
-                      fit: BoxFit.contain,
-                      child: SizedBox(
-                        width: _imageWidth.toDouble(),
-                        height: _imageHeight.toDouble(),
-                        child: CustomPaint(
-                          painter: _ImagePainter(_processedImage!),
-                        ),
-                      ),
-                    )
+                  ? RawImage(image: _processedImage, fit: BoxFit.contain)
                   : const CircularProgressIndicator(),
             ),
           ),
-
-          // 状态信息
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
             child: Text(
@@ -192,33 +172,45 @@ class _BeautyPageState extends State<BeautyPage> {
               style: const TextStyle(fontSize: 13, color: Colors.grey),
             ),
           ),
-
-          // 美颜参数控制滑块
           Expanded(
             flex: 2,
-            child: Padding(
+            child: ListView(
               padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  _buildSliderRow('磨皮', _smoothing, (v) {
-                    _smoothing = v;
-                    _processImage();
-                  }),
-                  _buildSliderRow('美白', _whitening, (v) {
-                    _whitening = v;
-                    _processImage();
-                  }),
-                  _buildSliderRow('瘦脸', _faceThin, (v) {
-                    _faceThin = v;
-                    _processImage();
-                  }),
-                  _buildSliderRow('口红', _lipstick, (v) {
-                    _lipstick = v;
-                    _processImage();
-                  }),
+              children: [
+                _buildSliderRow('磨皮', _smoothing, (v) {
+                  _smoothing = v;
+                  _processImage();
+                }),
+                _buildSliderRow('美白', _whitening, (v) {
+                  _whitening = v;
+                  _processImage();
+                }),
+                _buildSliderRow('瘦脸', _faceThin, (v) {
+                  _faceThin = v;
+                  _processImage();
+                }),
+                _buildSliderRow('口红', _lipstick, (v) {
+                  _lipstick = v;
+                  _processImage();
+                }),
+                for (final group in _bodyGroups) ...[
+                  Padding(
+                    padding: const EdgeInsets.only(top: 12, bottom: 4),
+                    child: Text(
+                      group.title,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  for (final item in group.items)
+                    _buildSliderRow(item.label, _body[item.param] ?? 0, (v) {
+                      _body[item.param] = v;
+                      _processImage();
+                    }),
                 ],
-              ),
+              ],
             ),
           ),
         ],
@@ -226,12 +218,11 @@ class _BeautyPageState extends State<BeautyPage> {
     );
   }
 
-  /// 构建单行滑块控件
   Widget _buildSliderRow(
       String label, double value, ValueChanged<double> onChanged) {
     return Row(
       children: [
-        SizedBox(width: 40, child: Text(label)),
+        SizedBox(width: 72, child: Text(label)),
         Expanded(
           child: Slider(
             value: value,
@@ -253,24 +244,4 @@ class _BeautyPageState extends State<BeautyPage> {
       ],
     );
   }
-}
-
-/// 自定义绘制器，将 ui.Image 绘制到 Canvas
-class _ImagePainter extends CustomPainter {
-  final ui.Image image;
-
-  _ImagePainter(this.image);
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    canvas.drawImage(
-      image,
-      Offset.zero,
-      Paint()..filterQuality = FilterQuality.high,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant _ImagePainter oldDelegate) =>
-      oldDelegate.image != image;
 }

@@ -3,6 +3,7 @@ import SwiftUI
 enum BeautyTab: String, CaseIterable, Identifiable {
   case skin
   case reshape
+  case body
   case makeup
   case filter
   case sticker
@@ -15,7 +16,8 @@ enum BeautyTab: String, CaseIterable, Identifiable {
   var symbol: String {
     switch self {
     case .skin: return "face.smiling"
-    case .reshape: return "person.crop.circle"
+    case .reshape: return "wand.and.stars"
+    case .body: return "figure.stand"
     case .makeup: return "paintbrush.pointed"
     case .filter: return "camera.filters"
     case .sticker: return "sparkles"
@@ -85,6 +87,17 @@ struct ReshapeItem: Identifiable {
 struct ReshapeGroup: Identifiable {
   let id: String
   let items: [ReshapeItem]
+}
+
+struct BodyReshapeItem: Identifiable {
+  let key: FBBodyReshape
+  let labelKey: String
+  var id: Int { Int(key.rawValue) }
+}
+
+struct BodyReshapeGroup: Identifiable {
+  let id: String
+  let items: [BodyReshapeItem]
 }
 
 enum StickerKind: String, CaseIterable, Identifiable {
@@ -158,6 +171,26 @@ enum BeautyCatalog {
   ]
 
   static let reshapeItems: [ReshapeItem] = reshapeGroups.flatMap(\.items)
+
+  static let bodyGroups: [BodyReshapeGroup] = [
+    BodyReshapeGroup(id: "bodyTorso", items: [
+      .init(key: .bodySlim, labelKey: "reshape.bodySlim"),
+      .init(key: .torsoLong, labelKey: "reshape.torsoLong"),
+      .init(key: .waistSlim, labelKey: "reshape.waistSlim"),
+      .init(key: .bustEnhance, labelKey: "reshape.bustEnhance"),
+    ]),
+    BodyReshapeGroup(id: "bodyArm", items: [
+      .init(key: .shoulderSlim, labelKey: "reshape.shoulderSlim"),
+      .init(key: .armSlim, labelKey: "reshape.armSlim"),
+    ]),
+    BodyReshapeGroup(id: "bodyLeg", items: [
+      .init(key: .legSlim, labelKey: "reshape.legSlim"),
+      .init(key: .legLong, labelKey: "reshape.legLong"),
+      .init(key: .legStretch, labelKey: "reshape.legStretch"),
+    ]),
+  ]
+
+  static let bodyItems: [BodyReshapeItem] = bodyGroups.flatMap(\.items)
 
   static let lipstickColors: [CatalogOption<FBLipstickColor>] = [
     .init(id: .rouge, labelKey: "lipstick.rouge", color: Color(hex: 0xBE185D)),

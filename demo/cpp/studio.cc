@@ -395,6 +395,9 @@ void Studio::ApplyToEngine(const Params& p, const Params* prev) {
   for (size_t i = 0; i < p.reshape.size(); ++i) {
     engine_->SetReshape(static_cast<Reshape>(i), p.reshape[i]);
   }
+  for (size_t i = 0; i < p.body_reshape.size(); ++i) {
+    engine_->SetBodyReshape(static_cast<BodyReshape>(i), p.body_reshape[i]);
+  }
 
   engine_->SetLipstick(p.lipstick);
   engine_->SetLipstickColor(p.lipstick_color);

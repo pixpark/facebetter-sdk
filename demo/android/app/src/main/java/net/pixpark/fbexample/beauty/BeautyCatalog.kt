@@ -16,12 +16,14 @@ import net.pixpark.facebetter.BeautyParams.EyelashStyle
 import net.pixpark.facebetter.BeautyParams.LipstickColor
 import net.pixpark.facebetter.BeautyParams.PupilColor
 import net.pixpark.facebetter.BeautyParams.Reshape
+import net.pixpark.facebetter.BeautyParams.BodyReshape
 import net.pixpark.facebetter.BeautyParams.SmoothingStyle
 import net.pixpark.facebetter.BeautyParams.WhiteningStyle
 
 enum class BeautyTab(val labelKey: String) {
     SKIN("tab.skin"),
     RESHAPE("tab.reshape"),
+    BODY("tab.body"),
     MAKEUP("tab.makeup"),
     FILTER("tab.filter"),
     STICKER("tab.sticker"),
@@ -61,6 +63,16 @@ data class CatalogOption<T>(
 data class ReshapeItem(
     val key: Reshape,
     val labelKey: String,
+)
+
+data class BodyReshapeItem(
+    val key: BodyReshape,
+    val labelKey: String,
+)
+
+data class BodyReshapeGroup(
+    val id: String,
+    val items: List<BodyReshapeItem>,
 )
 
 enum class StickerKind(val titleKey: String, val folder: String) {
@@ -118,6 +130,35 @@ object BeautyCatalog {
         ReshapeItem(Reshape.MOUTH_SMILE, "reshape.mouthSmile"),
         ReshapeItem(Reshape.LIP_THICKNESS, "reshape.lipThickness"),
     )
+
+    val bodyGroups = listOf(
+        BodyReshapeGroup(
+            "bodyTorso",
+            listOf(
+                BodyReshapeItem(BodyReshape.BODY_SLIM, "reshape.bodySlim"),
+                BodyReshapeItem(BodyReshape.TORSO_LONG, "reshape.torsoLong"),
+                BodyReshapeItem(BodyReshape.WAIST_SLIM, "reshape.waistSlim"),
+                BodyReshapeItem(BodyReshape.BUST_ENHANCE, "reshape.bustEnhance"),
+            ),
+        ),
+        BodyReshapeGroup(
+            "bodyArm",
+            listOf(
+                BodyReshapeItem(BodyReshape.SHOULDER_SLIM, "reshape.shoulderSlim"),
+                BodyReshapeItem(BodyReshape.ARM_SLIM, "reshape.armSlim"),
+            ),
+        ),
+        BodyReshapeGroup(
+            "bodyLeg",
+            listOf(
+                BodyReshapeItem(BodyReshape.LEG_SLIM, "reshape.legSlim"),
+                BodyReshapeItem(BodyReshape.LEG_LONG, "reshape.legLong"),
+                BodyReshapeItem(BodyReshape.LEG_STRETCH, "reshape.legStretch"),
+            ),
+        ),
+    )
+
+    val bodyItems = bodyGroups.flatMap { it.items }
 
     val lipstickColors = listOf(
         CatalogOption(LipstickColor.ROUGE, "lipstick.rouge", Color(0xFFBE185D)),

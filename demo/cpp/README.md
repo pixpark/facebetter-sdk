@@ -12,9 +12,10 @@ GLFW + Dear ImGui 的 Facebetter Demo 界面，演示 C++ API。启动后先进�
 demo/cpp/sdk/
 ├── include/facebetter/   # 头文件
 ├── lib/                  # facebetter.dll + .lib  /  libfacebetter.so  /  libfacebetter.dylib
-└── resource/
+    └── resource/
     ├── resource.fbd       # 必须指向这个文件，不能填目录
-    └── resource_3d.fbd    # 可选；与 resource.fbd 同目录时 Demo 会自动加载（3D 贴纸）
+    ├── resource_3d.fbd    # 可选；与 resource.fbd 同目录时 Demo 会自动加载（3D 贴纸）
+    └── resource_body.fbd  # 可选；同目录自动加载（瘦身）
 ```
 
 也可把包放到别处，配置时加 `-DFACEBETTER_SDK_DIR=/path/to/sdk`。

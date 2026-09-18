@@ -12,6 +12,7 @@ struct Inspector: View {
           switch studio.tab {
           case .skin: SkinPanel(studio: studio)
           case .reshape: ReshapePanel(studio: studio)
+          case .body: BodyPanel(studio: studio)
           case .makeup: MakeupPanel(studio: studio)
           case .filter: FilterPanel(studio: studio)
           case .sticker: StickerPanel(studio: studio)
@@ -173,7 +174,7 @@ private struct ReshapePanel: View {
 
   var body: some View {
     ForEach(BeautyCatalog.reshapeGroups) { group in
-      InspectorCard(title: studio.t("reshape.\(group.id)"), symbol: "person.crop.circle") {
+      InspectorCard(title: studio.t("reshape.\(group.id)"), symbol: "wand.and.stars") {
         VStack(spacing: 12) {
           ForEach(group.items) { item in
             BipolarSlider(
@@ -181,6 +182,28 @@ private struct ReshapePanel: View {
               value: Binding(
                 get: { studio.params.reshape[item.key] ?? 0 },
                 set: { studio.params.reshape[item.key] = $0 }
+              )
+            )
+          }
+        }
+      }
+    }
+  }
+}
+
+private struct BodyPanel: View {
+  @ObservedObject var studio: StudioModel
+
+  var body: some View {
+    ForEach(BeautyCatalog.bodyGroups) { group in
+      InspectorCard(title: studio.t("reshape.\(group.id)"), symbol: "figure.stand") {
+        VStack(spacing: 12) {
+          ForEach(group.items) { item in
+            ParamSlider(
+              label: studio.t(item.labelKey),
+              value: Binding(
+                get: { studio.params.bodyReshape[item.key] ?? 0 },
+                set: { studio.params.bodyReshape[item.key] = $0 }
               )
             )
           }

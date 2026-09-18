@@ -9,6 +9,7 @@ struct BeautyParams: Equatable {
   var sharpening: Float = 0
   var skinOnly = false
   var reshape: [FBReshape: Float] = BeautyParams.emptyReshape()
+  var bodyReshape: [FBBodyReshape: Float] = BeautyParams.emptyBodyReshape()
 
   var lipstick: Float = 0
   var lipstickColor: FBLipstickColor = .rouge
@@ -47,6 +48,14 @@ struct BeautyParams: Equatable {
   static func emptyReshape() -> [FBReshape: Float] {
     var values: [FBReshape: Float] = [:]
     for item in BeautyCatalog.reshapeItems {
+      values[item.key] = 0
+    }
+    return values
+  }
+
+  static func emptyBodyReshape() -> [FBBodyReshape: Float] {
+    var values: [FBBodyReshape: Float] = [:]
+    for item in BeautyCatalog.bodyItems {
       values[item.key] = 0
     }
     return values

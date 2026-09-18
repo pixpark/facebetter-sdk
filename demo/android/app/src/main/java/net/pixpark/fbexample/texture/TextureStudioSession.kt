@@ -22,6 +22,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import net.pixpark.facebetter.BeautyParams.Reshape
+import net.pixpark.facebetter.BeautyParams.BodyReshape
 import net.pixpark.fbexample.AppLocale
 import net.pixpark.fbexample.L10n
 import net.pixpark.fbexample.beauty.BeautySession
@@ -52,6 +53,7 @@ class TextureStudioSession(
     override var tab by mutableStateOf(BeautyTab.SKIN)
     override var selectedSkin by mutableStateOf(SkinItem.SMOOTHING)
     override var selectedReshape by mutableStateOf(Reshape.FACE_THIN)
+    override var selectedBody by mutableStateOf(BodyReshape.BODY_SLIM)
     override var selectedMakeup by mutableStateOf(MakeupItem.LIPSTICK)
     override var panelExpanded by mutableStateOf(false)
     override var locale by mutableStateOf(initialLocale ?: detectStudioLocale(appContext))

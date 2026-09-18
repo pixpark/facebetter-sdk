@@ -35,6 +35,7 @@ import net.pixpark.fbexample.engine.MediaStoreSaver
 import net.pixpark.fbexample.engine.scaledIfNeeded
 import net.pixpark.fbexample.engine.toDisplayBitmap
 import net.pixpark.facebetter.BeautyParams.Reshape
+import net.pixpark.facebetter.BeautyParams.BodyReshape
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.math.roundToInt
 
@@ -51,6 +52,7 @@ class StudioViewModel(application: Application) : AndroidViewModel(application),
     override var tab by mutableStateOf(BeautyTab.SKIN)
     override var selectedSkin by mutableStateOf(SkinItem.SMOOTHING)
     override var selectedReshape by mutableStateOf(Reshape.FACE_THIN)
+    override var selectedBody by mutableStateOf(BodyReshape.BODY_SLIM)
     override var selectedMakeup by mutableStateOf(MakeupItem.LIPSTICK)
     override var locale by mutableStateOf(detectStudioLocale(application))
         private set

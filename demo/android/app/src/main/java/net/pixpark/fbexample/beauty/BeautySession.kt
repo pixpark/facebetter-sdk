@@ -2,6 +2,7 @@ package net.pixpark.fbexample.beauty
 
 import android.content.Context
 import net.pixpark.facebetter.BeautyParams.Reshape
+import net.pixpark.facebetter.BeautyParams.BodyReshape
 import net.pixpark.fbexample.AppLocale
 import org.json.JSONObject
 
@@ -10,6 +11,7 @@ interface BeautySession {
     var tab: BeautyTab
     var selectedSkin: SkinItem
     var selectedReshape: Reshape
+    var selectedBody: BodyReshape
     var selectedMakeup: MakeupItem
     var panelExpanded: Boolean
     val locale: AppLocale

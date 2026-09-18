@@ -18,11 +18,12 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Accessibility
+import androidx.compose.material.icons.outlined.AutoFixHigh
 import androidx.compose.material.icons.outlined.AutoAwesome
 import androidx.compose.material.icons.outlined.Brush
 import androidx.compose.material.icons.outlined.Face
 import androidx.compose.material.icons.outlined.FilterVintage
-import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Wallpaper
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Slider
@@ -58,6 +59,7 @@ fun BeautyPanel(viewModel: BeautySession) {
             when (viewModel.tab) {
                 BeautyTab.SKIN -> SkinSection(viewModel)
                 BeautyTab.RESHAPE -> ReshapeSection(viewModel)
+                BeautyTab.BODY -> BodySection(viewModel)
                 BeautyTab.MAKEUP -> MakeupSection(viewModel)
                 BeautyTab.FILTER -> FilterSection(viewModel)
                 BeautyTab.STICKER -> StickerSection(viewModel)
@@ -107,7 +109,8 @@ private fun TabBar(viewModel: BeautySession) {
 private val BeautyTab.icon: ImageVector
     get() = when (this) {
         BeautyTab.SKIN -> Icons.Outlined.Face
-        BeautyTab.RESHAPE -> Icons.Outlined.Person
+        BeautyTab.RESHAPE -> Icons.Outlined.AutoFixHigh
+        BeautyTab.BODY -> Icons.Outlined.Accessibility
         BeautyTab.MAKEUP -> Icons.Outlined.Brush
         BeautyTab.FILTER -> Icons.Outlined.FilterVintage
         BeautyTab.STICKER -> Icons.Outlined.AutoAwesome
@@ -196,6 +199,41 @@ private fun ReshapeSection(viewModel: BeautySession) {
                     selected = viewModel.selectedReshape == item.key,
                     onClick = { viewModel.selectedReshape = item.key },
                 )
+            }
+        }
+    }
+}
+
+@Composable
+private fun BodySection(viewModel: BeautySession) {
+    val value = viewModel.params.bodyReshape[viewModel.selectedBody] ?: 0f
+    val title = BeautyCatalog.bodyItems.firstOrNull { it.key == viewModel.selectedBody }?.labelKey
+        ?: "reshape.bodySlim"
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        IntensitySlider(
+            title = viewModel.t(title),
+            value = value,
+            onChange = { next ->
+                viewModel.updateParams {
+                    copy(bodyReshape = bodyReshape.toMutableMap().apply { put(viewModel.selectedBody, next) })
+                }
+            },
+        )
+        BeautyCatalog.bodyGroups.forEach { group ->
+            Text(
+                viewModel.t("reshape.${group.id}"),
+                color = Color.White.copy(0.55f),
+                fontSize = 11.sp,
+                modifier = Modifier.padding(horizontal = 14.dp),
+            )
+            ChipRow {
+                group.items.forEach { item ->
+                    ChoiceChip(
+                        title = viewModel.t(item.labelKey),
+                        selected = viewModel.selectedBody == item.key,
+                        onClick = { viewModel.selectedBody = item.key },
+                    )
+                }
             }
         }
     }

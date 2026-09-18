@@ -9,6 +9,7 @@ class BeautySession: ObservableObject {
   @Published var tab: BeautyTab = .skin
   @Published var selectedSkin: SkinItem = .smoothing
   @Published var selectedReshape: FBReshape = .faceThin
+  @Published var selectedBody: FBBodyReshape = .bodySlim
   @Published var selectedMakeup: MakeupItem = .lipstick
   @Published var locale: AppLocale
   @Published var panelExpanded = false

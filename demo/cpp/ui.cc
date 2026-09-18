@@ -26,7 +26,8 @@ constexpr float kTabBarHeight = 56.f;
 
 // Material Icons PUA → UTF-8（与 Web Demo 同一套图标名）
 constexpr const char kIconFace[] = "\xEE\xA1\xBC";        // U+E87C face
-constexpr const char kIconReshape[] = "\xEE\xA4\xAC";     // U+E92C accessibility_new
+constexpr const char kIconReshape[] = "\xEE\x99\xA3";     // U+E663 auto_fix_high
+constexpr const char kIconBody[] = "\xEE\xA1\x8E";        // U+E84E accessibility
 constexpr const char kIconMakeup[] = "\xEE\x8E\xAE";      // U+E3AE brush
 constexpr const char kIconFilter[] = "\xEE\x90\x8A";      // U+E40A palette
 constexpr const char kIconSticker[] = "\xEE\x99\x9F";     // U+E65F auto_awesome
@@ -742,6 +743,51 @@ void DrawReshape(Studio& studio) {
   }
 }
 
+void DrawBody(Studio& studio) {
+  Params& p = studio.params();
+  struct Item {
+    BodyReshape param;
+    const char* key;
+  };
+  struct Group {
+    const char* key;
+    const Item* items;
+    int count;
+  };
+  static const Item kTorso[] = {
+      {BodyReshape::BodySlim, "reshape.bodySlim"},
+      {BodyReshape::TorsoLong, "reshape.torsoLong"},
+      {BodyReshape::WaistSlim, "reshape.waistSlim"},
+      {BodyReshape::BustEnhance, "reshape.bustEnhance"},
+  };
+  static const Item kArm[] = {
+      {BodyReshape::ShoulderSlim, "reshape.shoulderSlim"},
+      {BodyReshape::ArmSlim, "reshape.armSlim"},
+  };
+  static const Item kLeg[] = {
+      {BodyReshape::LegSlim, "reshape.legSlim"},
+      {BodyReshape::LegLong, "reshape.legLong"},
+      {BodyReshape::LegStretch, "reshape.legStretch"},
+  };
+  const Group groups[] = {
+      {"reshape.bodyTorso", kTorso, 4},
+      {"reshape.bodyArm", kArm, 2},
+      {"reshape.bodyLeg", kLeg, 3},
+  };
+  for (const Group& g : groups) {
+    BeginCard(g.key);
+    CardTitle(T(g.key));
+    ImGui::PushID(g.key);
+    for (int i = 0; i < g.count; ++i) {
+      float& v = p.body_reshape[static_cast<size_t>(g.items[i].param)];
+      if (ParamSlider(T(g.items[i].key), &v))
+        studio.NotifyParamsChanged();
+    }
+    ImGui::PopID();
+    EndCard();
+  }
+}
+
 template <typename StyleT, typename ColorT>
 void MakeupBlock(Studio& studio,
                  const char* title,
@@ -1026,20 +1072,22 @@ void DrawInspector(Studio& studio) {
   ImGui::TextColored(kMuted, "%s", live);
   ImGui::EndChild();
 
-  const char* tabs[] = {"tab.skin", "tab.reshape", "tab.makeup",
+  const char* tabs[] = {"tab.skin", "tab.reshape", "tab.body", "tab.makeup",
                         "tab.filter", "tab.sticker", "tab.background"};
-  const char* tab_icons[] = {kIconFace, kIconReshape, kIconMakeup,
+  const char* tab_icons[] = {kIconFace, kIconReshape, kIconBody, kIconMakeup,
                              kIconFilter, kIconSticker, kIconBackground};
   ImGui::PushStyleColor(ImGuiCol_ChildBg, Rgba(20, 22, 28));
   ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8, 6));
   ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(4, 4));
   ImGui::BeginChild("tabs", ImVec2(-1, kTabBarHeight),
                     ImGuiChildFlags_AlwaysUseWindowPadding);
+  constexpr int kTabCount = 7;
   const float tab_w =
-      (ImGui::GetContentRegionAvail().x - ImGui::GetStyle().ItemSpacing.x * 5.f) /
-      6.f;
+      (ImGui::GetContentRegionAvail().x -
+       ImGui::GetStyle().ItemSpacing.x * static_cast<float>(kTabCount - 1)) /
+      static_cast<float>(kTabCount);
   const float tab_h = ImGui::GetContentRegionAvail().y;
-  for (int i = 0; i < 6; ++i) {
+  for (int i = 0; i < kTabCount; ++i) {
     if (i != 0)
       ImGui::SameLine();
     ImGui::PushID(i);
@@ -1058,10 +1106,12 @@ void DrawInspector(Studio& studio) {
   else if (g_tab == 1)
     DrawReshape(studio);
   else if (g_tab == 2)
-    DrawMakeup(studio);
+    DrawBody(studio);
   else if (g_tab == 3)
-    DrawFilter(studio);
+    DrawMakeup(studio);
   else if (g_tab == 4)
+    DrawFilter(studio);
+  else if (g_tab == 5)
     DrawSticker(studio);
   else
     DrawBackground(studio);
@@ -1177,8 +1227,9 @@ void LoadStudioFonts(float dpi_scale) {
     icon_cfg.OversampleV = dpi_scale >= 1.5f ? 1 : 2;
     icon_cfg.PixelSnapH = true;
     static const ImWchar icon_ranges[] = {
-        0xE3A5, 0xE3A5, 0xE3AE, 0xE3AE, 0xE40A, 0xE40A,
-        0xE65F, 0xE65F, 0xE87C, 0xE87C, 0xE92C, 0xE92C, 0};
+        0xE3A5, 0xE3A5, 0xE3AE, 0xE3AE, 0xE40A, 0xE40A, 0xE412, 0xE412,
+        0xE439, 0xE439, 0xE65F, 0xE65F, 0xE663, 0xE663, 0xE84E, 0xE84E,
+        0xE87C, 0xE87C, 0};
     g_icon_font = io.Fonts->AddFontFromFileTTF(
         FB_DEMO_ICON_FONT, kIconFontPx * dpi_scale, &icon_cfg, icon_ranges);
   }

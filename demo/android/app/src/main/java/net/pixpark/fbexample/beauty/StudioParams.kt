@@ -15,6 +15,7 @@ import net.pixpark.facebetter.BeautyParams.EyelashStyle
 import net.pixpark.facebetter.BeautyParams.LipstickColor
 import net.pixpark.facebetter.BeautyParams.PupilColor
 import net.pixpark.facebetter.BeautyParams.Reshape
+import net.pixpark.facebetter.BeautyParams.BodyReshape
 import net.pixpark.facebetter.BeautyParams.SmoothingStyle
 import net.pixpark.facebetter.BeautyParams.WhiteningStyle
 
@@ -27,6 +28,7 @@ data class StudioParams(
     val sharpening: Float = 0f,
     val skinOnly: Boolean = false,
     val reshape: Map<Reshape, Float> = BeautyCatalog.reshapeItems.associate { it.key to 0f },
+    val bodyReshape: Map<BodyReshape, Float> = BeautyCatalog.bodyItems.associate { it.key to 0f },
     val lipstick: Float = 0f,
     val lipstickColor: LipstickColor = LipstickColor.ROUGE,
     val blush: Float = 0f,

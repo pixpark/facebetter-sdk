@@ -362,7 +362,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "set -e\nDEST=\"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/Facebetter\"\nSRC=\"${SRCROOT}/../web/react/public\"\nmkdir -p \"${DEST}/filters\" \"${DEST}/stickers\"\nrsync -a \"${SRC}/assets/filters/\" \"${DEST}/filters/\"\nrsync -a \"${SRC}/stickers/\" \"${DEST}/stickers/\"\ncp \"${SRC}/background.jpg\" \"${DEST}/background.jpg\"\nif [ -f \"${SRC}/resource_3d.fbd\" ]; then\n  cp \"${SRC}/resource_3d.fbd\" \"${DEST}/resource_3d.fbd\"\nfi\nif [ -f \"${SRC}/assets/filters/filter_mapping.json\" ]; then\n  cp \"${SRC}/assets/filters/filter_mapping.json\" \"${DEST}/filter_mapping.json\"\nfi\n";
+			shellScript = "set -e\nDEST=\"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/Facebetter\"\nSRC=\"${SRCROOT}/../web/react/public\"\nmkdir -p \"${DEST}/filters\" \"${DEST}/stickers\"\nrsync -a \"${SRC}/assets/filters/\" \"${DEST}/filters/\"\nrsync -a \"${SRC}/stickers/\" \"${DEST}/stickers/\"\ncp \"${SRC}/background.jpg\" \"${DEST}/background.jpg\"\nif [ -f \"${SRC}/resource_3d.fbd\" ]; then\n  cp \"${SRC}/resource_3d.fbd\" \"${DEST}/resource_3d.fbd\"\nfi\nif [ -f \"${SRC}/resource_body.fbd\" ]; then\n  cp \"${SRC}/resource_body.fbd\" \"${DEST}/resource_body.fbd\"\nfi\nif [ -f \"${SRC}/assets/filters/filter_mapping.json\" ]; then\n  cp \"${SRC}/assets/filters/filter_mapping.json\" \"${DEST}/filter_mapping.json\"\nfi\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 

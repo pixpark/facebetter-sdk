@@ -1,5 +1,6 @@
 import {
   Reshape,
+  BodyReshape,
   WhiteningStyle,
   SmoothingStyle,
   LipstickColor,
@@ -54,7 +55,8 @@ export function stickerFolder(kind) {
 
 export const TABS = [
   { id: 'skin', icon: 'face' },
-  { id: 'reshape', icon: 'accessibility_new' },
+  { id: 'reshape', icon: 'auto_fix_high' },
+  { id: 'body', icon: 'accessibility' },
   { id: 'makeup', icon: 'brush' },
   { id: 'filter', icon: 'palette' },
   { id: 'sticker', icon: 'auto_awesome' },
@@ -128,6 +130,35 @@ export const RESHAPE_GROUPS = [
     ],
   },
 ]
+
+export const BODY_GROUPS = [
+  {
+    id: 'bodyTorso',
+    items: [
+      { key: BodyReshape.BodySlim, labelKey: 'reshape.bodySlim' },
+      { key: BodyReshape.TorsoLong, labelKey: 'reshape.torsoLong' },
+      { key: BodyReshape.WaistSlim, labelKey: 'reshape.waistSlim' },
+      { key: BodyReshape.BustEnhance, labelKey: 'reshape.bustEnhance' },
+    ],
+  },
+  {
+    id: 'bodyArm',
+    items: [
+      { key: BodyReshape.ShoulderSlim, labelKey: 'reshape.shoulderSlim' },
+      { key: BodyReshape.ArmSlim, labelKey: 'reshape.armSlim' },
+    ],
+  },
+  {
+    id: 'bodyLeg',
+    items: [
+      { key: BodyReshape.LegSlim, labelKey: 'reshape.legSlim' },
+      { key: BodyReshape.LegLong, labelKey: 'reshape.legLong' },
+      { key: BodyReshape.LegStretch, labelKey: 'reshape.legStretch' },
+    ],
+  },
+]
+
+export const BODY_ITEMS = BODY_GROUPS.flatMap((group) => group.items)
 
 export const LIPSTICK_COLORS = [
   { id: LipstickColor.Rouge, labelKey: 'lipstick.rouge', swatch: 'from-[#9d174d] to-[#be185d]' },
@@ -288,6 +319,10 @@ export function createDefaultParams() {
       reshape[item.key] = 0
     }
   }
+  const bodyReshape = {}
+  for (const item of BODY_ITEMS) {
+    bodyReshape[item.key] = 0
+  }
   return {
     smoothing: 0,
     smoothingStyle: SmoothingStyle.Texture,
@@ -297,6 +332,7 @@ export function createDefaultParams() {
     sharpening: 0,
     skinOnly: false,
     reshape,
+    bodyReshape,
     lipstick: 0,
     lipstickColor: LipstickColor.Rouge,
     blush: 0,
@@ -342,6 +378,9 @@ export function applyParams(engine, params, resources, prev = null) {
 
   for (const [key, value] of Object.entries(params.reshape)) {
     engine.setReshape(Number(key), value)
+  }
+  for (const [key, value] of Object.entries(params.bodyReshape || {})) {
+    engine.setBodyReshape(Number(key), value)
   }
 
   engine.setLipstick(params.lipstick)

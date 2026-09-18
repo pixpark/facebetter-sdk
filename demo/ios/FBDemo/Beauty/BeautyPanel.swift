@@ -34,6 +34,8 @@ struct BeautyPanel: View {
       SkinSection()
     case .reshape:
       ReshapeSection()
+    case .body:
+      BodySection()
     case .makeup:
       MakeupSection()
     case .filter:
@@ -184,6 +186,51 @@ private struct ReshapeSection: View {
     Binding(
       get: { studio.params.reshape[studio.selectedReshape] ?? 0 },
       set: { studio.params.reshape[studio.selectedReshape] = $0 }
+    )
+  }
+}
+
+private struct BodySection: View {
+  @EnvironmentObject private var studio: BeautySession
+
+  var body: some View {
+    VStack(alignment: .leading, spacing: 10) {
+      IntensitySlider(
+        title: studio.t(currentItem?.labelKey ?? "reshape.bodySlim"),
+        value: bodyBinding
+      )
+      ForEach(BeautyCatalog.bodyGroups) { group in
+        VStack(alignment: .leading, spacing: 6) {
+          Text(studio.t("reshape.\(group.id)"))
+            .font(.caption2)
+            .foregroundStyle(.white.opacity(0.55))
+            .padding(.horizontal, 14)
+          ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+              ForEach(group.items) { item in
+                ChoiceChip(
+                  title: studio.t(item.labelKey),
+                  selected: studio.selectedBody == item.key
+                ) {
+                  studio.selectedBody = item.key
+                }
+              }
+            }
+            .padding(.horizontal, 14)
+          }
+        }
+      }
+    }
+  }
+
+  private var currentItem: BodyReshapeItem? {
+    BeautyCatalog.bodyItems.first { $0.key == studio.selectedBody }
+  }
+
+  private var bodyBinding: Binding<Float> {
+    Binding(
+      get: { studio.params.bodyReshape[studio.selectedBody] ?? 0 },
+      set: { studio.params.bodyReshape[studio.selectedBody] = $0 }
     )
   }
 }

@@ -36,11 +36,14 @@ using facebetter::beauty_params::EyelashStyle;
 using facebetter::beauty_params::LipstickColor;
 using facebetter::beauty_params::PupilColor;
 using facebetter::beauty_params::Reshape;
+using facebetter::beauty_params::BodyReshape;
 using facebetter::beauty_params::SmoothingStyle;
 using facebetter::beauty_params::WhiteningStyle;
 
 constexpr size_t kReshapeCount =
     static_cast<size_t>(Reshape::BrowThickness) + 1;
+constexpr size_t kBodyReshapeCount =
+    static_cast<size_t>(BodyReshape::TorsoLong) + 1;
 
 enum class Source { None, Image, Camera };
 
@@ -56,6 +59,7 @@ struct Params {
   bool skin_only = false;
 
   std::array<float, kReshapeCount> reshape{};
+  std::array<float, kBodyReshapeCount> body_reshape{};
 
   float lipstick = 0.f;
   LipstickColor lipstick_color = LipstickColor::Rouge;

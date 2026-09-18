@@ -15,6 +15,7 @@ import {
   LIPSTICK_COLORS,
   PUPIL_COLORS,
   RESHAPE_GROUPS,
+  BODY_GROUPS,
   SKIN_PRESETS,
   WHITENING_STYLES,
 } from '../catalog.js'
@@ -108,7 +109,7 @@ function ReshapePanel({ params, setParams }) {
   return (
     <>
       {RESHAPE_GROUPS.map((group) => (
-        <Card key={group.id} title={t(`reshape.${group.id}`)} icon="accessibility_new">
+        <Card key={group.id} title={t(`reshape.${group.id}`)} icon="auto_fix_high">
           <div className="grid grid-cols-1 gap-3">
             {group.items.map((item) => (
               <BipolarSlider
@@ -116,6 +117,31 @@ function ReshapePanel({ params, setParams }) {
                 label={t(item.labelKey)}
                 value={params.reshape[item.key] || 0}
                 onChange={(value) => setParams((p) => ({ ...p, reshape: { ...p.reshape, [item.key]: value } }))}
+              />
+            ))}
+          </div>
+        </Card>
+      ))}
+    </>
+  )
+}
+
+function BodyPanel({ params, setParams }) {
+  const { t } = useI18n()
+  return (
+    <>
+      {BODY_GROUPS.map((group) => (
+        <Card key={group.id} title={t(`reshape.${group.id}`)} icon="accessibility">
+          <div className="grid grid-cols-1 gap-3">
+            {group.items.map((item) => (
+              <ParamSlider
+                key={item.key}
+                label={t(item.labelKey)}
+                value={Math.round((params.bodyReshape?.[item.key] || 0) * 100)}
+                onChange={(v) => setParams((p) => ({
+                  ...p,
+                  bodyReshape: { ...p.bodyReshape, [item.key]: v / 100 },
+                }))}
               />
             ))}
           </div>
@@ -452,7 +478,7 @@ export default function Inspector({ tab, onTab, params, setParams, filterMap, st
           {fps} FPS&nbsp;&nbsp;{ms} ms
         </span>
       </div>
-      <div className="px-3 py-2 border-b border-[#222630] bg-[#14161c] grid grid-cols-6 gap-1">
+      <div className="px-3 py-2 border-b border-[#222630] bg-[#14161c] grid grid-cols-7 gap-1">
         {TABS.map((item) => {
           const active = tab === item.id
           return (
@@ -476,6 +502,7 @@ export default function Inspector({ tab, onTab, params, setParams, filterMap, st
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
         {tab === 'skin' ? <SkinPanel params={params} setParams={setParams} /> : null}
         {tab === 'reshape' ? <ReshapePanel params={params} setParams={setParams} /> : null}
+        {tab === 'body' ? <BodyPanel params={params} setParams={setParams} /> : null}
         {tab === 'makeup' ? <MakeupPanel params={params} setParams={setParams} /> : null}
         {tab === 'filter' ? <FilterPanel params={params} setParams={setParams} filterMap={filterMap} /> : null}
         {tab === 'background' ? <BackgroundPanel params={params} setParams={setParams} /> : null}

@@ -62,6 +62,7 @@ class BeautyEngine(
                 isReady = true
                 statusKey = "status.ready"
                 assetBytes("facebetter/resource_3d.fbd")?.let { created.addResourcePack(it) }
+                assetBytes("facebetter/resource_body.fbd")?.let { created.addResourcePack(it) }
 
                 val callbacks = EngineCallbacks()
                 callbacks.onEngineEvent = EngineCallbacks.OnEngineEventCallback { code, _ ->
@@ -166,6 +167,9 @@ class BeautyEngine(
 
         for (item in BeautyCatalog.reshapeItems) {
             current.setReshape(item.key, params.reshape[item.key] ?: 0f)
+        }
+        for (item in BeautyCatalog.bodyItems) {
+            current.setBodyReshape(item.key, params.bodyReshape[item.key] ?: 0f)
         }
 
         current.setLipstick(params.lipstick)
