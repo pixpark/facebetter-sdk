@@ -4,10 +4,10 @@ import UIKit
 enum BeautyTab: String, CaseIterable, Identifiable {
   case skin
   case reshape
-  case body
   case makeup
   case filter
   case sticker
+  case body
   case background
 
   var id: String { rawValue }
@@ -16,8 +16,8 @@ enum BeautyTab: String, CaseIterable, Identifiable {
 
   var symbol: String {
     switch self {
-    case .skin: return "face.smiling"
-    case .reshape: return "wand.and.stars"
+    case .skin: return "camera.macro"
+    case .reshape: return "face.smiling"
     case .body: return "figure.stand"
     case .makeup: return "paintbrush.pointed"
     case .filter: return "camera.filters"
@@ -326,11 +326,9 @@ enum BeautyCatalog {
     .init(id: "kiss2", kind: .face),
     .init(id: "mustache", kind: .face),
     .init(id: "fan_club", kind: .face),
-    .init(id: "braids_glasses", kind: .face, animated: true),
     .init(id: "falling_sakura", kind: .face, animated: true),
     .init(id: "falling_pigs", kind: .face, animated: true),
     .init(id: "butterfly", kind: .screen, animated: true),
-    .init(id: "rain", kind: .screen, animated: true),
     .init(id: "petals", kind: .screen, animated: true),
     .init(id: "oculos", kind: .threeD),
     .init(id: "red_glasses", kind: .threeD),

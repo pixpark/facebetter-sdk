@@ -55,7 +55,7 @@ function SkinPanel({ params, setParams }) {
   return (
     <Card
       title={t('skin.title')}
-      icon="face"
+      icon="spa"
       extra={
         <div className="flex items-center gap-2">
           <div className="text-telemetry-xs text-gray-200">{t('skin.skinOnly')}</div>
@@ -109,7 +109,7 @@ function ReshapePanel({ params, setParams }) {
   return (
     <>
       {RESHAPE_GROUPS.map((group) => (
-        <Card key={group.id} title={t(`reshape.${group.id}`)} icon="auto_fix_high">
+        <Card key={group.id} title={t(`reshape.${group.id}`)} icon="face">
           <div className="grid grid-cols-1 gap-3">
             {group.items.map((item) => (
               <BipolarSlider

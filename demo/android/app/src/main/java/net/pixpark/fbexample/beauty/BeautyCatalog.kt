@@ -23,10 +23,10 @@ import net.pixpark.facebetter.BeautyParams.WhiteningStyle
 enum class BeautyTab(val labelKey: String) {
     SKIN("tab.skin"),
     RESHAPE("tab.reshape"),
-    BODY("tab.body"),
     MAKEUP("tab.makeup"),
     FILTER("tab.filter"),
     STICKER("tab.sticker"),
+    BODY("tab.body"),
     BACKGROUND("tab.background"),
 }
 
@@ -293,11 +293,9 @@ object BeautyCatalog {
         StickerItem("kiss2", StickerKind.FACE),
         StickerItem("mustache", StickerKind.FACE),
         StickerItem("fan_club", StickerKind.FACE),
-        StickerItem("braids_glasses", StickerKind.FACE, animated = true),
         StickerItem("falling_sakura", StickerKind.FACE, animated = true),
         StickerItem("falling_pigs", StickerKind.FACE, animated = true),
         StickerItem("butterfly", StickerKind.SCREEN, animated = true),
-        StickerItem("rain", StickerKind.SCREEN, animated = true),
         StickerItem("petals", StickerKind.SCREEN, animated = true),
         StickerItem("oculos", StickerKind.THREE_D),
         StickerItem("red_glasses", StickerKind.THREE_D),

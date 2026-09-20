@@ -25,8 +25,8 @@ constexpr float kCtrlHeight = 28.f;
 constexpr float kTabBarHeight = 56.f;
 
 // Material Icons PUA → UTF-8（与 Web Demo 同一套图标名）
+constexpr const char kIconSpa[] = "\xEE\xAD\x8C";         // U+EB4C spa
 constexpr const char kIconFace[] = "\xEE\xA1\xBC";        // U+E87C face
-constexpr const char kIconReshape[] = "\xEE\x99\xA3";     // U+E663 auto_fix_high
 constexpr const char kIconBody[] = "\xEE\xA1\x8E";        // U+E84E accessibility
 constexpr const char kIconMakeup[] = "\xEE\x8E\xAE";      // U+E3AE brush
 constexpr const char kIconFilter[] = "\xEE\x90\x8A";      // U+E40A palette
@@ -1072,10 +1072,10 @@ void DrawInspector(Studio& studio) {
   ImGui::TextColored(kMuted, "%s", live);
   ImGui::EndChild();
 
-  const char* tabs[] = {"tab.skin", "tab.reshape", "tab.body", "tab.makeup",
-                        "tab.filter", "tab.sticker", "tab.background"};
-  const char* tab_icons[] = {kIconFace, kIconReshape, kIconBody, kIconMakeup,
-                             kIconFilter, kIconSticker, kIconBackground};
+  const char* tabs[] = {"tab.skin", "tab.reshape", "tab.makeup", "tab.filter",
+                        "tab.sticker", "tab.body", "tab.background"};
+  const char* tab_icons[] = {kIconSpa, kIconFace, kIconMakeup, kIconFilter,
+                             kIconSticker, kIconBody, kIconBackground};
   ImGui::PushStyleColor(ImGuiCol_ChildBg, Rgba(20, 22, 28));
   ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8, 6));
   ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(4, 4));
@@ -1106,13 +1106,13 @@ void DrawInspector(Studio& studio) {
   else if (g_tab == 1)
     DrawReshape(studio);
   else if (g_tab == 2)
-    DrawBody(studio);
-  else if (g_tab == 3)
     DrawMakeup(studio);
-  else if (g_tab == 4)
+  else if (g_tab == 3)
     DrawFilter(studio);
-  else if (g_tab == 5)
+  else if (g_tab == 4)
     DrawSticker(studio);
+  else if (g_tab == 5)
+    DrawBody(studio);
   else
     DrawBackground(studio);
   ImGui::EndChild();
@@ -1228,8 +1228,8 @@ void LoadStudioFonts(float dpi_scale) {
     icon_cfg.PixelSnapH = true;
     static const ImWchar icon_ranges[] = {
         0xE3A5, 0xE3A5, 0xE3AE, 0xE3AE, 0xE40A, 0xE40A, 0xE412, 0xE412,
-        0xE439, 0xE439, 0xE65F, 0xE65F, 0xE663, 0xE663, 0xE84E, 0xE84E,
-        0xE87C, 0xE87C, 0};
+        0xE439, 0xE439, 0xE65F, 0xE65F, 0xE84E, 0xE84E, 0xE87C, 0xE87C,
+        0xEB4C, 0xEB4C, 0};
     g_icon_font = io.Fonts->AddFontFromFileTTF(
         FB_DEMO_ICON_FONT, kIconFontPx * dpi_scale, &icon_cfg, icon_ranges);
   }

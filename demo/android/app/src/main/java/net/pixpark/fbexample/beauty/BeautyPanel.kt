@@ -19,11 +19,11 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Accessibility
-import androidx.compose.material.icons.outlined.AutoFixHigh
 import androidx.compose.material.icons.outlined.AutoAwesome
 import androidx.compose.material.icons.outlined.Brush
 import androidx.compose.material.icons.outlined.Face
 import androidx.compose.material.icons.outlined.FilterVintage
+import androidx.compose.material.icons.outlined.Spa
 import androidx.compose.material.icons.outlined.Wallpaper
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Slider
@@ -108,8 +108,8 @@ private fun TabBar(viewModel: BeautySession) {
 
 private val BeautyTab.icon: ImageVector
     get() = when (this) {
-        BeautyTab.SKIN -> Icons.Outlined.Face
-        BeautyTab.RESHAPE -> Icons.Outlined.AutoFixHigh
+        BeautyTab.SKIN -> Icons.Outlined.Spa
+        BeautyTab.RESHAPE -> Icons.Outlined.Face
         BeautyTab.BODY -> Icons.Outlined.Accessibility
         BeautyTab.MAKEUP -> Icons.Outlined.Brush
         BeautyTab.FILTER -> Icons.Outlined.FilterVintage

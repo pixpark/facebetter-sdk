@@ -31,11 +31,9 @@ export const STICKERS = [
   { id: 'kiss2', kind: 'face' },
   { id: 'mustache', kind: 'face' },
   { id: 'fan_club', kind: 'face' },
-  { id: 'braids_glasses', kind: 'face', animated: true },
   { id: 'falling_sakura', kind: 'face', animated: true },
   { id: 'falling_pigs', kind: 'face', animated: true },
   { id: 'butterfly', kind: 'screen', animated: true },
-  { id: 'rain', kind: 'screen', animated: true },
   { id: 'petals', kind: 'screen', animated: true },
   { id: 'oculos', kind: '3d' },
   { id: 'red_glasses', kind: '3d' },
@@ -54,12 +52,12 @@ export function stickerFolder(kind) {
 }
 
 export const TABS = [
-  { id: 'skin', icon: 'face' },
-  { id: 'reshape', icon: 'auto_fix_high' },
-  { id: 'body', icon: 'accessibility' },
+  { id: 'skin', icon: 'spa' },
+  { id: 'reshape', icon: 'face' },
   { id: 'makeup', icon: 'brush' },
   { id: 'filter', icon: 'palette' },
   { id: 'sticker', icon: 'auto_awesome' },
+  { id: 'body', icon: 'accessibility' },
   { id: 'background', icon: 'blur_on' },
 ]
 

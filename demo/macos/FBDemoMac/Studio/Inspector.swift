@@ -109,7 +109,7 @@ private struct SkinPanel: View {
   @ObservedObject var studio: StudioModel
 
   var body: some View {
-    InspectorCard(title: studio.t("skin.title"), symbol: "face.smiling") {
+    InspectorCard(title: studio.t("skin.title"), symbol: "camera.macro") {
       Toggle(isOn: $studio.params.skinOnly) {
         Text(studio.t("skin.skinOnly"))
           .font(.system(size: 10))
@@ -174,7 +174,7 @@ private struct ReshapePanel: View {
 
   var body: some View {
     ForEach(BeautyCatalog.reshapeGroups) { group in
-      InspectorCard(title: studio.t("reshape.\(group.id)"), symbol: "wand.and.stars") {
+      InspectorCard(title: studio.t("reshape.\(group.id)"), symbol: "face.smiling") {
         VStack(spacing: 12) {
           ForEach(group.items) { item in
             BipolarSlider(
