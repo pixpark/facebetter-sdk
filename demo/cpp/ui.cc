@@ -21,8 +21,12 @@ ImFont* g_icon_font = nullptr;
 constexpr float kUiFontPx = 12.f;
 constexpr float kBtnFontPx = 11.f;
 constexpr float kIconFontPx = 14.f;
-constexpr float kCtrlHeight = 28.f;
-constexpr float kTabBarHeight = 56.f;
+
+float g_ui_scale = 1.f;
+
+float UiPx(float px) {
+  return px * g_ui_scale;
+}
 
 // Material Icons PUA → UTF-8（与 Web Demo 同一套图标名）
 constexpr const char kIconSpa[] = "\xEE\xAD\x8C";         // U+EB4C spa
@@ -45,7 +49,9 @@ ImTextureID TexId(unsigned int tex) {
   return static_cast<ImTextureID>(tex);
 }
 
-constexpr float kInspectorWidth = 380.f;
+float InspectorWidth() {
+  return UiPx(380.f);
+}
 
 const ImVec4 kBg = Rgba(11, 12, 16);
 const ImVec4 kTop = Rgba(14, 16, 20);
@@ -62,7 +68,7 @@ ImVec2 LockedButtonSize(const char* label, ImVec2 size) {
   if (size.x <= 0.f)
     size.x = ImGui::CalcTextSize(label).x + ImGui::GetStyle().FramePadding.x * 2.f;
   if (size.y <= 0.f)
-    size.y = kCtrlHeight;
+    size.y = UiPx(28.f);
   return size;
 }
 
@@ -232,7 +238,7 @@ void BeginCard(const char* id) {
   ImGui::PushStyleColor(ImGuiCol_ChildBg, kCard);
   ImGui::PushStyleColor(ImGuiCol_Border, Rgba(38, 42, 53));
   ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 12.f);
-  ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(16, 14));
+  ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(UiPx(16), UiPx(14)));
   ImGui::BeginChild(id, ImVec2(-1, 0),
                     ImGuiChildFlags_AutoResizeY | ImGuiChildFlags_Border);
 }
@@ -259,9 +265,9 @@ void CardTitle(const char* title, const char* extra = nullptr) {
 }
 
 bool SliderBar(int* value, int vmin, int vmax, bool bipolar) {
-  constexpr float kHitH = 14.f;
-  constexpr float kTrackH = 6.f;
-  constexpr float kGrabR = 7.f;
+  const float kHitH = UiPx(14.f);
+  const float kTrackH = UiPx(6.f);
+  const float kGrabR = UiPx(7.f);
   const ImVec2 p = ImGui::GetCursorScreenPos();
   const float w = ImGui::GetContentRegionAvail().x;
   ImGui::InvisibleButton("##s", ImVec2(w, kHitH));
@@ -336,7 +342,7 @@ bool Toggle(const char* id, bool* on) {
   ImGui::PushStyleColor(ImGuiCol_Button, *on ? Rgba(52, 199, 89) : Rgba(58, 58, 60));
   ImGui::PushStyleColor(ImGuiCol_ButtonHovered, *on ? Rgba(48, 209, 88)
                                                     : Rgba(72, 72, 74));
-  const bool hit = ImGui::Button("##sw", ImVec2(42, 24));
+  const bool hit = ImGui::Button("##sw", ImVec2(UiPx(42), UiPx(24)));
   ImGui::PopStyleColor(2);
   ImGui::PopStyleVar();
   const ImVec2 min = ImGui::GetItemRectMin();
@@ -418,9 +424,9 @@ float PillWidth(const char* label) {
 void DrawTopBar(Studio& studio) {
   ImGui::PushStyleColor(ImGuiCol_ChildBg, kTop);
   ImGui::PushStyleColor(ImGuiCol_Border, kBorder);
-  ImGui::BeginChild("topbar", ImVec2(-1, 48), ImGuiChildFlags_Border,
+  ImGui::BeginChild("topbar", ImVec2(-1, UiPx(48)), ImGuiChildFlags_Border,
                     ImGuiWindowFlags_NoScrollbar);
-  ImGui::SetCursorPos(ImVec2(16, (48.f - kCtrlHeight) * 0.5f));
+  ImGui::SetCursorPos(ImVec2(UiPx(16), (UiPx(48) - UiPx(28.f)) * 0.5f));
   ImGui::AlignTextToFramePadding();
   ImGui::TextUnformatted("Facebetter");
   ImGui::SameLine();
@@ -450,7 +456,7 @@ void DrawTopBar(Studio& studio) {
   }
 
   const float gap = 8.f;
-  const float lang_w = 78.f;
+  const float lang_w = UiPx(78.f);
   const float cluster =
       PillWidth(T("nav.website")) + gap + lang_w + gap +
       PillWidth(T("nav.export"));
@@ -465,15 +471,15 @@ void DrawTopBar(Studio& studio) {
   ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(3, 3));
   ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(3, 0));
   ImGui::PushStyleColor(ImGuiCol_ChildBg, Rgba(24, 26, 32));
-  ImGui::BeginChild("lang", ImVec2(lang_w, kCtrlHeight),
+  ImGui::BeginChild("lang", ImVec2(lang_w, UiPx(28.f)),
                     ImGuiChildFlags_Border |
                         ImGuiChildFlags_AlwaysUseWindowPadding,
                     ImGuiWindowFlags_NoScrollbar);
   const float lang_h = ImGui::GetContentRegionAvail().y;
-  if (Chip(T("nav.langZh"), g_lang == Lang::Zh, ImVec2(32, lang_h)))
+  if (Chip(T("nav.langZh"), g_lang == Lang::Zh, ImVec2(UiPx(32), lang_h)))
     g_lang = Lang::Zh;
   ImGui::SameLine(0, 3);
-  if (Chip(T("nav.langEn"), g_lang == Lang::En, ImVec2(32, lang_h)))
+  if (Chip(T("nav.langEn"), g_lang == Lang::En, ImVec2(UiPx(32), lang_h)))
     g_lang = Lang::En;
   ImGui::EndChild();
   ImGui::PopStyleColor();
@@ -510,7 +516,7 @@ void DrawTopBar(Studio& studio) {
 
 void DrawViewport(Studio& studio) {
   ImGui::PushStyleColor(ImGuiCol_ChildBg, kBg);
-  ImGui::BeginChild("viewport", ImVec2(-kInspectorWidth, 0),
+  ImGui::BeginChild("viewport", ImVec2(-InspectorWidth(), 0),
                     ImGuiChildFlags_None, ImGuiWindowFlags_NoScrollbar);
   const ImVec2 avail = ImGui::GetContentRegionAvail();
   const GpuFrame& processed = studio.ProcessedGpu();
@@ -1057,11 +1063,11 @@ void DrawBackground(Studio& studio) {
 void DrawInspector(Studio& studio) {
   ImGui::PushStyleColor(ImGuiCol_ChildBg, kPanel);
   ImGui::PushStyleColor(ImGuiCol_Border, kBorder);
-  ImGui::BeginChild("inspector", ImVec2(kInspectorWidth, 0),
+  ImGui::BeginChild("inspector", ImVec2(InspectorWidth(), 0),
                     ImGuiChildFlags_Border);
 
-  ImGui::BeginChild("ins_head", ImVec2(-1, 44), ImGuiChildFlags_None);
-  ImGui::SetCursorPosY(12);
+  ImGui::BeginChild("ins_head", ImVec2(-1, UiPx(44)), ImGuiChildFlags_None);
+  ImGui::SetCursorPosY(UiPx(12));
   ImGui::TextUnformatted(T("console.title"));
   const auto stats = studio.Stats();
   char live[48];
@@ -1077,9 +1083,9 @@ void DrawInspector(Studio& studio) {
   const char* tab_icons[] = {kIconSpa, kIconFace, kIconMakeup, kIconFilter,
                              kIconSticker, kIconBody, kIconBackground};
   ImGui::PushStyleColor(ImGuiCol_ChildBg, Rgba(20, 22, 28));
-  ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8, 6));
-  ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(4, 4));
-  ImGui::BeginChild("tabs", ImVec2(-1, kTabBarHeight),
+  ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(UiPx(8), UiPx(6)));
+  ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(UiPx(4), UiPx(4)));
+  ImGui::BeginChild("tabs", ImVec2(-1, UiPx(56.f)),
                     ImGuiChildFlags_AlwaysUseWindowPadding);
   constexpr int kTabCount = 7;
   const float tab_w =
@@ -1172,9 +1178,20 @@ void ApplyStudioTheme() {
   c[ImGuiCol_Separator] = kBorder;
 }
 
-void LoadStudioFonts(float dpi_scale) {
-  if (dpi_scale < 1.f)
-    dpi_scale = 1.f;
+void SetUiScale(float ui_scale) {
+  if (ui_scale < 1.f)
+    ui_scale = 1.f;
+  g_ui_scale = ui_scale;
+  if (ui_scale != 1.f)
+    ImGui::GetStyle().ScaleAllSizes(ui_scale);
+}
+
+void LoadStudioFonts(float framebuffer_scale, float ui_scale) {
+  if (framebuffer_scale < 1.f)
+    framebuffer_scale = 1.f;
+  if (ui_scale < 1.f)
+    ui_scale = 1.f;
+  const float raster = framebuffer_scale * ui_scale;
   ImGuiIO& io = ImGui::GetIO();
   const char* candidates[] = {
 #ifdef __APPLE__
@@ -1192,11 +1209,12 @@ void LoadStudioFonts(float dpi_scale) {
 #endif
   };
   ImFontConfig cfg;
-  cfg.OversampleH = dpi_scale >= 1.5f ? 1 : 2;
-  cfg.OversampleV = dpi_scale >= 1.5f ? 1 : 2;
+  cfg.OversampleH = raster >= 1.5f ? 1 : 2;
+  cfg.OversampleV = raster >= 1.5f ? 1 : 2;
   cfg.PixelSnapH = false;
-  // 按物理像素栅格化，再用 FontGlobalScale 缩回逻辑尺寸，Retina 上才不会发糊。
-  cfg.GlyphOffset = ImVec2(0.f, -1.1f * dpi_scale);
+  // 按物理像素栅格化。FontGlobalScale 只抵消 framebuffer 比例，
+  // 保留 ui_scale，这样 Windows 高分屏上的字会跟着系统缩放变大。
+  cfg.GlyphOffset = ImVec2(0.f, -1.1f * raster);
   ImFontGlyphRangesBuilder builder;
   builder.AddRanges(io.Fonts->GetGlyphRangesDefault());
   ForEachI18nText([&](const char* text) { builder.AddText(text); });
@@ -1207,13 +1225,13 @@ void LoadStudioFonts(float dpi_scale) {
   builder.BuildRanges(&ranges);
   bool loaded = false;
   for (const char* path : candidates) {
-    if (!io.Fonts->AddFontFromFileTTF(path, kUiFontPx * dpi_scale, &cfg,
+    if (!io.Fonts->AddFontFromFileTTF(path, kUiFontPx * raster, &cfg,
                                       ranges.Data)) {
       continue;
     }
     ImFontConfig btn_cfg = cfg;
-    btn_cfg.GlyphOffset = ImVec2(0.f, -1.0f * dpi_scale);
-    g_btn_font = io.Fonts->AddFontFromFileTTF(path, kBtnFontPx * dpi_scale,
+    btn_cfg.GlyphOffset = ImVec2(0.f, -1.0f * raster);
+    g_btn_font = io.Fonts->AddFontFromFileTTF(path, kBtnFontPx * raster,
                                              &btn_cfg, ranges.Data);
     loaded = true;
     break;
@@ -1223,18 +1241,18 @@ void LoadStudioFonts(float dpi_scale) {
 #ifdef FB_DEMO_ICON_FONT
   {
     ImFontConfig icon_cfg;
-    icon_cfg.OversampleH = dpi_scale >= 1.5f ? 1 : 2;
-    icon_cfg.OversampleV = dpi_scale >= 1.5f ? 1 : 2;
+    icon_cfg.OversampleH = raster >= 1.5f ? 1 : 2;
+    icon_cfg.OversampleV = raster >= 1.5f ? 1 : 2;
     icon_cfg.PixelSnapH = true;
     static const ImWchar icon_ranges[] = {
         0xE3A5, 0xE3A5, 0xE3AE, 0xE3AE, 0xE40A, 0xE40A, 0xE412, 0xE412,
         0xE439, 0xE439, 0xE65F, 0xE65F, 0xE84E, 0xE84E, 0xE87C, 0xE87C,
         0xEB4C, 0xEB4C, 0};
     g_icon_font = io.Fonts->AddFontFromFileTTF(
-        FB_DEMO_ICON_FONT, kIconFontPx * dpi_scale, &icon_cfg, icon_ranges);
+        FB_DEMO_ICON_FONT, kIconFontPx * raster, &icon_cfg, icon_ranges);
   }
 #endif
-  io.FontGlobalScale = 1.f / dpi_scale;
+  io.FontGlobalScale = 1.f / framebuffer_scale;
 }
 
 void DrawStudio(Studio& studio, GLFWwindow*) {

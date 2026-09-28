@@ -32,6 +32,21 @@ static float FramebufferScale(GLFWwindow* window) {
   return static_cast<float>(fb_w) / static_cast<float>(win_w);
 }
 
+// Windows: window size is in pixels and content scale is the display
+// scaling (150% / 200%). macOS: both content scale and framebuffer scale
+// are the Retina factor, so the layout scale stays 1 (points).
+static float UiScale(GLFWwindow* window) {
+  float x = 1.f;
+  float y = 1.f;
+  glfwGetWindowContentScale(window, &x, &y);
+  const float content = x > y ? x : y;
+  const float fb = FramebufferScale(window);
+  if (content <= 0.f || fb <= 0.f)
+    return 1.f;
+  const float ui = content / fb;
+  return ui < 1.f ? 1.f : ui;
+}
+
 static void OnDrop(GLFWwindow* window, int count, const char** paths) {
   auto* studio = static_cast<Studio*>(glfwGetWindowUserPointer(window));
   if (!studio || count <= 0 || !paths || !paths[0])
@@ -60,7 +75,6 @@ int main() {
     glfwTerminate();
     return 1;
   }
-  glfwSetWindowSizeLimits(window, 1100, 700, GLFW_DONT_CARE, GLFW_DONT_CARE);
   glfwMakeContextCurrent(window);
   glfwSwapInterval(1);
   if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress))) {
@@ -76,7 +90,12 @@ int main() {
   io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
   io.IniFilename = nullptr;
   demo::ApplyStudioTheme();
-  demo::LoadStudioFonts(FramebufferScale(window));
+  const float ui_scale = UiScale(window);
+  demo::SetUiScale(ui_scale);
+  demo::LoadStudioFonts(FramebufferScale(window), ui_scale);
+  glfwSetWindowSizeLimits(window, static_cast<int>(1100.f * ui_scale),
+                          static_cast<int>(700.f * ui_scale), GLFW_DONT_CARE,
+                          GLFW_DONT_CARE);
   ImGui_ImplGlfw_InitForOpenGL(window, true);
   ImGui_ImplOpenGL3_Init("#version 330");
 

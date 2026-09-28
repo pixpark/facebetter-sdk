@@ -12,9 +12,9 @@
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
+#include <windows.h>
 #include <commdlg.h>
 #include <shellapi.h>
-#include <windows.h>
 #else
 #include <array>
 #endif
