@@ -182,18 +182,41 @@ if(FB_DEMO_IN_TREE AND TARGET pack_bundle)
   add_dependencies(facebetter_demo pack_bundle)
 endif()
 
-# 资源路径：引擎 fopen 直接打开 resource.fbd 文件
-file(TO_CMAKE_PATH "${FB_DEMO_RESOURCE_FILE}" _fb_res)
-file(TO_CMAKE_PATH "${FB_DEMO_STICKER_DIR}" _fb_sticker)
-file(TO_CMAKE_PATH "${FB_DEMO_STICKER_SCREEN_DIR}" _fb_sticker_screen)
-file(TO_CMAKE_PATH "${FB_DEMO_STICKER3D_DIR}" _fb_sticker3d)
-file(TO_CMAKE_PATH "${FB_DEMO_FILTER_DIR}" _fb_filter)
-file(TO_CMAKE_PATH "${FB_DEMO_BACKGROUND_PATH}" _fb_bg)
-set(FB_DEMO_FACE_PATH "${FB_DEMO_WEB_PUBLIC}/face.jpg")
-file(TO_CMAKE_PATH "${FB_DEMO_FACE_PATH}" _fb_face)
-set(FB_DEMO_ICON_FONT
-    "${CMAKE_CURRENT_SOURCE_DIR}/fonts/MaterialIcons-Regular.ttf")
-file(TO_CMAKE_PATH "${FB_DEMO_ICON_FONT}" _fb_icon_font)
+# 资源路径：引擎 fopen 直接打开 resource.fbd 文件。
+# FB_DEMO_PORTABLE：路径相对可执行文件目录，供 --package-demo 打包。
+option(FB_DEMO_PORTABLE "Bake demo asset paths relative to the executable" OFF)
+if(FB_DEMO_PORTABLE)
+  set(_fb_res "resource/resource.fbd")
+  set(_fb_sticker "assets/stickers/face")
+  set(_fb_sticker_screen "assets/stickers/screen")
+  set(_fb_sticker3d "assets/stickers/3d")
+  set(_fb_filter "assets/filters/portrait")
+  set(_fb_bg "assets/background.jpg")
+  set(_fb_face "assets/face.jpg")
+  set(_fb_icon_font "fonts/MaterialIcons-Regular.ttf")
+  target_compile_definitions(facebetter_demo PRIVATE FB_DEMO_PORTABLE)
+  if(APPLE)
+    # Leave room for install_name_tool when the package is relocated.
+    target_link_options(facebetter_demo PRIVATE
+      "LINKER:-headerpad_max_install_names")
+    if(TARGET facebetter)
+      target_link_options(facebetter PRIVATE
+        "LINKER:-headerpad_max_install_names")
+    endif()
+  endif()
+else()
+  file(TO_CMAKE_PATH "${FB_DEMO_RESOURCE_FILE}" _fb_res)
+  file(TO_CMAKE_PATH "${FB_DEMO_STICKER_DIR}" _fb_sticker)
+  file(TO_CMAKE_PATH "${FB_DEMO_STICKER_SCREEN_DIR}" _fb_sticker_screen)
+  file(TO_CMAKE_PATH "${FB_DEMO_STICKER3D_DIR}" _fb_sticker3d)
+  file(TO_CMAKE_PATH "${FB_DEMO_FILTER_DIR}" _fb_filter)
+  file(TO_CMAKE_PATH "${FB_DEMO_BACKGROUND_PATH}" _fb_bg)
+  set(FB_DEMO_FACE_PATH "${FB_DEMO_WEB_PUBLIC}/face.jpg")
+  file(TO_CMAKE_PATH "${FB_DEMO_FACE_PATH}" _fb_face)
+  set(FB_DEMO_ICON_FONT
+      "${CMAKE_CURRENT_SOURCE_DIR}/fonts/MaterialIcons-Regular.ttf")
+  file(TO_CMAKE_PATH "${FB_DEMO_ICON_FONT}" _fb_icon_font)
+endif()
 target_compile_definitions(facebetter_demo PRIVATE
   FB_DEMO_RESOURCE_DIR="${_fb_res}"
   FB_DEMO_STICKER_DIR="${_fb_sticker}"
@@ -203,6 +226,35 @@ target_compile_definitions(facebetter_demo PRIVATE
   FB_DEMO_BACKGROUND_PATH="${_fb_bg}"
   FB_DEMO_FACE_PATH="${_fb_face}"
   FB_DEMO_ICON_FONT="${_fb_icon_font}")
+
+if(FB_DEMO_PORTABLE)
+  set(_ocv_bin "")
+  if(OpenCV_DIR AND EXISTS "${OpenCV_DIR}/../bin")
+    get_filename_component(_ocv_bin "${OpenCV_DIR}/../bin" ABSOLUTE)
+  endif()
+  set(_mnn "")
+  if(APPLE AND EXISTS
+     "${CMAKE_SOURCE_DIR}/third_party/mnn/lib/macos/MNN.framework")
+    set(_mnn "${CMAKE_SOURCE_DIR}/third_party/mnn/lib/macos/MNN.framework")
+  endif()
+  file(TO_CMAKE_PATH "${_ocv_bin}" _ocv_bin_cmake)
+  file(TO_CMAKE_PATH "${_mnn}" _mnn_cmake)
+  file(TO_CMAKE_PATH "${CMAKE_BINARY_DIR}/out/resource" _res_dir_cmake)
+  file(TO_CMAKE_PATH "${FB_DEMO_WEB_PUBLIC}" _public_cmake)
+  file(TO_CMAKE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/fonts/MaterialIcons-Regular.ttf"
+       _font_cmake)
+  file(TO_CMAKE_PATH "${CMAKE_BINARY_DIR}/out/bin" _exe_dir_cmake)
+  file(GENERATE OUTPUT "${CMAKE_BINARY_DIR}/portable_demo_manifest.txt" CONTENT
+"opencv_bin=${_ocv_bin_cmake}
+resource_dir=${_res_dir_cmake}
+web_public=${_public_cmake}
+icon_font=${_font_cmake}
+exe_dir=${_exe_dir_cmake}
+exe=$<TARGET_FILE:facebetter_demo>
+runtime=$<TARGET_FILE:facebetter>
+mnn_framework=${_mnn_cmake}
+")
+endif()
 
 # 客户包：把运行时库拷到可执行文件旁，并设 RPATH
 if(NOT FB_DEMO_IN_TREE AND FB_DEMO_RUNTIME_LIB)

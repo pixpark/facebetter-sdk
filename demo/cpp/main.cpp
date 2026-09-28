@@ -18,7 +18,60 @@
 #include <windows.h>
 #endif
 
+#if defined(FB_DEMO_PORTABLE) && !defined(_WIN32)
+#include <climits>
+#include <cstdlib>
+#include <cstring>
+#include <unistd.h>
+#ifdef __APPLE__
+#include <mach-o/dyld.h>
+#endif
+#endif
+
 using demo::Studio;
+
+#ifdef FB_DEMO_PORTABLE
+// Asset paths in a customer zip are relative to the executable.
+static void UseExecutableDirectory() {
+#ifdef _WIN32
+  wchar_t path[MAX_PATH];
+  const DWORD n = GetModuleFileNameW(nullptr, path, MAX_PATH);
+  if (n == 0 || n >= MAX_PATH)
+    return;
+  for (DWORD i = n; i > 0; --i) {
+    if (path[i - 1] == L'\\' || path[i - 1] == L'/') {
+      path[i - 1] = L'\0';
+      break;
+    }
+  }
+  SetCurrentDirectoryW(path);
+#elif defined(__APPLE__)
+  char buf[PATH_MAX];
+  uint32_t size = sizeof(buf);
+  if (_NSGetExecutablePath(buf, &size) != 0)
+    return;
+  char resolved[PATH_MAX];
+  if (!realpath(buf, resolved))
+    return;
+  char* slash = std::strrchr(resolved, '/');
+  if (!slash || slash == resolved)
+    return;
+  *slash = '\0';
+  chdir(resolved);
+#elif defined(__linux__)
+  char buf[PATH_MAX];
+  const ssize_t n = readlink("/proc/self/exe", buf, sizeof(buf) - 1);
+  if (n <= 0)
+    return;
+  buf[n] = '\0';
+  char* slash = std::strrchr(buf, '/');
+  if (!slash || slash == buf)
+    return;
+  *slash = '\0';
+  chdir(buf);
+#endif
+}
+#endif
 
 static float FramebufferScale(GLFWwindow* window) {
   int fb_w = 0;
@@ -56,6 +109,9 @@ static void OnDrop(GLFWwindow* window, int count, const char** paths) {
 }
 
 int main() {
+#ifdef FB_DEMO_PORTABLE
+  UseExecutableDirectory();
+#endif
 #ifdef _WIN32
   SetProcessDPIAware();
 #endif
