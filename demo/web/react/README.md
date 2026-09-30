@@ -1,6 +1,6 @@
 # Facebetter Web Demo
 
-React 相机 / 修图示例。通过 **npm** 安装 `facebetter` **2.1.0**。
+React 相机 / 修图示例。通过 **npm** 安装 `facebetter` **2.1.1**。
 
 ```bash
 cd demo/web/react
