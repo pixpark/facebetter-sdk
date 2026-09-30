@@ -382,42 +382,80 @@ void Studio::SetStatus(std::string text) {
 }
 
 void Studio::ApplyToEngine(const Params& p, const Params* prev) {
-  engine_->SetSmoothing(p.smoothing);
-  engine_->SetSmoothingStyle(p.smoothing_style);
-  engine_->SetWhitening(p.whitening);
-  engine_->SetWhiteningStyle(p.whitening_style);
-  engine_->SetRosiness(p.rosiness);
-  engine_->SetSharpening(p.sharpening);
-  engine_->SetBeautySkinOnly(p.skin_only);
+  // 摄像头每一帧都会进到这里。参数没变就不要再 Set，否则引擎会把
+  // “Switched … style” 按帧刷出来。
+  auto changed = [&](auto member) {
+    return prev == nullptr || prev->*member != p.*member;
+  };
 
-  for (size_t i = 0; i < p.reshape.size(); ++i) {
-    engine_->SetReshape(static_cast<Reshape>(i), p.reshape[i]);
+  if (changed(&Params::smoothing))
+    engine_->SetSmoothing(p.smoothing);
+  if (changed(&Params::smoothing_style))
+    engine_->SetSmoothingStyle(p.smoothing_style);
+  if (changed(&Params::whitening))
+    engine_->SetWhitening(p.whitening);
+  if (changed(&Params::whitening_style))
+    engine_->SetWhiteningStyle(p.whitening_style);
+  if (changed(&Params::rosiness))
+    engine_->SetRosiness(p.rosiness);
+  if (changed(&Params::sharpening))
+    engine_->SetSharpening(p.sharpening);
+  if (changed(&Params::skin_only))
+    engine_->SetBeautySkinOnly(p.skin_only);
+
+  if (changed(&Params::reshape)) {
+    for (size_t i = 0; i < p.reshape.size(); ++i) {
+      engine_->SetReshape(static_cast<Reshape>(i), p.reshape[i]);
+    }
   }
-  for (size_t i = 0; i < p.body_reshape.size(); ++i) {
-    engine_->SetBodyReshape(static_cast<BodyReshape>(i), p.body_reshape[i]);
+  if (changed(&Params::body_reshape)) {
+    for (size_t i = 0; i < p.body_reshape.size(); ++i) {
+      engine_->SetBodyReshape(static_cast<BodyReshape>(i), p.body_reshape[i]);
+    }
   }
 
-  engine_->SetLipstick(p.lipstick);
-  engine_->SetLipstickColor(p.lipstick_color);
-  engine_->SetBlush(p.blush);
-  engine_->SetBlushStyle(p.blush_style);
-  engine_->SetBlushColor(p.blush_color);
-  engine_->SetContour(p.contour);
-  engine_->SetContourStyle(p.contour_style);
-  engine_->SetEyeShadow(p.eyeshadow);
-  engine_->SetEyeShadowStyle(p.eyeshadow_style);
-  engine_->SetEyeShadowColor(p.eyeshadow_color);
-  engine_->SetEyeLiner(p.eyeliner);
-  engine_->SetEyeLinerStyle(p.eyeliner_style);
-  engine_->SetEyeLinerColor(p.eyeliner_color);
-  engine_->SetEyebrow(p.eyebrow);
-  engine_->SetEyebrowStyle(p.eyebrow_style);
-  engine_->SetEyebrowColor(p.eyebrow_color);
-  engine_->SetEyelash(p.eyelash);
-  engine_->SetEyelashStyle(p.eyelash_style);
-  engine_->SetEyelashColor(p.eyelash_color);
-  engine_->SetPupil(p.pupil);
-  engine_->SetPupilColor(p.pupil_color);
+  if (changed(&Params::lipstick))
+    engine_->SetLipstick(p.lipstick);
+  if (changed(&Params::lipstick_color))
+    engine_->SetLipstickColor(p.lipstick_color);
+  if (changed(&Params::blush))
+    engine_->SetBlush(p.blush);
+  if (changed(&Params::blush_style))
+    engine_->SetBlushStyle(p.blush_style);
+  if (changed(&Params::blush_color))
+    engine_->SetBlushColor(p.blush_color);
+  if (changed(&Params::contour))
+    engine_->SetContour(p.contour);
+  if (changed(&Params::contour_style))
+    engine_->SetContourStyle(p.contour_style);
+  if (changed(&Params::eyeshadow))
+    engine_->SetEyeShadow(p.eyeshadow);
+  if (changed(&Params::eyeshadow_style))
+    engine_->SetEyeShadowStyle(p.eyeshadow_style);
+  if (changed(&Params::eyeshadow_color))
+    engine_->SetEyeShadowColor(p.eyeshadow_color);
+  if (changed(&Params::eyeliner))
+    engine_->SetEyeLiner(p.eyeliner);
+  if (changed(&Params::eyeliner_style))
+    engine_->SetEyeLinerStyle(p.eyeliner_style);
+  if (changed(&Params::eyeliner_color))
+    engine_->SetEyeLinerColor(p.eyeliner_color);
+  if (changed(&Params::eyebrow))
+    engine_->SetEyebrow(p.eyebrow);
+  if (changed(&Params::eyebrow_style))
+    engine_->SetEyebrowStyle(p.eyebrow_style);
+  if (changed(&Params::eyebrow_color))
+    engine_->SetEyebrowColor(p.eyebrow_color);
+  if (changed(&Params::eyelash))
+    engine_->SetEyelash(p.eyelash);
+  if (changed(&Params::eyelash_style))
+    engine_->SetEyelashStyle(p.eyelash_style);
+  if (changed(&Params::eyelash_color))
+    engine_->SetEyelashColor(p.eyelash_color);
+  if (changed(&Params::pupil))
+    engine_->SetPupil(p.pupil);
+  if (changed(&Params::pupil_color))
+    engine_->SetPupilColor(p.pupil_color);
 
   const bool filter_changed = !prev || prev->filter_id != p.filter_id;
   if (filter_changed) {
@@ -428,7 +466,8 @@ void Studio::ApplyToEngine(const Params& p, const Params* prev) {
                          ".fbd");
     }
   }
-  if (!p.filter_id.empty())
+  if (!p.filter_id.empty() &&
+      (filter_changed || changed(&Params::filter_intensity)))
     engine_->SetFilterIntensity(p.filter_intensity);
 
   if (!prev || prev->sticker_id != p.sticker_id) {
