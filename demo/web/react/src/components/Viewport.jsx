@@ -33,74 +33,20 @@ function fitDisplaySize(imageWidth, imageHeight, maxWidth, maxHeight) {
   }
 }
 
-function drawFaces(canvas, faces, imageData) {
-  if (!canvas || !imageData) return
-  canvas.width = imageData.width
-  canvas.height = imageData.height
-  const ctx = canvas.getContext('2d')
-  ctx.clearRect(0, 0, canvas.width, canvas.height)
-  if (!faces?.length) return
-
-  faces.forEach((face, index) => {
-    const x = face.rect.x * canvas.width
-    const y = face.rect.y * canvas.height
-    const w = face.rect.width * canvas.width
-    const h = face.rect.height * canvas.height
-    ctx.strokeStyle = 'rgba(255,255,255,0.55)'
-    ctx.setLineDash([6, 4])
-    ctx.strokeRect(x, y, w, h)
-    ctx.setLineDash([])
-    ctx.strokeStyle = 'rgba(255,255,255,0.8)'
-    ctx.lineWidth = 2
-    const c = 8
-    ctx.beginPath()
-    ctx.moveTo(x, y + c); ctx.lineTo(x, y); ctx.lineTo(x + c, y)
-    ctx.moveTo(x + w - c, y); ctx.lineTo(x + w, y); ctx.lineTo(x + w, y + c)
-    ctx.moveTo(x, y + h - c); ctx.lineTo(x, y + h); ctx.lineTo(x + c, y + h)
-    ctx.moveTo(x + w - c, y + h); ctx.lineTo(x + w, y + h); ctx.lineTo(x + w, y + h - c)
-    ctx.stroke()
-
-    if (face.key_points) {
-      face.key_points.forEach((point, i) => {
-        const visible = !face.visibility || face.visibility[i] > 0.4
-        if (!visible) return
-        ctx.fillStyle = '#fff'
-        ctx.beginPath()
-        ctx.arc(point.x * canvas.width, point.y * canvas.height, 1.4, 0, Math.PI * 2)
-        ctx.fill()
-      })
-    }
-
-    const score = ((face.score || 0) * 100).toFixed(1)
-    const label = `Face_${String(index + 1).padStart(2, '0')} ${score}%`
-    ctx.font = '10px "JetBrains Mono", monospace'
-    const tw = ctx.measureText(label).width
-    ctx.fillStyle = 'rgba(255,255,255,0.9)'
-    ctx.fillRect(x + w / 2 - tw / 2 - 6, y - 18, tw + 12, 14)
-    ctx.fillStyle = '#111317'
-    ctx.fillText(label, x + w / 2 - tw / 2, y - 8)
-  })
-}
-
 export default function Viewport({
   original,
   processed,
-  faces,
-  faceOverlay,
-  onToggleFaceOverlay,
   onPickImage,
   onStartCamera,
   onLoadSample,
 }) {
   const afterRef = useRef(null)
   const beforeRef = useRef(null)
-  const overlayRef = useRef(null)
   const stageRef = useRef(null)
   const { t, locale } = useI18n()
   const [holding, setHolding] = useState(false)
   const [stageSize, setStageSize] = useState({ width: 0, height: 0 })
   const showOriginal = holding && Boolean(original)
-  const showOverlay = faceOverlay && !showOriginal
   const frame = processed || original
   const display = fitDisplaySize(frame?.width || 0, frame?.height || 0, stageSize.width, stageSize.height)
 
@@ -119,9 +65,8 @@ export default function Viewport({
   useEffect(() => {
     drawImageData(afterRef.current, processed)
     drawImageData(beforeRef.current, original)
-    drawFaces(overlayRef.current, showOverlay ? faces : [], processed || original)
-    syncOverlaySize(afterRef.current, [beforeRef.current, overlayRef.current])
-  }, [original, processed, faces, showOverlay, showOriginal, display.width, display.height])
+    syncOverlaySize(afterRef.current, [beforeRef.current])
+  }, [original, processed, showOriginal, display.width, display.height])
 
   const startHold = (event) => {
     if (!original || event.button > 0) return
@@ -166,24 +111,6 @@ export default function Viewport({
               </div>
             ) : null}
           </div>
-          <canvas ref={overlayRef} className="absolute inset-0 pointer-events-none z-20" />
-          <button
-            type="button"
-            className={
-              `absolute top-3 right-3 z-40 px-2.5 py-1 rounded-full backdrop-blur-md border text-label-sm font-medium flex items-center gap-1.5 shadow-sm ` +
-              (faceOverlay
-                ? 'bg-white text-neutral-950 border-white'
-                : 'bg-[#0e1014]/80 text-gray-300 border-white/10 hover:text-white')
-            }
-            onPointerDown={(event) => event.stopPropagation()}
-            onClick={(event) => {
-              event.stopPropagation()
-              onToggleFaceOverlay?.()
-            }}
-          >
-            <Icon name="face" className="text-sm" />
-            {t('preview.keypoints')}
-          </button>
           <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-30 pointer-events-none">
             <div className="px-2.5 py-1 rounded-full bg-[#0e1014]/80 backdrop-blur-md border border-white/10 text-label-sm text-gray-300 flex items-center gap-1.5 shadow-sm">
               <Icon name="touch_app" className="text-sm text-gray-400" />

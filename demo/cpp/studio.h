@@ -20,7 +20,6 @@ struct GLFWwindow;
 namespace demo {
 
 using facebetter::EngineStats;
-using facebetter::FaceDetectionResult;
 using facebetter::beauty_params::BlushColor;
 using facebetter::beauty_params::BlushStyle;
 using facebetter::beauty_params::ChromaKeyColor;
@@ -93,7 +92,6 @@ struct Params {
   float chroma_smoothness = 0.1f;
   float chroma_desaturation = 0.1f;
 
-  bool face_overlay = false;
 };
 
 enum class StickerKind { Face, Screen, ThreeD };
@@ -147,7 +145,6 @@ class Studio {
   bool HasFrame() const;
   const GpuFrame& OriginalGpu() const { return original_gpu_; }
   const GpuFrame& ProcessedGpu() const { return processed_gpu_; }
-  std::vector<FaceDetectionResult> Faces() const;
   EngineStats Stats() const;
   std::string Status() const;  // empty if expired
   const std::vector<Asset>& Filters() const { return filters_; }
@@ -159,7 +156,6 @@ class Studio {
   void ApplyToEngine(const Params& p, const Params* prev);
   void Publish(RgbaBuffer processed,
                RgbaBuffer original,
-               std::vector<FaceDetectionResult> faces,
                EngineStats stats);
   void SetStatus(std::string text);
   static void UploadTexture(GpuFrame* gpu, const RgbaBuffer& buf);
@@ -189,12 +185,10 @@ class Studio {
 
   RgbaBuffer pending_processed_;
   RgbaBuffer pending_original_;
-  std::vector<FaceDetectionResult> pending_faces_;
   EngineStats pending_stats_;
 
   GpuFrame original_gpu_;
   GpuFrame processed_gpu_;
-  std::vector<FaceDetectionResult> faces_;
   EngineStats stats_;
   std::string status_;
   std::chrono::steady_clock::time_point status_until_{};

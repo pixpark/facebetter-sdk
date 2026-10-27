@@ -180,12 +180,6 @@ bool Studio::Init(GLFWwindow* window) {
     return false;
   }
 
-  EngineCallbacks callbacks;
-  callbacks.on_face_landmarks = [this](const std::vector<FaceDetectionResult>& results) {
-    std::lock_guard<std::mutex> lock(mu_);
-    pending_faces_ = results;
-  };
-  engine_->SetCallbacks(callbacks);
   engine_->ClearSticker();
   engine_->Clear3DSticker();
   engine_->ClearFilter();
@@ -316,9 +310,7 @@ void Studio::NotifyParamsChanged() {
 }
 
 void Studio::ResetParams() {
-  const bool overlay = params_.face_overlay;
   params_ = Params{};
-  params_.face_overlay = overlay;
   NotifyParamsChanged();
   SetStatus("status.reset");
 }
@@ -326,7 +318,6 @@ void Studio::ResetParams() {
 void Studio::UploadGpu() {
   RgbaBuffer processed;
   RgbaBuffer original;
-  std::vector<FaceDetectionResult> faces;
   EngineStats stats;
   {
     std::lock_guard<std::mutex> lock(mu_);
@@ -334,14 +325,12 @@ void Studio::UploadGpu() {
       return;
     processed = pending_processed_;
     original = pending_original_;
-    faces = pending_faces_;
     stats = pending_stats_;
     pending_ready_ = false;
   }
   cv_.notify_one();
   UploadTexture(&processed_gpu_, processed);
   UploadTexture(&original_gpu_, original);
-  faces_ = std::move(faces);
   stats_ = stats;
 }
 
@@ -357,10 +346,6 @@ bool Studio::IsCamera() const {
 
 bool Studio::HasFrame() const {
   return processed_gpu_.texture != 0 && processed_gpu_.width > 0;
-}
-
-std::vector<FaceDetectionResult> Studio::Faces() const {
-  return faces_;
 }
 
 EngineStats Studio::Stats() const {
@@ -523,13 +508,11 @@ void Studio::ApplyToEngine(const Params& p, const Params* prev) {
 
 void Studio::Publish(RgbaBuffer processed,
                      RgbaBuffer original,
-                     std::vector<FaceDetectionResult> faces,
                      EngineStats stats) {
   {
     std::lock_guard<std::mutex> lock(mu_);
     pending_processed_ = std::move(processed);
     pending_original_ = std::move(original);
-    pending_faces_ = std::move(faces);
     pending_stats_ = stats;
     pending_ready_ = true;
   }
@@ -614,12 +597,7 @@ void Studio::WorkerLoop() {
       auto output = engine_->ProcessImage(frame);
       if (!output || !output->Data())
         return false;
-      std::vector<FaceDetectionResult> latest;
-      {
-        std::lock_guard<std::mutex> lock(mu_);
-        latest = pending_faces_;
-      }
-      Publish(CopyOutput(*output), input, std::move(latest), engine_->GetStats());
+      Publish(CopyOutput(*output), input, engine_->GetStats());
       return true;
     };
 

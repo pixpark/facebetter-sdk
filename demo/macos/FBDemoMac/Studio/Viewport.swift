@@ -26,12 +26,6 @@ struct Viewport: View {
             )
             .shadow(color: .black.opacity(0.45), radius: 24, y: 8)
             .gesture(compareGesture)
-            .overlay {
-              if studio.params.faceOverlay && !studio.isComparing {
-                LandmarkOverlay(faces: studio.faces, imageSize: studio.frameSize)
-                  .allowsHitTesting(false)
-              }
-            }
             .overlay(alignment: .topLeading) {
               if studio.isComparing {
                 HStack(spacing: 6) {
@@ -47,31 +41,6 @@ struct Viewport: View {
                 .clipShape(RoundedRectangle(cornerRadius: 6))
                 .padding(12)
               }
-            }
-            .overlay(alignment: .topTrailing) {
-              Button {
-                studio.params.faceOverlay.toggle()
-              } label: {
-                HStack(spacing: 6) {
-                  Image(systemName: "face.dashed")
-                  Text(studio.t("preview.keypoints"))
-                }
-                .font(.system(size: 11, weight: .medium))
-                .padding(.horizontal, 10)
-                .padding(.vertical, 5)
-                .foregroundStyle(studio.params.faceOverlay ? Color(hex: 0x0A0A0A) : Color(hex: 0xD1D5DB))
-                .background(studio.params.faceOverlay ? Color.white : Color(hex: 0x0E1014).opacity(0.80))
-                .overlay(
-                  Capsule().stroke(
-                    studio.params.faceOverlay ? Color.white : Color.white.opacity(0.10),
-                    lineWidth: 1
-                  )
-                )
-                .clipShape(Capsule())
-              }
-              .buttonStyle(.plain)
-              .withoutFocusRing()
-              .padding(12)
             }
             .overlay(alignment: .bottom) {
               HStack(spacing: 6) {
@@ -210,41 +179,6 @@ private struct DotGrid: View {
           y += step
         }
         x += step
-      }
-    }
-  }
-}
-
-private struct LandmarkOverlay: View {
-  let faces: [FBFaceDetectionResult]
-  let imageSize: CGSize
-
-  var body: some View {
-    Canvas { context, size in
-      guard imageSize.width > 0, imageSize.height > 0 else { return }
-      for face in faces {
-        let rect = face.rect
-        let box = CGRect(
-          x: CGFloat(rect.x) * size.width,
-          y: CGFloat(rect.y) * size.height,
-          width: CGFloat(rect.width) * size.width,
-          height: CGFloat(rect.height) * size.height
-        )
-        context.stroke(Path(box), with: .color(.white.opacity(0.55)), lineWidth: 1)
-
-        guard let points = face.keyPoints else { continue }
-        let visibility = face.visibility ?? []
-        for (index, point) in points.enumerated() {
-          if index < visibility.count, visibility[index].floatValue < 0.4 {
-            continue
-          }
-          let center = CGPoint(
-            x: CGFloat(point.x) * size.width,
-            y: CGFloat(point.y) * size.height
-          )
-          let dot = Path(ellipseIn: CGRect(x: center.x - 1.2, y: center.y - 1.2, width: 2.4, height: 2.4))
-          context.fill(dot, with: .color(.white))
-        }
       }
     }
   }

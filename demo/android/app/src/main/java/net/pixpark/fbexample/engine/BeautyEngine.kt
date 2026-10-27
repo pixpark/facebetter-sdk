@@ -6,7 +6,6 @@ import android.util.Log
 import net.pixpark.facebetter.BeautyEffectEngine
 import net.pixpark.facebetter.EngineCallbacks
 import net.pixpark.facebetter.EngineEventCode
-import net.pixpark.facebetter.FaceDetectionResult
 import net.pixpark.facebetter.ImageFrame
 import net.pixpark.fbexample.beauty.BackgroundFill
 import net.pixpark.fbexample.beauty.BeautyCatalog
@@ -32,7 +31,6 @@ class BeautyEngine(
         private set
 
     var onEvent: ((String) -> Unit)? = null
-    var onFaces: ((List<FaceDetectionResult>) -> Unit)? = null
 
     fun start() {
         lock.withLock {
@@ -82,9 +80,6 @@ class BeautyEngine(
                     }
                     statusKey = key
                     onEvent?.invoke(key)
-                }
-                callbacks.onFaceLandmarks = EngineCallbacks.OnFaceLandmarksCallback { results ->
-                    onFaces?.invoke(results ?: emptyList())
                 }
                 created.setCallbacks(callbacks)
 

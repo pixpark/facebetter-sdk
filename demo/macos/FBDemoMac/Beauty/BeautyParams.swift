@@ -42,7 +42,6 @@ struct BeautyParams: Equatable {
   var chromaSimilarity: Float = 0.4
   var chromaSmoothness: Float = 0.1
   var chromaDesaturation: Float = 0.1
-  var faceOverlay = false
 
   static func emptyReshape() -> [FBReshape: Float] {
     var values: [FBReshape: Float] = [:]

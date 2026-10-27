@@ -13,12 +13,6 @@ struct StudioView: View {
         .ignoresSafeArea()
         .gesture(previewGesture)
 
-      if studio.showLandmarks && !studio.isComparing {
-        LandmarkOverlay(faces: studio.faces, imageSize: studio.frameSize)
-          .ignoresSafeArea()
-          .allowsHitTesting(false)
-      }
-
       LinearGradient(
         colors: [.black.opacity(0.55), .clear, .black.opacity(0.72)],
         startPoint: .top,
@@ -123,16 +117,6 @@ struct StudioView: View {
       }
 
       Button {
-        studio.showLandmarks.toggle()
-      } label: {
-        TopIcon(
-          symbol: "dot.viewfinder",
-          title: studio.t("nav.landmarks"),
-          active: studio.showLandmarks
-        )
-      }
-
-      Button {
         studio.suspendForExternalTexture()
         showTextureDemo = true
       } label: {
@@ -234,60 +218,4 @@ struct TopIcon: View {
       in: RoundedRectangle(cornerRadius: 12, style: .continuous)
     )
   }
-}
-
-private struct LandmarkOverlay: View {
-  let faces: [FBFaceDetectionResult]
-  let imageSize: CGSize
-
-  var body: some View {
-    GeometryReader { proxy in
-      Canvas { context, size in
-        let content = aspectFitRect(imageSize: imageSize, in: size)
-        guard content.width > 0, content.height > 0 else { return }
-        for face in faces {
-          let rect = face.rect
-          let box = CGRect(
-            x: content.minX + CGFloat(rect.x) * content.width,
-            y: content.minY + CGFloat(rect.y) * content.height,
-            width: CGFloat(rect.width) * content.width,
-            height: CGFloat(rect.height) * content.height
-          )
-          context.stroke(Path(box), with: .color(.white.opacity(0.7)), lineWidth: 1)
-
-          guard let points = face.keyPoints else { continue }
-          let visibility = face.visibility ?? []
-          for (index, point) in points.enumerated() {
-            if index < visibility.count, visibility[index].floatValue < 0.4 {
-              continue
-            }
-            let center = CGPoint(
-              x: content.minX + CGFloat(point.x) * content.width,
-              y: content.minY + CGFloat(point.y) * content.height
-            )
-            let dot = Path(
-              ellipseIn: CGRect(x: center.x - 1.2, y: center.y - 1.2, width: 2.4, height: 2.4)
-            )
-            context.fill(dot, with: .color(.white))
-          }
-        }
-      }
-      .frame(width: proxy.size.width, height: proxy.size.height)
-    }
-  }
-}
-
-private func aspectFitRect(imageSize: CGSize, in viewSize: CGSize) -> CGRect {
-  guard imageSize.width > 0, imageSize.height > 0, viewSize.width > 0, viewSize.height > 0 else {
-    return .zero
-  }
-  let scale = min(viewSize.width / imageSize.width, viewSize.height / imageSize.height)
-  let width = imageSize.width * scale
-  let height = imageSize.height * scale
-  return CGRect(
-    x: (viewSize.width - width) / 2,
-    y: (viewSize.height - height) / 2,
-    width: width,
-    height: height
-  )
 }

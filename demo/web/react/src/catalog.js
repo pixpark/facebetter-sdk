@@ -359,7 +359,6 @@ export function createDefaultParams() {
     chromaSimilarity: 0.4,
     chromaSmoothness: 0.1,
     chromaDesaturation: 0.1,
-    faceOverlay: false,
   }
 }
 

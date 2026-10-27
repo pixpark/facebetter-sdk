@@ -11,7 +11,6 @@ enum StudioSource {
 
 final class StudioModel: BeautySession {
   @Published var source: StudioSource = .camera
-  @Published var showLandmarks = false
   @Published var isComparing = false {
     didSet {
       stateLock.lock()
@@ -21,7 +20,6 @@ final class StudioModel: BeautySession {
     }
   }
   @Published var statusKey = "status.initializing"
-  @Published var faces: [FBFaceDetectionResult] = []
   @Published var frameSize: CGSize = .zero
   @Published var fps: Double = 0
   @Published var processMs: Double = 0
@@ -46,11 +44,6 @@ final class StudioModel: BeautySession {
     engine.onEvent = { [weak self] key in
       DispatchQueue.main.async {
         self?.flash(key)
-      }
-    }
-    engine.onFaces = { [weak self] faces in
-      DispatchQueue.main.async {
-        self?.faces = faces
       }
     }
     camera.onFrame = { [weak self] buffer in

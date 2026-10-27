@@ -13,7 +13,6 @@ final class BeautyEngine {
   private(set) var statusKey = "status.initializing"
 
   var onEvent: ((String) -> Void)?
-  var onFaces: (([FBFaceDetectionResult]) -> Void)?
 
   init(startImmediately: Bool = true) {
     resourceRoot = Bundle.main.resourceURL?.appendingPathComponent("Facebetter", isDirectory: true)
@@ -142,9 +141,6 @@ final class BeautyEngine {
       self.statusKey = key
       self.lock.unlock()
       self.onEvent?(key)
-    }
-    callbacks.onFaceLandmarks = { [weak self] results in
-      self?.onFaces?(results ?? [])
     }
     created.setCallbacks(callbacks)
 

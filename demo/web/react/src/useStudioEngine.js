@@ -107,7 +107,6 @@ export function useStudioEngine() {
   const [loadPercent, setLoadPercent] = useState(0)
   const [ready, setReady] = useState(false)
   const [params, setParams] = useState(() => createDefaultParams())
-  const [faces, setFaces] = useState([])
   const [source, setSource] = useState('idle')
   const [frameId, setFrameId] = useState(0)
   const [filterMap, setFilterMap] = useState({})
@@ -349,9 +348,6 @@ export function useStudioEngine() {
         engineRef.current = engine
         resourcesRef.current = resources
         appliedParamsRef.current = null
-        engine.setCallbacks({
-          onFaceLandmarks: (results) => setFaces(results || []),
-        })
         setReady(true)
         setStatusKey('')
         setStatusExtra('')
@@ -385,7 +381,6 @@ export function useStudioEngine() {
     ready,
     params,
     setParams,
-    faces,
     source,
     frameId,
     filterMap,

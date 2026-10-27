@@ -3,7 +3,6 @@ package net.pixpark.fbexample.studio
 import android.graphics.Bitmap
 import android.widget.ImageView
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
@@ -23,7 +22,6 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Cameraswitch
-import androidx.compose.material.icons.outlined.FilterCenterFocus
 import androidx.compose.material.icons.outlined.IosShare
 import androidx.compose.material.icons.outlined.Language
 import androidx.compose.material.icons.outlined.Layers
@@ -44,17 +42,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
-import net.pixpark.facebetter.FaceDetectionResult
 import net.pixpark.fbexample.AppLocale
 import net.pixpark.fbexample.beauty.BeautyPanel
 import kotlin.math.roundToInt
@@ -105,15 +99,6 @@ fun StudioScreen(
                         ),
                     ),
             )
-
-            if (viewModel.showLandmarks && !viewModel.isComparing) {
-                LandmarkOverlay(
-                    faces = viewModel.faces,
-                    imageWidth = viewModel.previewBitmap?.width ?: 0,
-                    imageHeight = viewModel.previewBitmap?.height ?: 0,
-                    modifier = Modifier.fillMaxSize(),
-                )
-            }
 
             Column(
                 modifier = Modifier
@@ -234,13 +219,6 @@ private fun TopBar(
             viewModel.t("nav.export"),
             modifier = Modifier.weight(1f),
             onClick = { viewModel.capture() },
-        )
-        TopIcon(
-            Icons.Outlined.FilterCenterFocus,
-            viewModel.t("nav.landmarks"),
-            active = viewModel.showLandmarks,
-            modifier = Modifier.weight(1f),
-            onClick = { viewModel.showLandmarks = !viewModel.showLandmarks },
         )
         TopIcon(
             Icons.Outlined.Layers,
@@ -380,78 +358,4 @@ private fun StatusChip(text: String, comparing: Boolean, modifier: Modifier = Mo
         )
         Text(text, color = Color.White, fontSize = 12.sp)
     }
-}
-
-@Composable
-private fun LandmarkOverlay(
-    faces: List<FaceDetectionResult>,
-    imageWidth: Int,
-    imageHeight: Int,
-    modifier: Modifier = Modifier,
-) {
-    Canvas(modifier = modifier) {
-        val content = aspectFitRect(
-            imageWidth = imageWidth.toFloat(),
-            imageHeight = imageHeight.toFloat(),
-            viewWidth = size.width,
-            viewHeight = size.height,
-        )
-        if (content.width <= 0f || content.height <= 0f) {
-            return@Canvas
-        }
-        faces.forEach { face ->
-            val rect = face.rect ?: return@forEach
-            drawRect(
-                color = Color.White.copy(0.7f),
-                topLeft = Offset(
-                    content.left + rect.x * content.width,
-                    content.top + rect.y * content.height,
-                ),
-                size = Size(rect.width * content.width, rect.height * content.height),
-                style = Stroke(width = 1.dp.toPx()),
-            )
-            val points = face.keyPoints ?: return@forEach
-            val visibility = face.visibility
-            points.forEachIndexed { index, point ->
-                if (visibility != null && index < visibility.size && visibility[index] < 0.4f) {
-                    return@forEachIndexed
-                }
-                drawCircle(
-                    color = Color.White,
-                    radius = 1.2.dp.toPx(),
-                    center = Offset(
-                        content.left + point.x * content.width,
-                        content.top + point.y * content.height,
-                    ),
-                )
-            }
-        }
-    }
-}
-
-private data class ContentRect(
-    val left: Float,
-    val top: Float,
-    val width: Float,
-    val height: Float,
-)
-
-private fun aspectFitRect(
-    imageWidth: Float,
-    imageHeight: Float,
-    viewWidth: Float,
-    viewHeight: Float,
-): ContentRect {
-    if (imageWidth <= 0f || imageHeight <= 0f || viewWidth <= 0f || viewHeight <= 0f) {
-        return ContentRect(0f, 0f, 0f, 0f)
-    }
-    val scale = minOf(viewWidth / imageWidth, viewHeight / imageHeight)
-    val width = imageWidth * scale
-    val height = imageHeight * scale
-    return ContentRect(
-        left = (viewWidth - width) / 2f,
-        top = (viewHeight - height) / 2f,
-        width = width,
-        height = height,
-    )
 }

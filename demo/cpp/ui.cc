@@ -370,53 +370,6 @@ void ChipGrid(int columns, int count, Fn&& fn) {
   }
 }
 
-void DrawLandmarks(ImDrawList* dl,
-                   ImVec2 p0,
-                   ImVec2 p1,
-                   const std::vector<FaceDetectionResult>& faces) {
-  const float w = p1.x - p0.x;
-  const float h = p1.y - p0.y;
-  int index = 0;
-  for (const auto& face : faces) {
-    const float x = p0.x + face.rect.x * w;
-    const float y = p0.y + face.rect.y * h;
-    const float rw = face.rect.width * w;
-    const float rh = face.rect.height * h;
-    const ImU32 line = IM_COL32(255, 255, 255, 200);
-    const float c = 8.f;
-    dl->AddRect(ImVec2(x, y), ImVec2(x + rw, y + rh), IM_COL32(255, 255, 255, 90));
-    dl->AddLine(ImVec2(x, y + c), ImVec2(x, y), line, 2.f);
-    dl->AddLine(ImVec2(x, y), ImVec2(x + c, y), line, 2.f);
-    dl->AddLine(ImVec2(x + rw - c, y), ImVec2(x + rw, y), line, 2.f);
-    dl->AddLine(ImVec2(x + rw, y), ImVec2(x + rw, y + c), line, 2.f);
-    dl->AddLine(ImVec2(x, y + rh - c), ImVec2(x, y + rh), line, 2.f);
-    dl->AddLine(ImVec2(x, y + rh), ImVec2(x + c, y + rh), line, 2.f);
-    dl->AddLine(ImVec2(x + rw - c, y + rh), ImVec2(x + rw, y + rh), line, 2.f);
-    dl->AddLine(ImVec2(x + rw, y + rh), ImVec2(x + rw, y + rh - c), line, 2.f);
-
-    for (size_t i = 0; i < face.key_points.size(); ++i) {
-      const bool visible =
-          i >= face.visibility.size() || face.visibility[i] > 0.4f;
-      if (!visible)
-        continue;
-      dl->AddCircleFilled(
-          ImVec2(p0.x + face.key_points[i].x * w,
-                 p0.y + face.key_points[i].y * h),
-          1.6f, IM_COL32(255, 255, 255, 230));
-    }
-
-    char label[48];
-    std::snprintf(label, sizeof(label), "Face_%02d %.1f%%", ++index,
-                  face.score * 100.f);
-    const ImVec2 ts = ImGui::CalcTextSize(label);
-    const ImVec2 lp(x + rw * 0.5f - ts.x * 0.5f, y - 18.f);
-    dl->AddRectFilled(ImVec2(lp.x - 6, lp.y - 2),
-                      ImVec2(lp.x + ts.x + 6, lp.y + ts.y + 2),
-                      IM_COL32(255, 255, 255, 230), 3.f);
-    dl->AddText(lp, IM_COL32(17, 19, 23, 255), label);
-  }
-}
-
 float PillWidth(const char* label) {
   return ImGui::CalcTextSize(label).x + ImGui::GetStyle().FramePadding.x * 2.f;
 }
@@ -595,9 +548,6 @@ void DrawViewport(Studio& studio) {
                       IM_COL32_WHITE, 6.f);
   dl->AddRect(origin, p1, IM_COL32(35, 39, 49, 255), 6.f);
 
-  if (p.face_overlay && !holding)
-    DrawLandmarks(dl, origin, p1, studio.Faces());
-
   if (holding) {
     const char* tag = T("preview.original");
     const ImVec2 ts = ImGui::CalcTextSize(tag);
@@ -607,10 +557,6 @@ void DrawViewport(Studio& studio) {
     dl->AddText(ImVec2(origin.x + 18, origin.y + 16), IM_COL32(220, 220, 220, 255),
                 tag);
   }
-
-  ImGui::SetCursorScreenPos(ImVec2(p1.x - 108, origin.y + 12));
-  if (Pill(T("preview.keypoints"), p.face_overlay))
-    p.face_overlay = !p.face_overlay;
 
   const char* hint = holding ? T("preview.release") : T("preview.hold");
   const ImVec2 hs = ImGui::CalcTextSize(hint);

@@ -28,9 +28,6 @@ export default function App() {
         <Viewport
           original={studio.original}
           processed={studio.processed}
-          faces={studio.faces}
-          faceOverlay={studio.params.faceOverlay}
-          onToggleFaceOverlay={() => studio.setParams((p) => ({ ...p, faceOverlay: !p.faceOverlay }))}
           onPickImage={() => fileRef.current?.click()}
           onStartCamera={() => studio.startCamera().catch((error) => window.alert(error.message))}
           onLoadSample={() => studio.loadSampleImage().catch((error) => window.alert(error.message))}

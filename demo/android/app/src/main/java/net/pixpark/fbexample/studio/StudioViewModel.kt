@@ -18,7 +18,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import net.pixpark.facebetter.FaceDetectionResult
 import net.pixpark.facebetter.ImageFrame
 import net.pixpark.fbexample.AppLocale
 import net.pixpark.fbexample.L10n
@@ -58,12 +57,9 @@ class StudioViewModel(application: Application) : AndroidViewModel(application),
         private set
     var source by mutableStateOf(StudioSource.CAMERA)
         private set
-    var showLandmarks by mutableStateOf(false)
     var isComparing by mutableStateOf(false)
         private set
     var statusKey by mutableStateOf("status.initializing")
-        private set
-    var faces by mutableStateOf<List<FaceDetectionResult>>(emptyList())
         private set
     var fps by mutableDoubleStateOf(0.0)
         private set
@@ -88,11 +84,6 @@ class StudioViewModel(application: Application) : AndroidViewModel(application),
             viewModelScope.launch(Dispatchers.Main) {
                 engineReady.set(key == "status.ready")
                 flash(key)
-            }
-        }
-        engine.onFaces = { next ->
-            viewModelScope.launch(Dispatchers.Main) {
-                faces = next
             }
         }
         filterLabels = loadFilterLabels(application)
