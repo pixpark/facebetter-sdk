@@ -34,7 +34,6 @@ enum class SkinItem(val labelKey: String) {
     SMOOTHING("skin.smoothing"),
     WHITENING("skin.whitening"),
     ROSINESS("skin.rosiness"),
-    SHARPENING("skin.sharpening"),
 }
 
 enum class MakeupItem(val labelKey: String) {

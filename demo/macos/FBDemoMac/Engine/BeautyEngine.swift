@@ -153,7 +153,6 @@ final class BeautyEngine {
     engine.setWhitening(params.whitening)
     engine.setWhiteningStyle(params.whiteningStyle)
     engine.setRosiness(params.rosiness)
-    engine.setSharpening(params.sharpening)
     engine.setBeautySkinOnly(params.skinOnly)
 
     for item in BeautyCatalog.reshapeItems {

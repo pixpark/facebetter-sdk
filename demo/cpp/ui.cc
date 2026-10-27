@@ -28,7 +28,7 @@ float UiPx(float px) {
   return px * g_ui_scale;
 }
 
-// Material Icons PUA → UTF-8（与 Web Demo 同一套图标名）
+// Material Icons PUA code points as UTF-8. Same icon names as the Web demo.
 constexpr const char kIconSpa[] = "\xEE\xAD\x8C";         // U+EB4C spa
 constexpr const char kIconFace[] = "\xEE\xA1\xBC";        // U+E87C face
 constexpr const char kIconBody[] = "\xEE\xA1\x8E";        // U+E84E accessibility
@@ -643,7 +643,7 @@ void DrawSkin(Studio& studio) {
   const bool reset_skin = ImGui::Button(T("skin.reset"), reset_sz);
   PopBtnFont();
   if (reset_skin) {
-    p.smoothing = p.whitening = p.rosiness = p.sharpening = 0.f;
+    p.smoothing = p.whitening = p.rosiness = 0.f;
     studio.NotifyParamsChanged();
   }
   ImGui::PopStyleColor(2);
@@ -677,8 +677,6 @@ void DrawSkin(Studio& studio) {
   if (ParamSlider(T("skin.whitening"), &p.whitening))
     studio.NotifyParamsChanged();
   if (ParamSlider(T("skin.rosiness"), &p.rosiness))
-    studio.NotifyParamsChanged();
-  if (ParamSlider(T("skin.sharpening"), &p.sharpening))
     studio.NotifyParamsChanged();
   EndCard();
 }
@@ -1212,14 +1210,15 @@ void LoadStudioFonts(float framebuffer_scale, float ui_scale) {
   cfg.OversampleH = raster >= 1.5f ? 1 : 2;
   cfg.OversampleV = raster >= 1.5f ? 1 : 2;
   cfg.PixelSnapH = false;
-  // 按物理像素栅格化。FontGlobalScale 只抵消 framebuffer 比例，
-  // 保留 ui_scale，这样 Windows 高分屏上的字会跟着系统缩放变大。
+  // Rasterize at physical pixels. FontGlobalScale cancels only the framebuffer
+  // scale and keeps ui_scale, so type follows the Windows display scale.
   cfg.GlyphOffset = ImVec2(0.f, -1.1f * raster);
   ImFontGlyphRangesBuilder builder;
   builder.AddRanges(io.Fonts->GetGlyphRangesDefault());
   ForEachI18nText([&](const char* text) { builder.AddText(text); });
   builder.AddText("Facebetter Demo 0123456789%._-");
-  // AddFontFromFileTTF 只保存指针，图集要到 NewFrame 才构建，ranges 必须活过这次调用。
+  // AddFontFromFileTTF stores the pointer. The atlas is built at NewFrame, so
+  // ranges must outlive this call.
   static ImVector<ImWchar> ranges;
   ranges.clear();
   builder.BuildRanges(&ranges);

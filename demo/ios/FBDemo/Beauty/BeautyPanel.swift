@@ -138,7 +138,6 @@ private struct SkinSection: View {
         case .smoothing: return studio.params.smoothing
         case .whitening: return studio.params.whitening
         case .rosiness: return studio.params.rosiness
-        case .sharpening: return studio.params.sharpening
         }
       },
       set: { value in
@@ -146,7 +145,6 @@ private struct SkinSection: View {
         case .smoothing: studio.params.smoothing = value
         case .whitening: studio.params.whitening = value
         case .rosiness: studio.params.rosiness = value
-        case .sharpening: studio.params.sharpening = value
         }
       }
     )

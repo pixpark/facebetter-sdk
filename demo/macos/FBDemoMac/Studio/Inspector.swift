@@ -127,7 +127,6 @@ private struct SkinPanel: View {
           studio.params.smoothing = 0
           studio.params.whitening = 0
           studio.params.rosiness = 0
-          studio.params.sharpening = 0
         }
         .buttonStyle(.plain)
         .withoutFocusRing()
@@ -164,7 +163,6 @@ private struct SkinPanel: View {
       }
       ParamSlider(label: studio.t("skin.whitening"), value: $studio.params.whitening)
       ParamSlider(label: studio.t("skin.rosiness"), value: $studio.params.rosiness)
-      ParamSlider(label: studio.t("skin.sharpening"), value: $studio.params.sharpening)
     }
   }
 }

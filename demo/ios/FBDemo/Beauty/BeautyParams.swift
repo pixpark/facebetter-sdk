@@ -6,7 +6,6 @@ struct BeautyParams: Equatable {
   var whitening: Float = 0
   var whiteningStyle: FBWhiteningStyle = .coldWhite
   var rosiness: Float = 0
-  var sharpening: Float = 0
   var skinOnly = false
   var reshape: [FBReshape: Float] = BeautyParams.emptyReshape()
   var bodyReshape: [FBBodyReshape: Float] = BeautyParams.emptyBodyReshape()

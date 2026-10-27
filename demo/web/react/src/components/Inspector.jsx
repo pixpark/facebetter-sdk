@@ -72,7 +72,7 @@ function SkinPanel({ params, setParams }) {
         <button
           type="button"
           className="text-telemetry-xs text-gray-500 hover:text-white hover:underline"
-          onClick={() => setParams((p) => ({ ...p, smoothing: 0, whitening: 0, rosiness: 0, sharpening: 0 }))}
+          onClick={() => setParams((p) => ({ ...p, smoothing: 0, whitening: 0, rosiness: 0 }))}
         >
           {t('skin.reset')}
         </button>
@@ -99,7 +99,6 @@ function SkinPanel({ params, setParams }) {
       </div>
       <ParamSlider label={t('skin.whitening')} value={Math.round(params.whitening * 100)} onChange={(v) => setParams((p) => ({ ...p, whitening: v / 100 }))} />
       <ParamSlider label={t('skin.rosiness')} value={Math.round(params.rosiness * 100)} onChange={(v) => setParams((p) => ({ ...p, rosiness: v / 100 }))} />
-      <ParamSlider label={t('skin.sharpening')} value={Math.round(params.sharpening * 100)} onChange={(v) => setParams((p) => ({ ...p, sharpening: v / 100 }))} />
     </Card>
   )
 }

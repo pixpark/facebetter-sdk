@@ -294,7 +294,6 @@ export const STUDIO_LOOK = {
   smoothing: 0.68,
   whitening: 0.42,
   rosiness: 0.35,
-  sharpening: 0.25,
   lipstick: 0.75,
   lipstickColor: LipstickColor.RetroRed,
   blush: 0.48,
@@ -327,7 +326,6 @@ export function createDefaultParams() {
     whitening: 0,
     whiteningStyle: WhiteningStyle.ColdWhite,
     rosiness: 0,
-    sharpening: 0,
     skinOnly: false,
     reshape,
     bodyReshape,
@@ -371,7 +369,6 @@ export function applyParams(engine, params, resources, prev = null) {
   engine.setWhitening(params.whitening)
   engine.setWhiteningStyle(params.whiteningStyle)
   engine.setRosiness(params.rosiness)
-  engine.setSharpening(params.sharpening)
   engine.setBeautySkinOnly(params.skinOnly)
 
   for (const [key, value] of Object.entries(params.reshape)) {

@@ -312,13 +312,15 @@ private fun ImageProxy.toImageFrame(frontFacing: Boolean): ImageFrame? {
             )
         }
     } ?: return null
+    // CameraX leaves pixels in sensor orientation. Rotate and mirror this CPU
+    // buffer here. These calls do not transform a GL texture.
     when (imageInfo.rotationDegrees % 360) {
         90 -> frame.rotate(ImageFrame.Rotation.ROTATION_90)
         180 -> frame.rotate(ImageFrame.Rotation.ROTATION_180)
         270 -> frame.rotate(ImageFrame.Rotation.ROTATION_270)
     }
     if (frontFacing) {
-        frame.mirror("horizontal")
+        frame.mirror(ImageFrame.MirrorMode.HORIZONTAL)
     }
     return frame
 }

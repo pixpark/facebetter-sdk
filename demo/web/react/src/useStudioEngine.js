@@ -174,8 +174,10 @@ export function useStudioEngine() {
         canvas.width = video.videoWidth
         canvas.height = video.videoHeight
         const ctx = canvas.getContext('2d', { willReadFrequently: true })
-        // Front-camera selfie preview: flip once here so original and
+        // Front-camera selfie preview: flip the CPU canvas once so original and
         // processed share the same orientation during hold-to-compare.
+        // processImage then uses MirrorMode.None. Web has no rotate API, and
+        // processTexture does not mirror.
         ctx.translate(canvas.width, 0)
         ctx.scale(-1, 1)
         ctx.drawImage(video, 0, 0)

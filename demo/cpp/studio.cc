@@ -173,7 +173,6 @@ bool Studio::Init(GLFWwindow* window) {
   eng_cfg.app_id = kAppId;
   eng_cfg.app_key = kAppKey;
   eng_cfg.resource_path = FB_DEMO_RESOURCE_DIR;
-  eng_cfg.external_context = false;
 
   engine_ = BeautyEffectEngine::Create(eng_cfg);
   if (!engine_) {
@@ -382,8 +381,8 @@ void Studio::SetStatus(std::string text) {
 }
 
 void Studio::ApplyToEngine(const Params& p, const Params* prev) {
-  // 摄像头每一帧都会进到这里。参数没变就不要再 Set，否则引擎会把
-  // “Switched … style” 按帧刷出来。
+  // The camera calls this every frame. Skip setters when the value is unchanged,
+  // or the engine logs "Switched … style" on every frame.
   auto changed = [&](auto member) {
     return prev == nullptr || prev->*member != p.*member;
   };
@@ -398,8 +397,6 @@ void Studio::ApplyToEngine(const Params& p, const Params* prev) {
     engine_->SetWhiteningStyle(p.whitening_style);
   if (changed(&Params::rosiness))
     engine_->SetRosiness(p.rosiness);
-  if (changed(&Params::sharpening))
-    engine_->SetSharpening(p.sharpening);
   if (changed(&Params::skin_only))
     engine_->SetBeautySkinOnly(p.skin_only);
 

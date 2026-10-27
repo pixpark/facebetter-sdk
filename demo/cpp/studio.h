@@ -55,7 +55,6 @@ struct Params {
   float whitening = 0.f;
   WhiteningStyle whitening_style = WhiteningStyle::ColdWhite;
   float rosiness = 0.f;
-  float sharpening = 0.f;
   bool skin_only = false;
 
   std::array<float, kReshapeCount> reshape{};

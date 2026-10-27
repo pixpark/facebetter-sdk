@@ -17,7 +17,6 @@ import kotlin.concurrent.withLock
 
 class BeautyEngine(
     private val context: Context,
-    private val externalContext: Boolean = false,
 ) {
     private val lock = ReentrantLock()
     private var engine: BeautyEffectEngine? = null
@@ -55,7 +54,6 @@ class BeautyEngine(
                     config.appId = CONFIG_APP_ID
                     config.appKey = CONFIG_APP_KEY
                 }
-                config.externalContext = externalContext
 
                 val created = BeautyEffectEngine(context.applicationContext, config)
                 engine = created
@@ -162,7 +160,6 @@ class BeautyEngine(
         current.setWhitening(params.whitening)
         current.setWhiteningStyle(params.whiteningStyle)
         current.setRosiness(params.rosiness)
-        current.setSharpening(params.sharpening)
         current.setBeautySkinOnly(params.skinOnly)
 
         for (item in BeautyCatalog.reshapeItems) {

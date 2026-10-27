@@ -4,7 +4,6 @@ import UIKit
 
 final class BeautyEngine {
   private let lock = NSLock()
-  private let externalContext: Bool
   private var engine: FBBeautyEffectEngine?
   private var previous = BeautyParams()
   private var resourceRoot: URL
@@ -16,8 +15,7 @@ final class BeautyEngine {
   var onEvent: ((String) -> Void)?
   var onFaces: (([FBFaceDetectionResult]) -> Void)?
 
-  init(externalContext: Bool = false, startImmediately: Bool = true) {
-    self.externalContext = externalContext
+  init(startImmediately: Bool = true) {
     resourceRoot = Bundle.main.resourceURL?.appendingPathComponent("Facebetter", isDirectory: true)
       ?? Bundle.main.bundleURL
     if startImmediately {
@@ -115,7 +113,6 @@ final class BeautyEngine {
       engineConfig.appId = configValues["APP_ID"] ?? ""
       engineConfig.appKey = configValues["APP_KEY"] ?? ""
     }
-    engineConfig.externalContext = externalContext
 
     let created = FBBeautyEffectEngine.createEngine(with: engineConfig)
     engine = created
@@ -180,7 +177,6 @@ final class BeautyEngine {
     engine.setWhitening(params.whitening)
     engine.setWhiteningStyle(params.whiteningStyle)
     engine.setRosiness(params.rosiness)
-    engine.setSharpening(params.sharpening)
     engine.setBeautySkinOnly(params.skinOnly)
 
     for item in BeautyCatalog.reshapeItems {

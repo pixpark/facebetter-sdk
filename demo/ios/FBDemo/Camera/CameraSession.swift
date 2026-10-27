@@ -158,6 +158,9 @@ final class CameraSession: NSObject, AVCaptureVideoDataOutputSampleBufferDelegat
   }
 
   private func configureConnection() {
+    // Orientation and the front-camera mirror are applied on the capture
+    // connection. The resulting buffer is already upright, so the demo does
+    // not call ImageFrame rotate or mirror. Those calls only rewrite CPU pixels.
     guard let connection = videoOutput.connection(with: .video) else { return }
     if connection.isVideoOrientationSupported {
       connection.videoOrientation = .portrait

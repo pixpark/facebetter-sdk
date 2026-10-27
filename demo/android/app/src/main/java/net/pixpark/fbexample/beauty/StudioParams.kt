@@ -25,7 +25,6 @@ data class StudioParams(
     val whitening: Float = 0f,
     val whiteningStyle: WhiteningStyle = WhiteningStyle.COLD_WHITE,
     val rosiness: Float = 0f,
-    val sharpening: Float = 0f,
     val skinOnly: Boolean = false,
     val reshape: Map<Reshape, Float> = BeautyCatalog.reshapeItems.associate { it.key to 0f },
     val bodyReshape: Map<BodyReshape, Float> = BeautyCatalog.bodyItems.associate { it.key to 0f },
@@ -86,13 +85,11 @@ data class StudioParams(
         SkinItem.SMOOTHING -> smoothing
         SkinItem.WHITENING -> whitening
         SkinItem.ROSINESS -> rosiness
-        SkinItem.SHARPENING -> sharpening
     }
 
     fun setSkinIntensity(item: SkinItem, value: Float): StudioParams = when (item) {
         SkinItem.SMOOTHING -> copy(smoothing = value)
         SkinItem.WHITENING -> copy(whitening = value)
         SkinItem.ROSINESS -> copy(rosiness = value)
-        SkinItem.SHARPENING -> copy(sharpening = value)
     }
 }

@@ -30,7 +30,7 @@ final class TextureStudioModel: BeautySession {
   private var frameCount = 0
 
   override init(locale: AppLocale? = nil) {
-    engine = BeautyEngine(externalContext: true, startImmediately: false)
+    engine = BeautyEngine(startImmediately: false)
     super.init(locale: locale)
     engine.onEvent = { [weak self] key in
       DispatchQueue.main.async {
@@ -46,6 +46,7 @@ final class TextureStudioModel: BeautySession {
       }
     }
     preview.process = { [weak self] texture, width, height in
+      // The GL texture is already upright. processTexture does not rotate or mirror it.
       guard let self else { return texture }
       self.stateLock.lock()
       let bypass = self.compareFlag

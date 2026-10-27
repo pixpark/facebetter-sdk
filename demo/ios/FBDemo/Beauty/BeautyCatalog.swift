@@ -31,7 +31,6 @@ enum SkinItem: String, CaseIterable, Identifiable {
   case smoothing
   case whitening
   case rosiness
-  case sharpening
 
   var id: String { rawValue }
   var labelKey: String { "skin.\(rawValue)" }

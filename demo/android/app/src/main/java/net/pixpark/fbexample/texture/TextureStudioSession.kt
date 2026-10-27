@@ -42,7 +42,7 @@ class TextureStudioSession(
     initialLocale: AppLocale? = null,
 ) : BeautySession {
     private val appContext = context.applicationContext
-    private val engine = BeautyEngine(appContext, externalContext = true)
+    private val engine = BeautyEngine(appContext)
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private val mainHandler = Handler(Looper.getMainLooper())
     private val compareFlag = AtomicBoolean(false)
@@ -94,6 +94,8 @@ class TextureStudioSession(
         lifecycleOwner = owner
         preview.frontFacing = frontFacing
         preview.process = { texture, width, height ->
+            // The preview surface is already upright. processTexture does not
+            // rotate or mirror a GL texture.
             engine.processTexture(texture, width, height, compareFlag.get())
         }
         preview.onPresented = {
