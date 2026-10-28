@@ -17,8 +17,14 @@ struct TextureStudioView: View {
         .ignoresSafeArea()
         .gesture(previewGesture)
 
+      // The watermark sits around 82%–88% of the frame. A gradient across the lower half would gray out the white mark.
       LinearGradient(
-        colors: [.black.opacity(0.55), .clear, .black.opacity(0.72)],
+        stops: [
+          .init(color: .black.opacity(0.55), location: 0),
+          .init(color: .clear, location: 0.18),
+          .init(color: .clear, location: 0.90),
+          .init(color: .black.opacity(0.55), location: 1),
+        ],
         startPoint: .top,
         endPoint: .bottom
       )
@@ -28,21 +34,15 @@ struct TextureStudioView: View {
       VStack(spacing: 0) {
         topBar
         hud
+        if !model.isComparing {
+          holdHint
+            .padding(.top, 10)
+        }
         Spacer()
           .allowsHitTesting(false)
         if !model.statusKey.isEmpty {
           statusChip
             .padding(.bottom, 8)
-        }
-        if !model.isComparing {
-          HStack(spacing: 8) {
-            hintChip(model.t("preview.hold"))
-            if model.panelExpanded {
-              hintChip(model.t("preview.collapseHint"))
-            }
-          }
-          .padding(.bottom, 8)
-          .allowsHitTesting(false)
         }
         BeautyPanel(studio: model)
       }
@@ -136,8 +136,8 @@ struct TextureStudioView: View {
     .padding(.top, 6)
   }
 
-  private func hintChip(_ text: String) -> some View {
-    Text(text)
+  private var holdHint: some View {
+    Text(model.t("preview.hold"))
       .font(.caption2)
       .foregroundStyle(.white.opacity(0.55))
       .padding(.horizontal, 10)

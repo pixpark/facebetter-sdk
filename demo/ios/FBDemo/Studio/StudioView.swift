@@ -13,8 +13,14 @@ struct StudioView: View {
         .ignoresSafeArea()
         .gesture(previewGesture)
 
+      // The watermark sits around 82%–88% of the frame. A gradient across the lower half would gray out the white mark.
       LinearGradient(
-        colors: [.black.opacity(0.55), .clear, .black.opacity(0.72)],
+        stops: [
+          .init(color: .black.opacity(0.55), location: 0),
+          .init(color: .clear, location: 0.18),
+          .init(color: .clear, location: 0.90),
+          .init(color: .black.opacity(0.55), location: 1),
+        ],
         startPoint: .top,
         endPoint: .bottom
       )
@@ -24,21 +30,15 @@ struct StudioView: View {
       VStack(spacing: 0) {
         topBar
         fpsBadge
+        if !studio.isComparing {
+          holdHint
+            .padding(.top, 10)
+        }
         Spacer()
           .allowsHitTesting(false)
         if !studio.statusKey.isEmpty {
           statusChip
             .padding(.bottom, 8)
-        }
-        if !studio.isComparing {
-          HStack(spacing: 8) {
-            hintChip(studio.t("preview.hold"))
-            if studio.panelExpanded {
-              hintChip(studio.t("preview.collapseHint"))
-            }
-          }
-          .padding(.bottom, 8)
-          .allowsHitTesting(false)
         }
         BeautyPanel(studio: studio)
       }
@@ -73,15 +73,6 @@ struct StudioView: View {
       .onEnded { _ in
         studio.isComparing = false
       }
-  }
-
-  private func hintChip(_ text: String) -> some View {
-    Text(text)
-      .font(.caption2)
-      .foregroundStyle(.white.opacity(0.55))
-      .padding(.horizontal, 10)
-      .padding(.vertical, 5)
-      .background(.black.opacity(0.35), in: Capsule())
   }
 
   private var topBar: some View {
@@ -178,6 +169,15 @@ struct StudioView: View {
     if ms > 60 { return .red }
     if ms < 30 { return .green }
     return .orange
+  }
+
+  private var holdHint: some View {
+    Text(studio.t("preview.hold"))
+      .font(.caption2)
+      .foregroundStyle(.white.opacity(0.55))
+      .padding(.horizontal, 10)
+      .padding(.vertical, 5)
+      .background(.black.opacity(0.35), in: Capsule())
   }
 
   private var statusChip: some View {
