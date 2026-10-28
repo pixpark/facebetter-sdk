@@ -8,6 +8,7 @@ final class BeautyEngine {
   private var previous = BeautyParams()
   private var resourceRoot: URL
   private var backgroundImageData: Data?
+  private var presetCache: [String: Data] = [:]
 
   private(set) var isReady = false
   private(set) var statusKey = "status.initializing"
@@ -173,6 +174,12 @@ final class BeautyEngine {
     engine.setWhitening(params.whitening)
     engine.setWhiteningStyle(params.whiteningStyle)
     engine.setRosiness(params.rosiness)
+    engine.setClarity(params.clarity)
+    engine.setBrightness(params.brightness)
+    engine.setContrast(params.contrast)
+    engine.setSaturation(params.saturation)
+    engine.setColorTemperature(params.colorTemperature)
+    engine.setColorTint(params.colorTint)
     engine.setBeautySkinOnly(params.skinOnly)
 
     for item in BeautyCatalog.reshapeItems {
@@ -203,6 +210,7 @@ final class BeautyEngine {
     engine.setEyelashColor(params.eyelashColor)
     engine.setPupil(params.pupil)
     engine.setPupilColor(params.pupilColor)
+    engine.setTeethWhiten(params.teethWhiten)
 
     if prev.filterID != params.filterID {
       if let filterID = params.filterID, let path = filterPath(filterID) {
@@ -244,18 +252,33 @@ final class BeautyEngine {
       }
     }
 
-    if prev.backgroundFill != params.backgroundFill || prev.bgBlur != params.bgBlur {
+    if prev.backgroundFill != params.backgroundFill || prev.bgBlur != params.bgBlur
+      || prev.bgPreset != params.bgPreset {
       switch params.backgroundFill {
       case .blur:
         engine.setVirtualBackgroundBlur(params.bgBlur)
       case .image:
-        if let backgroundImageData, !backgroundImageData.isEmpty {
+        let presetID = params.bgPreset ?? BeautyCatalog.backgroundPresets.first?.id
+        if let presetID, let data = presetData(presetID) {
+          engine.setVirtualBackgroundWith(data)
+        } else if let backgroundImageData, !backgroundImageData.isEmpty {
           engine.setVirtualBackgroundWith(backgroundImageData)
         }
       case .off:
         engine.clearVirtualBackground()
       }
     }
+    if prev.subjectOutline != params.subjectOutline {
+      engine.setSubjectOutline(params.subjectOutline)
+    }
+  }
+
+  private func presetData(_ id: String) -> Data? {
+    if let cached = presetCache[id] { return cached }
+    let url = resourceRoot.appendingPathComponent("backgrounds/\(id).jpg")
+    guard let data = try? Data(contentsOf: url), !data.isEmpty else { return nil }
+    presetCache[id] = data
+    return data
   }
 
   private func filterPath(_ id: String) -> String? {
@@ -361,7 +384,7 @@ extension UIImage {
 
   convenience init?(pixelBuffer: CVPixelBuffer) {
     let image = CIImage(cvPixelBuffer: pixelBuffer)
-    let context = CIContext(options: [.useSoftwareRenderer: false])
+    let context = CIContext(options: [.useSoftwareRenderer: true])
     guard let cgImage = context.createCGImage(image, from: image.extent) else { return nil }
     self.init(cgImage: cgImage)
   }

@@ -31,6 +31,7 @@ enum SkinItem: String, CaseIterable, Identifiable {
   case smoothing
   case whitening
   case rosiness
+  case clarity
 
   var id: String { rawValue }
   var labelKey: String { "skin.\(rawValue)" }
@@ -39,6 +40,7 @@ enum SkinItem: String, CaseIterable, Identifiable {
 enum MakeupItem: String, CaseIterable, Identifiable {
   case lipstick
   case blush
+  case teeth
   case contour
   case eyeshadow
   case eyeliner
@@ -48,6 +50,11 @@ enum MakeupItem: String, CaseIterable, Identifiable {
 
   var id: String { rawValue }
   var labelKey: String { "makeup.\(rawValue)" }
+}
+
+struct BackgroundPreset: Identifiable {
+  let id: String
+  let labelKey: String
 }
 
 enum BackgroundFill: String, CaseIterable, Identifiable {
@@ -199,6 +206,10 @@ enum BeautyCatalog {
     .init(id: .coralOrange, labelKey: "lipstick.coralOrange", color: Color(hex: 0xD65129)),
     .init(id: .gentlePink, labelKey: "lipstick.gentlePink", color: Color(hex: 0xF9A8D4)),
     .init(id: .vitalityOrange, labelKey: "lipstick.vitalityOrange", color: Color(hex: 0xFB923C)),
+    .init(id: .rosewood, labelKey: "lipstick.rosewood", color: Color(hex: 0xAF626A)),
+    .init(id: .brickRed, labelKey: "lipstick.brickRed", color: Color(hex: 0xA33C2C)),
+    .init(id: .berry, labelKey: "lipstick.berry", color: Color(hex: 0x8B2D49)),
+    .init(id: .nude, labelKey: "lipstick.nude", color: Color(hex: 0xC4917D)),
   ]
 
   static let blushStyles: [CatalogOption<FBBlushStyle>] = [
@@ -217,6 +228,8 @@ enum BeautyCatalog {
     .init(id: .vividRed, labelKey: "blushColor.vividRed", color: Color(hex: 0xBE123C)),
     .init(id: .berry, labelKey: "blushColor.berry", color: Color(hex: 0x831843)),
     .init(id: .sunsetOrange, labelKey: "blushColor.sunsetOrange", color: Color(hex: 0xC2410C)),
+    .init(id: .peach, labelKey: "blushColor.peach", color: Color(hex: 0xC96A4A)),
+    .init(id: .sakuraPink, labelKey: "blushColor.sakuraPink", color: Color(hex: 0xC25B7A)),
   ]
 
   static let contourStyles: [CatalogOption<FBContourStyle>] = [
@@ -243,6 +256,10 @@ enum BeautyCatalog {
     .init(id: .brown, labelKey: "eyeshadowColor.brown", color: Color(hex: 0x78350F)),
     .init(id: .gold, labelKey: "eyeshadowColor.gold", color: Color(hex: 0xA16207)),
     .init(id: .pink, labelKey: "eyeshadowColor.pink", color: Color(hex: 0x9D174D)),
+    .init(id: .champagne, labelKey: "eyeshadowColor.champagne", color: Color(hex: 0xA8835F)),
+    .init(id: .caramel, labelKey: "eyeshadowColor.caramel", color: Color(hex: 0x9A4A1C)),
+    .init(id: .burgundy, labelKey: "eyeshadowColor.burgundy", color: Color(hex: 0x6B1F2C)),
+    .init(id: .charcoal, labelKey: "eyeshadowColor.charcoal", color: Color(hex: 0x3A3536)),
   ]
 
   static let eyelinerStyles: [CatalogOption<FBEyeLinerStyle>] = [
@@ -255,10 +272,12 @@ enum BeautyCatalog {
   ]
 
   static let eyelinerColors: [CatalogOption<FBEyeLinerColor>] = [
+    .init(id: .black, labelKey: "eyelinerColor.black", color: Color(hex: 0x0A0A0A)),
+    .init(id: .coffee, labelKey: "eyelinerColor.coffee", color: Color(hex: 0x1C1917)),
+    .init(id: .chocolate, labelKey: "eyelinerColor.chocolate", color: Color(hex: 0x431407)),
+    .init(id: .grey, labelKey: "eyelinerColor.grey", color: Color(hex: 0x52525B)),
     .init(id: .burgundy, labelKey: "eyelinerColor.burgundy", color: Color(hex: 0x7F1D1D)),
     .init(id: .plum, labelKey: "eyelinerColor.plum", color: Color(hex: 0x581C87)),
-    .init(id: .chocolate, labelKey: "eyelinerColor.chocolate", color: Color(hex: 0x431407)),
-    .init(id: .coffee, labelKey: "eyelinerColor.coffee", color: Color(hex: 0x1C1917)),
     .init(id: .mauve, labelKey: "eyelinerColor.mauve", color: Color(hex: 0x3F3F46)),
   ]
 
@@ -276,8 +295,9 @@ enum BeautyCatalog {
 
   static let eyebrowColors: [CatalogOption<FBEyebrowColor>] = [
     .init(id: .darkBrown, labelKey: "eyebrowColor.darkBrown", color: Color(hex: 0x44403C)),
-    .init(id: .black, labelKey: "eyebrowColor.black", color: Color(hex: 0x18181B)),
+    .init(id: .ashBrown, labelKey: "eyebrowColor.ashBrown", color: Color(hex: 0x5C5049)),
     .init(id: .softBrown, labelKey: "eyebrowColor.softBrown", color: Color(hex: 0x78716C)),
+    .init(id: .black, labelKey: "eyebrowColor.black", color: Color(hex: 0x27272A)),
   ]
 
   static let eyelashStyles: [CatalogOption<FBEyelashStyle>] = [
@@ -305,6 +325,14 @@ enum BeautyCatalog {
     .init(id: .sand, labelKey: "pupil.sand", color: Color(hex: 0xA8A29E)),
     .init(id: .glow, labelKey: "pupil.glow", color: Color(hex: 0xFDE68A)),
     .init(id: .slate, labelKey: "pupil.slate", color: Color(hex: 0x64748B)),
+  ]
+
+  static let backgroundPresets: [BackgroundPreset] = [
+    .init(id: "office", labelKey: "bg.preset.office"),
+    .init(id: "living", labelKey: "bg.preset.living"),
+    .init(id: "bookshelf", labelKey: "bg.preset.bookshelf"),
+    .init(id: "bedroom", labelKey: "bg.preset.bedroom"),
+    .init(id: "indoor", labelKey: "bg.preset.indoor"),
   ]
 
   static let chromaOptions: [CatalogOption<FBChromaKeyColor>] = [
