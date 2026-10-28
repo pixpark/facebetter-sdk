@@ -159,7 +159,7 @@ export default function Viewport({
           rel="noopener noreferrer"
           className="absolute bottom-3 left-1/2 z-20 -translate-x-1/2 text-[9px] leading-none text-white/25 hover:text-white/45 transition-colors"
         >
-          © 2021–{new Date().getFullYear()} PIXPARK LTD
+          Facebetter Beauty Effect SDK
         </a>
       </div>
     </main>

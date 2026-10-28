@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { BeautyEffectEngine, EngineConfig, FrameType, MirrorMode } from 'facebetter'
 import {
+  BG_PRESETS,
   FILTER_IDS,
   STICKERS,
   stickerFolder,
@@ -10,7 +11,10 @@ import {
 } from './catalog.js'
 import { fetchDemoLicenseToken } from './fetchLicenseToken.js'
 
-const MAX_EDGE = 1280
+/** Interactive preview / param tuning resolution. */
+const PREVIEW_MAX_EDGE = 1280
+/** Export long-edge cap (original used when smaller). */
+const EXPORT_MAX_EDGE = 8192
 
 async function fetchBinaryProgress(url, onProgress) {
   const response = await fetch(url)
@@ -72,14 +76,21 @@ async function loadResources() {
       if (data) stickers.set(item.id, data)
     })
   )
+  const backgrounds = new Map()
+  await Promise.all(
+    BG_PRESETS.map(async (item) => {
+      const data = await loadBuffer(`/backgrounds/${item.id}.jpg`)
+      if (data) backgrounds.set(item.id, data)
+    })
+  )
   return {
     filters,
     stickers,
-    background: await loadBuffer('/background.jpg'),
+    backgrounds,
   }
 }
 
-function imageToImageData(image, maxEdge = MAX_EDGE) {
+function imageToImageData(image, maxEdge) {
   const scale = Math.min(1, maxEdge / Math.max(image.width, image.height))
   const width = Math.max(1, Math.round(image.width * scale))
   const height = Math.max(1, Math.round(image.height * scale))
@@ -91,9 +102,34 @@ function imageToImageData(image, maxEdge = MAX_EDGE) {
   return ctx.getImageData(0, 0, width, height)
 }
 
+function downloadImageData(frame, mimeType = 'image/png') {
+  if (!frame) return
+  const canvas = document.createElement('canvas')
+  canvas.width = frame.width
+  canvas.height = frame.height
+  canvas.getContext('2d').putImageData(frame, 0, 0)
+  canvas.toBlob(
+    (blob) => {
+      if (!blob) return
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      const pad = (value) => String(value).padStart(2, '0')
+      const now = new Date()
+      const stamp = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`
+      a.download = `fb_${stamp}.${mimeType === 'image/jpeg' ? 'jpg' : 'png'}`
+      a.click()
+      URL.revokeObjectURL(url)
+    },
+    mimeType,
+    0.92
+  )
+}
+
 export function useStudioEngine() {
   const engineRef = useRef(null)
-  const resourcesRef = useRef({ filters: new Map(), stickers: new Map(), background: null })
+  const resourcesRef = useRef({ filters: new Map(), stickers: new Map(), backgrounds: new Map() })
+  const fullImageRef = useRef(null)
   const originalRef = useRef(null)
   const processedRef = useRef(null)
   const videoRef = useRef(null)
@@ -101,6 +137,7 @@ export function useStudioEngine() {
   const rafRef = useRef(0)
   const busyRef = useRef(false)
   const sourceRef = useRef('idle')
+  const exportBusyRef = useRef(false)
 
   const [statusKey, setStatusKey] = useState('status.loadingEngine')
   const [statusExtra, setStatusExtra] = useState('')
@@ -175,11 +212,10 @@ export function useStudioEngine() {
         const ctx = canvas.getContext('2d', { willReadFrequently: true })
         // Front-camera selfie preview: flip the CPU canvas once so original and
         // processed share the same orientation during hold-to-compare.
-        // processImage then uses MirrorMode.None. Web has no rotate API, and
-        // processTexture does not mirror.
         ctx.translate(canvas.width, 0)
         ctx.scale(-1, 1)
         ctx.drawImage(video, 0, 0)
+        fullImageRef.current = null
         originalRef.current = ctx.getImageData(0, 0, canvas.width, canvas.height)
         processCurrent(FrameType.Video, MirrorMode.None)
       } catch (error) {
@@ -195,7 +231,8 @@ export function useStudioEngine() {
     stopCamera()
     sourceRef.current = 'image'
     setSource('image')
-    originalRef.current = imageToImageData(image)
+    fullImageRef.current = image
+    originalRef.current = imageToImageData(image, PREVIEW_MAX_EDGE)
     processCurrent(FrameType.Image)
   }, [processCurrent, stopCamera])
 
@@ -257,29 +294,35 @@ export function useStudioEngine() {
   }, [flash])
 
   const exportImage = useCallback((mimeType = 'image/png') => {
-    const frame = processedRef.current
-    if (!frame) return
-    const canvas = document.createElement('canvas')
-    canvas.width = frame.width
-    canvas.height = frame.height
-    canvas.getContext('2d').putImageData(frame, 0, 0)
-    canvas.toBlob(
-      (blob) => {
-        if (!blob) return
-        const url = URL.createObjectURL(blob)
-        const a = document.createElement('a')
-        a.href = url
-        const pad = (value) => String(value).padStart(2, '0')
-        const now = new Date()
-        const stamp = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`
-        a.download = `fb_${stamp}.${mimeType === 'image/jpeg' ? 'jpg' : 'png'}`
-        a.click()
-        URL.revokeObjectURL(url)
-      },
-      mimeType,
-      0.92
-    )
-  }, [])
+    const engine = engineRef.current
+    if (!engine) return
+
+    if (sourceRef.current === 'image' && fullImageRef.current) {
+      if (exportBusyRef.current) return
+      exportBusyRef.current = true
+      flash('status.exporting')
+      try {
+        const full = imageToImageData(fullImageRef.current, EXPORT_MAX_EDGE)
+        const out = engine.processImage(
+          full,
+          full.width,
+          full.height,
+          FrameType.Image,
+          MirrorMode.None
+        )
+        downloadImageData(out, mimeType)
+        flash('status.exported')
+      } catch (error) {
+        console.error(error)
+        flash('status.exportFailed', error.message || '')
+      } finally {
+        exportBusyRef.current = false
+      }
+      return
+    }
+
+    downloadImageData(processedRef.current, mimeType)
+  }, [flash])
 
   useEffect(() => {
     if (!ready || !engineRef.current) return

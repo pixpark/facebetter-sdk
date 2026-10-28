@@ -1,4 +1,4 @@
-import { FILTER_IDS, STICKERS, STICKER_GROUPS, TABS, pickFilterLabel } from '../catalog.js'
+import { BG_PRESETS, FILTER_IDS, STICKERS, STICKER_GROUPS, TABS, createDefaultParams } from '../catalog.js'
 import {
   BLUSH_COLORS,
   BLUSH_STYLES,
@@ -26,9 +26,48 @@ function withLabels(items, t) {
   return items.map((item) => ({ ...item, label: t(item.labelKey) }))
 }
 
-function SwatchRow({ items, value, onChange, gradient }) {
+function Rule() {
+  return <div className="h-px bg-[#262a35]" />
+}
+
+function SectionHead({ children, extra }) {
   return (
-    <div className="grid grid-cols-3 gap-1.5">
+    <div className="flex items-center gap-2">
+      <span className="text-body-sm font-medium text-gray-200">{children}</span>
+      {extra ? <span className="text-telemetry-xs text-gray-400">{extra}</span> : null}
+    </div>
+  )
+}
+
+function Muted({ children }) {
+  return <div className="text-telemetry-xs text-gray-400">{children}</div>
+}
+
+function CardReset({ label, onClick }) {
+  return (
+    <button
+      type="button"
+      title={label}
+      aria-label={label}
+      onClick={onClick}
+      className="w-7 h-7 rounded-md text-gray-400 hover:text-white hover:bg-white/5 flex items-center justify-center"
+    >
+      <Icon name="refresh" className="text-base" />
+    </button>
+  )
+}
+
+function ChipGrid({ columns, children }) {
+  return (
+    <div className="grid gap-1.5" style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}>
+      {children}
+    </div>
+  )
+}
+
+function SwatchRow({ items, value, onChange, gradient, columns = 3 }) {
+  return (
+    <div className="grid gap-1.5" style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}>
       {items.map((item) => {
         const active = value === item.id
         return (
@@ -52,144 +91,161 @@ function SwatchRow({ items, value, onChange, gradient }) {
 
 function SkinPanel({ params, setParams }) {
   const { t } = useI18n()
+  const reset = () => {
+    const d = createDefaultParams()
+    setParams((p) => ({
+      ...p,
+      smoothing: d.smoothing,
+      smoothingStyle: d.smoothingStyle,
+      whitening: d.whitening,
+      whiteningStyle: d.whiteningStyle,
+      rosiness: d.rosiness,
+      blemish: d.blemish,
+      clarity: d.clarity,
+      skinOnly: d.skinOnly,
+    }))
+  }
   return (
-    <Card
-      title={t('skin.title')}
-      icon="spa"
-      extra={
-        <div className="flex items-center gap-2">
-          <div className="text-telemetry-xs text-gray-200">{t('skin.skinOnly')}</div>
-          <IOSSwitch
-            checked={params.skinOnly}
-            label={t('skin.skinOnlyAria')}
-            onChange={(checked) => setParams((p) => ({ ...p, skinOnly: checked }))}
-          />
-        </div>
-      }
-    >
+    <Card title={t('tab.skin')} icon="spa" extra={<CardReset label={t('console.reset')} onClick={reset} />}>
       <div className="flex items-center justify-between">
-        <span className="text-telemetry-xs text-gray-400">{t('skin.smoothingStyle')}</span>
-        <button
-          type="button"
-          className="text-telemetry-xs text-gray-500 hover:text-white hover:underline"
-          onClick={() => setParams((p) => ({ ...p, smoothing: 0, whitening: 0, rosiness: 0 }))}
-        >
-          {t('skin.reset')}
-        </button>
+        <div className="text-telemetry-xs text-gray-200">{t('skin.skinOnly')}</div>
+        <IOSSwitch
+          checked={params.skinOnly}
+          label={t('skin.skinOnlyAria')}
+          onChange={(checked) => setParams((p) => ({ ...p, skinOnly: checked }))}
+        />
       </div>
-      <div className="grid grid-cols-3 gap-1.5">
+      <Rule />
+      <SectionHead>{t('skin.group.smooth')}</SectionHead>
+      <Muted>{t('skin.smoothingStyle')}</Muted>
+      <ChipGrid columns={3}>
         {SKIN_PRESETS.map((preset) => (
           <Chip
             key={preset.id}
+            className="w-full min-w-0"
             active={params.smoothingStyle === preset.smoothingStyle}
             onClick={() => setParams((p) => ({ ...p, smoothingStyle: preset.smoothingStyle }))}
           >
             {t(`smoothing.${preset.id}`)}
           </Chip>
         ))}
-      </div>
+      </ChipGrid>
       <ParamSlider label={t('skin.smoothing')} value={Math.round(params.smoothing * 100)} onChange={(v) => setParams((p) => ({ ...p, smoothing: v / 100 }))} />
-      <div className="text-telemetry-xs text-gray-400">{t('skin.whiteningTone')}</div>
-      <div className="grid grid-cols-5 gap-1">
+      <ParamSlider label={t('skin.blemish')} value={Math.round((params.blemish || 0) * 100)} onChange={(v) => setParams((p) => ({ ...p, blemish: v / 100 }))} />
+      <Rule />
+      <SectionHead>{t('skin.group.tone')}</SectionHead>
+      <ChipGrid columns={5}>
         {WHITENING_STYLES.map((item) => (
-          <Chip key={item.id} active={params.whiteningStyle === item.id} onClick={() => setParams((p) => ({ ...p, whiteningStyle: item.id }))}>
+          <Chip
+            key={item.id}
+            className="w-full min-w-0 px-1"
+            active={params.whiteningStyle === item.id}
+            onClick={() => setParams((p) => ({ ...p, whiteningStyle: item.id }))}
+          >
             {t(item.labelKey)}
           </Chip>
         ))}
-      </div>
+      </ChipGrid>
       <ParamSlider label={t('skin.whitening')} value={Math.round(params.whitening * 100)} onChange={(v) => setParams((p) => ({ ...p, whitening: v / 100 }))} />
       <ParamSlider label={t('skin.rosiness')} value={Math.round(params.rosiness * 100)} onChange={(v) => setParams((p) => ({ ...p, rosiness: v / 100 }))} />
+      <Rule />
+      <SectionHead>{t('skin.group.clarity')}</SectionHead>
+      <ParamSlider label={t('skin.clarity')} value={Math.round((params.clarity || 0) * 100)} onChange={(v) => setParams((p) => ({ ...p, clarity: v / 100 }))} />
     </Card>
   )
 }
 
 function ReshapePanel({ params, setParams }) {
   const { t } = useI18n()
+  const reset = () => {
+    const d = createDefaultParams()
+    setParams((p) => ({ ...p, reshape: d.reshape }))
+  }
   return (
-    <>
-      {RESHAPE_GROUPS.map((group) => (
-        <Card key={group.id} title={t(`reshape.${group.id}`)} icon="face">
-          <div className="grid grid-cols-1 gap-3">
-            {group.items.map((item) => (
-              <BipolarSlider
-                key={item.key}
-                label={t(item.labelKey)}
-                value={params.reshape[item.key] || 0}
-                onChange={(value) => setParams((p) => ({ ...p, reshape: { ...p.reshape, [item.key]: value } }))}
-              />
-            ))}
-          </div>
-        </Card>
+    <Card title={t('tab.reshape')} icon="face" extra={<CardReset label={t('console.reset')} onClick={reset} />}>
+      {RESHAPE_GROUPS.map((group, index) => (
+        <div key={group.id} className="space-y-3">
+          {index > 0 ? <Rule /> : null}
+          <SectionHead>{t(`reshape.${group.id}`)}</SectionHead>
+          {group.items.map((item) => (
+            <BipolarSlider
+              key={item.key}
+              label={t(item.labelKey)}
+              value={params.reshape[item.key] || 0}
+              onChange={(value) => setParams((p) => ({ ...p, reshape: { ...p.reshape, [item.key]: value } }))}
+            />
+          ))}
+        </div>
       ))}
-    </>
+    </Card>
   )
 }
 
 function BodyPanel({ params, setParams }) {
   const { t } = useI18n()
+  const reset = () => {
+    const d = createDefaultParams()
+    setParams((p) => ({ ...p, bodyReshape: d.bodyReshape }))
+  }
   return (
-    <>
-      {BODY_GROUPS.map((group) => (
-        <Card key={group.id} title={t(`reshape.${group.id}`)} icon="accessibility">
-          <div className="grid grid-cols-1 gap-3">
-            {group.items.map((item) => (
-              <ParamSlider
-                key={item.key}
-                label={t(item.labelKey)}
-                value={Math.round((params.bodyReshape?.[item.key] || 0) * 100)}
-                onChange={(v) => setParams((p) => ({
-                  ...p,
-                  bodyReshape: { ...p.bodyReshape, [item.key]: v / 100 },
-                }))}
-              />
-            ))}
-          </div>
-        </Card>
+    <Card title={t('tab.body')} icon="accessibility" extra={<CardReset label={t('console.reset')} onClick={reset} />}>
+      {BODY_GROUPS.map((group, index) => (
+        <div key={group.id} className="space-y-3">
+          {index > 0 ? <Rule /> : null}
+          <SectionHead>{t(`reshape.${group.id}`)}</SectionHead>
+          {group.items.map((item) => (
+            <ParamSlider
+              key={item.key}
+              label={t(item.labelKey)}
+              value={Math.round((params.bodyReshape?.[item.key] || 0) * 100)}
+              onChange={(v) => setParams((p) => ({
+                ...p,
+                bodyReshape: { ...p.bodyReshape, [item.key]: v / 100 },
+              }))}
+            />
+          ))}
+        </div>
       ))}
-    </>
+    </Card>
   )
 }
 
 function MakeupBlock({
   title,
-  dot,
   intensity,
   onIntensity,
   styles,
   styleValue,
   onStyle,
   styleLabel,
+  styleColumns = 4,
   colors,
   colorValue,
   onColor,
   colorLabel,
+  colorColumns = 3,
   intensityLabel,
   gradient,
 }) {
   return (
     <div className="space-y-2.5">
-      <div className="flex items-center text-telemetry-xs">
-        <span className="text-gray-300 font-medium flex items-center gap-1">
-          {dot ? <span className={`w-1.5 h-1.5 rounded-full ${dot}`} /> : null}
-          {title}
-        </span>
-      </div>
+      <SectionHead>{title}</SectionHead>
       {styles ? (
         <>
-          <div className="text-telemetry-xs text-gray-400">{styleLabel}</div>
-          <div className="flex flex-wrap gap-1.5">
+          {styleLabel ? <Muted>{styleLabel}</Muted> : null}
+          <ChipGrid columns={styleColumns}>
             {styles.map((item) => (
-              <Chip key={item.id} active={styleValue === item.id} onClick={() => onStyle(item.id)}>
+              <Chip key={item.id} className="w-full min-w-0" active={styleValue === item.id} onClick={() => onStyle(item.id)}>
                 {item.label}
               </Chip>
             ))}
-          </div>
+          </ChipGrid>
         </>
       ) : null}
       {colors ? (
         <>
-          <div className="text-telemetry-xs text-gray-400">{colorLabel}</div>
-          <SwatchRow items={colors} value={colorValue} onChange={onColor} gradient={gradient} />
+          <Muted>{colorLabel}</Muted>
+          <SwatchRow items={colors} value={colorValue} onChange={onColor} gradient={gradient} columns={colorColumns} />
         </>
       ) : null}
       <ParamSlider label={intensityLabel} value={Math.round(intensity * 100)} onChange={(v) => onIntensity(v / 100)} />
@@ -202,24 +258,51 @@ function MakeupPanel({ params, setParams }) {
   const styleLabel = t('makeup.style')
   const colorLabel = t('makeup.color')
   const intensityLabel = t('makeup.intensity')
+  const reset = () => {
+    const d = createDefaultParams()
+    setParams((p) => ({
+      ...p,
+      lipstick: d.lipstick,
+      lipstickColor: d.lipstickColor,
+      blush: d.blush,
+      blushStyle: d.blushStyle,
+      blushColor: d.blushColor,
+      teethWhiten: d.teethWhiten,
+      contour: d.contour,
+      contourStyle: d.contourStyle,
+      eyeshadow: d.eyeshadow,
+      eyeshadowStyle: d.eyeshadowStyle,
+      eyeshadowColor: d.eyeshadowColor,
+      eyeliner: d.eyeliner,
+      eyelinerStyle: d.eyelinerStyle,
+      eyelinerColor: d.eyelinerColor,
+      eyebrow: d.eyebrow,
+      eyebrowStyle: d.eyebrowStyle,
+      eyebrowColor: d.eyebrowColor,
+      eyelash: d.eyelash,
+      eyelashStyle: d.eyelashStyle,
+      eyelashColor: d.eyelashColor,
+      pupil: d.pupil,
+      pupilColor: d.pupilColor,
+    }))
+  }
   return (
-    <Card title={t('makeup.title')} icon="brush" extra={<span className="px-2 py-0.5 rounded-full bg-white/5 text-gray-300 text-telemetry-xs border border-white/10">{t('makeup.fullSet')}</span>}>
+    <Card title={t('tab.makeup')} icon="brush" extra={<CardReset label={t('console.reset')} onClick={reset} />}>
       <MakeupBlock
         title={t('makeup.lipstick')}
-        dot="bg-[#c2183b]"
         intensity={params.lipstick}
         onIntensity={(v) => setParams((p) => ({ ...p, lipstick: v }))}
         colors={withLabels(LIPSTICK_COLORS, t)}
         colorValue={params.lipstickColor}
         onColor={(id) => setParams((p) => ({ ...p, lipstickColor: id }))}
         colorLabel={colorLabel}
+        colorColumns={3}
         intensityLabel={intensityLabel}
         gradient
       />
       <div className="h-px bg-[#262a35]" />
       <MakeupBlock
         title={t('makeup.blush')}
-        dot="bg-[#f87171]"
         intensity={params.blush}
         onIntensity={(v) => setParams((p) => ({ ...p, blush: v }))}
         styles={withLabels(BLUSH_STYLES, t)}
@@ -229,7 +312,20 @@ function MakeupPanel({ params, setParams }) {
         colorValue={params.blushColor}
         onColor={(id) => setParams((p) => ({ ...p, blushColor: id }))}
         styleLabel={styleLabel}
+        styleColumns={4}
         colorLabel={colorLabel}
+        colorColumns={3}
+        intensityLabel={intensityLabel}
+      />
+      <div className="h-px bg-[#262a35]" />
+      <MakeupBlock
+        title={t('makeup.teeth')}
+        intensity={params.teethWhiten || 0}
+        onIntensity={(v) => setParams((p) => ({ ...p, teethWhiten: v }))}
+        styles={[{ id: 'whiten', label: t('makeup.teethWhiten') }]}
+        styleValue="whiten"
+        onStyle={() => {}}
+        styleColumns={3}
         intensityLabel={intensityLabel}
       />
       <div className="h-px bg-[#262a35]" />
@@ -241,6 +337,7 @@ function MakeupPanel({ params, setParams }) {
         styleValue={params.contourStyle}
         onStyle={(id) => setParams((p) => ({ ...p, contourStyle: id }))}
         styleLabel={styleLabel}
+        styleColumns={4}
         intensityLabel={intensityLabel}
       />
       <div className="h-px bg-[#262a35]" />
@@ -255,7 +352,9 @@ function MakeupPanel({ params, setParams }) {
         colorValue={params.eyeshadowColor}
         onColor={(id) => setParams((p) => ({ ...p, eyeshadowColor: id }))}
         styleLabel={styleLabel}
+        styleColumns={4}
         colorLabel={colorLabel}
+        colorColumns={4}
         intensityLabel={intensityLabel}
       />
       <div className="h-px bg-[#262a35]" />
@@ -270,7 +369,9 @@ function MakeupPanel({ params, setParams }) {
         colorValue={params.eyelinerColor}
         onColor={(id) => setParams((p) => ({ ...p, eyelinerColor: id }))}
         styleLabel={styleLabel}
+        styleColumns={4}
         colorLabel={colorLabel}
+        colorColumns={4}
         intensityLabel={intensityLabel}
       />
       <div className="h-px bg-[#262a35]" />
@@ -285,7 +386,9 @@ function MakeupPanel({ params, setParams }) {
         colorValue={params.eyebrowColor}
         onColor={(id) => setParams((p) => ({ ...p, eyebrowColor: id }))}
         styleLabel={styleLabel}
+        styleColumns={4}
         colorLabel={colorLabel}
+        colorColumns={4}
         intensityLabel={intensityLabel}
       />
       <div className="h-px bg-[#262a35]" />
@@ -300,7 +403,9 @@ function MakeupPanel({ params, setParams }) {
         colorValue={params.eyelashColor}
         onColor={(id) => setParams((p) => ({ ...p, eyelashColor: id }))}
         styleLabel={styleLabel}
+        styleColumns={4}
         colorLabel={colorLabel}
+        colorColumns={3}
         intensityLabel={intensityLabel}
       />
       <div className="h-px bg-[#262a35]" />
@@ -312,46 +417,60 @@ function MakeupPanel({ params, setParams }) {
         styleValue={params.pupilColor}
         onStyle={(id) => setParams((p) => ({ ...p, pupilColor: id }))}
         styleLabel={t('makeup.pupilColor')}
+        styleColumns={4}
         intensityLabel={intensityLabel}
       />
     </Card>
   )
 }
 
-function FilterPanel({ params, setParams, filterMap = {} }) {
-  const { t, locale } = useI18n()
+function FilterPanel({ params, setParams }) {
+  const { t } = useI18n()
+  const reset = () => {
+    const d = createDefaultParams()
+    setParams((p) => ({
+      ...p,
+      brightness: d.brightness,
+      contrast: d.contrast,
+      saturation: d.saturation,
+      colorTemperature: d.colorTemperature,
+      colorTint: d.colorTint,
+      filterId: d.filterId,
+      filterIntensity: d.filterIntensity,
+    }))
+  }
   return (
-    <Card
-      title={t('filter.title')}
-      icon="palette"
-      extra={<span className="text-telemetry-xs text-gray-400">{t('filter.intensityValue')} {Math.round(params.filterIntensity * 100)}%</span>}
-    >
-      <div className="grid grid-cols-3 gap-2">
-        <button
-          type="button"
-          onClick={() => setParams((p) => ({ ...p, filterId: null }))}
-          className={`border rounded-lg bg-[#20232b] p-1.5 text-telemetry-xs ${params.filterId ? 'border-white/10 text-gray-400' : 'border-white/60 text-white'}`}
-        >
-          {t('filter.none')}
-        </button>
-        {FILTER_IDS.map((id) => (
-          <button
-            key={id}
-            type="button"
-            onClick={() => setParams((p) => ({ ...p, filterId: id }))}
-            className={`border rounded-lg bg-[#20232b] p-1.5 text-telemetry-xs truncate ${
-              params.filterId === id ? 'border-white/60 text-white' : 'border-white/10 text-gray-400 hover:border-white/20'
-            }`}
-          >
-            {pickFilterLabel(filterMap[id], locale, id)}
-          </button>
-        ))}
-      </div>
+    <Card title={t('tab.filter')} icon="palette" extra={<CardReset label={t('console.reset')} onClick={reset} />}>
+      <SectionHead>{t('color.group.adjust')}</SectionHead>
+      <BipolarSlider label={t('color.brightness')} value={params.brightness || 0} onChange={(v) => setParams((p) => ({ ...p, brightness: v }))} />
+      <BipolarSlider label={t('color.contrast')} value={params.contrast || 0} onChange={(v) => setParams((p) => ({ ...p, contrast: v }))} />
+      <BipolarSlider label={t('color.saturation')} value={params.saturation || 0} onChange={(v) => setParams((p) => ({ ...p, saturation: v }))} />
+      <BipolarSlider label={t('color.temperature')} value={params.colorTemperature || 0} onChange={(v) => setParams((p) => ({ ...p, colorTemperature: v }))} />
+      <BipolarSlider label={t('color.tint')} value={params.colorTint || 0} onChange={(v) => setParams((p) => ({ ...p, colorTint: v }))} />
+      <Rule />
+      <SectionHead extra={`${t('filter.intensity')} ${Math.round(params.filterIntensity * 100)}%`}>
+        {t('color.group.filter')}
+      </SectionHead>
       <ParamSlider
         label={t('filter.intensity')}
         value={Math.round(params.filterIntensity * 100)}
         onChange={(v) => setParams((p) => ({ ...p, filterIntensity: v / 100 }))}
       />
+      <ChipGrid columns={3}>
+        <Chip className="w-full min-w-0" active={!params.filterId} onClick={() => setParams((p) => ({ ...p, filterId: null }))}>
+          {t('filter.none')}
+        </Chip>
+        {FILTER_IDS.map((id) => (
+          <Chip
+            key={id}
+            className="w-full min-w-0 truncate"
+            active={params.filterId === id}
+            onClick={() => setParams((p) => ({ ...p, filterId: id }))}
+          >
+            {t(`filter.${id}`)}
+          </Chip>
+        ))}
+      </ChipGrid>
     </Card>
   )
 }
@@ -359,51 +478,96 @@ function FilterPanel({ params, setParams, filterMap = {} }) {
 function BackgroundPanel({ params, setParams }) {
   const { t } = useI18n()
   const fill = params.bgBlur > 0 ? 'blur' : params.bgPreset ? 'image' : 'off'
+  const reset = () => {
+    const d = createDefaultParams()
+    setParams((p) => ({
+      ...p,
+      bgBlur: d.bgBlur,
+      bgPreset: d.bgPreset,
+      chroma: d.chroma,
+      chromaSimilarity: d.chromaSimilarity,
+      chromaSmoothness: d.chromaSmoothness,
+      chromaDesaturation: d.chromaDesaturation,
+      subjectOutline: d.subjectOutline,
+    }))
+  }
 
   const setFill = (next) => {
     if (next === 'blur') {
-      setParams((p) => ({ ...p, bgBlur: p.bgBlur > 0 ? p.bgBlur : 0.5, bgPreset: false }))
+      setParams((p) => ({ ...p, bgBlur: p.bgBlur > 0 ? p.bgBlur : 0.5, bgPreset: null }))
       return
     }
     if (next === 'image') {
-      setParams((p) => ({ ...p, bgPreset: true, bgBlur: 0 }))
+      setParams((p) => ({
+        ...p,
+        bgBlur: 0,
+        bgPreset: typeof p.bgPreset === 'string' && p.bgPreset ? p.bgPreset : 'office',
+      }))
       return
     }
-    setParams((p) => ({ ...p, bgPreset: false, bgBlur: 0 }))
+    setParams((p) => ({ ...p, bgPreset: null, bgBlur: 0 }))
   }
 
   return (
-    <Card title={t('bg.title')}>
-      <div className="text-telemetry-xs text-gray-400">{t('bg.effect')}</div>
-      <div className="grid grid-cols-3 gap-1.5">
-        <Chip active={fill === 'off'} onClick={() => setFill('off')}>
+    <Card title={t('tab.background')} extra={<CardReset label={t('console.reset')} onClick={reset} />}>
+      <div className="flex items-center justify-between gap-3">
+        <div className="text-telemetry-xs text-gray-400">{t('bg.effect')}</div>
+        <div className="flex items-center gap-2">
+          <div className="text-telemetry-xs text-gray-200">{t('bg.outline')}</div>
+          <IOSSwitch
+            checked={!!params.subjectOutline}
+            label={t('bg.outline')}
+            onChange={(checked) => setParams((p) => ({ ...p, subjectOutline: checked }))}
+          />
+        </div>
+      </div>
+      <ChipGrid columns={3}>
+        <Chip className="w-full min-w-0" active={fill === 'off'} onClick={() => setFill('off')}>
           {t('bg.original')}
         </Chip>
-        <Chip active={fill === 'blur'} onClick={() => setFill('blur')}>
+        <Chip className="w-full min-w-0" active={fill === 'blur'} onClick={() => setFill('blur')}>
           {t('bg.blur')}
         </Chip>
-        <Chip active={fill === 'image'} onClick={() => setFill('image')}>
-          {t('bg.preset')}
+        <Chip className="w-full min-w-0" active={fill === 'image'} onClick={() => setFill('image')}>
+          {t('bg.image')}
         </Chip>
-      </div>
+      </ChipGrid>
       {fill === 'blur' ? (
         <ParamSlider
           label={t('bg.blurAmount')}
           value={Math.round(params.bgBlur * 100)}
-          onChange={(v) => setParams((p) => ({ ...p, bgBlur: v / 100, bgPreset: false }))}
+          onChange={(v) => setParams((p) => ({ ...p, bgBlur: v / 100, bgPreset: null }))}
         />
       ) : null}
       {fill === 'image' ? (
-        <img
-          src="/background.jpg"
-          alt={t('bg.preset')}
-          className="w-full h-20 object-cover rounded-lg border border-white/10"
-        />
+        <>
+          <Muted>{t('bg.presets')}</Muted>
+          <div className="grid grid-cols-3 gap-1.5">
+            {BG_PRESETS.map((item) => {
+              const active = params.bgPreset === item.id
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => setParams((p) => ({ ...p, bgPreset: item.id, bgBlur: 0 }))}
+                  className={
+                    `rounded-lg overflow-hidden border text-telemetry-xs ` +
+                    (active ? 'border-white/70 text-white' : 'border-white/10 text-gray-400 hover:border-white/30')
+                  }
+                >
+                  <img src={`/backgrounds/${item.id}.jpg`} alt="" className="w-full h-14 object-cover" />
+                  <span className="block py-1">{t(item.labelKey)}</span>
+                </button>
+              )
+            })}
+          </div>
+        </>
       ) : null}
 
-      <div className="text-telemetry-xs text-gray-400 pt-1">{t('bg.cutout')}</div>
-      <div className="grid grid-cols-4 gap-1.5">
+      <Muted>{t('bg.cutout')}</Muted>
+      <ChipGrid columns={4}>
         <Chip
+          className="w-full min-w-0"
           active={params.chroma === null}
           onClick={() => setParams((p) => ({ ...p, chroma: null }))}
         >
@@ -412,13 +576,14 @@ function BackgroundPanel({ params, setParams }) {
         {CHROMA_OPTIONS.map((item) => (
           <Chip
             key={item.id}
+            className="w-full min-w-0"
             active={params.chroma === item.id}
             onClick={() => setParams((p) => ({ ...p, chroma: item.id }))}
           >
             {t(item.labelKey)}
           </Chip>
         ))}
-      </div>
+      </ChipGrid>
       {params.chroma !== null ? (
         <>
           <ParamSlider label={t('bg.similarity')} value={Math.round(params.chromaSimilarity * 100)} onChange={(v) => setParams((p) => ({ ...p, chromaSimilarity: v / 100 }))} />
@@ -432,8 +597,9 @@ function BackgroundPanel({ params, setParams }) {
 
 function StickerPanel({ params, setParams }) {
   const { t } = useI18n()
+  const reset = () => setParams((p) => ({ ...p, stickerId: null }))
   return (
-    <Card title={t('sticker.title')}>
+    <Card title={t('tab.sticker')} extra={<CardReset label={t('console.reset')} onClick={reset} />}>
       <div className="grid grid-cols-3 gap-1.5">
         <Chip active={!params.stickerId} onClick={() => setParams((p) => ({ ...p, stickerId: null }))}>{t('sticker.none')}</Chip>
       </div>
@@ -462,7 +628,7 @@ function StickerPanel({ params, setParams }) {
   )
 }
 
-export default function Inspector({ tab, onTab, params, setParams, filterMap, stats, onReset }) {
+export default function Inspector({ tab, onTab, params, setParams, stats }) {
   const { t } = useI18n()
   const fps = Math.round(stats?.fps || 0)
   const ms = (stats?.avgProcessTimeMs || 0).toFixed(1)
@@ -503,19 +669,9 @@ export default function Inspector({ tab, onTab, params, setParams, filterMap, st
         {tab === 'reshape' ? <ReshapePanel params={params} setParams={setParams} /> : null}
         {tab === 'body' ? <BodyPanel params={params} setParams={setParams} /> : null}
         {tab === 'makeup' ? <MakeupPanel params={params} setParams={setParams} /> : null}
-        {tab === 'filter' ? <FilterPanel params={params} setParams={setParams} filterMap={filterMap} /> : null}
+        {tab === 'filter' ? <FilterPanel params={params} setParams={setParams} /> : null}
         {tab === 'background' ? <BackgroundPanel params={params} setParams={setParams} /> : null}
         {tab === 'sticker' ? <StickerPanel params={params} setParams={setParams} /> : null}
-      </div>
-      <div className="p-3 bg-[#16181f] border-t border-[#222630] flex items-center">
-        <button
-          type="button"
-          onClick={onReset}
-          className="px-3 py-1.5 rounded-lg bg-[#20232b] hover:bg-[#282d38] text-gray-300 hover:text-white text-label-sm font-medium border border-white/10 flex items-center gap-1.5"
-        >
-          <Icon name="refresh" className="text-sm text-gray-400" />
-          {t('console.reset')}
-        </button>
       </div>
     </aside>
   )

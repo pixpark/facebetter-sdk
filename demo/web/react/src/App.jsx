@@ -39,7 +39,6 @@ export default function App() {
           setParams={studio.setParams}
           filterMap={studio.filterMap}
           stats={studio.stats}
-          onReset={studio.resetParams}
         />
       </div>
 

@@ -82,33 +82,61 @@ export function Chip({ active, onClick, children, className = '', badge }) {
   )
 }
 
+const THUMB_W = 22
+const THUMB_H = 11
+
+function thumbLeft(percent) {
+  return `calc(${percent}% - ${(percent / 100) * THUMB_W}px)`
+}
+
+function fillToThumb(percent) {
+  return `calc(${percent}% + ${(0.5 - percent / 100) * THUMB_W}px)`
+}
+
+function SliderRow({ label, display, percent, origin = 0, children }) {
+  const from = Math.min(percent, origin)
+  const to = Math.max(percent, origin)
+  const active = Math.abs(percent - origin) > 0.05
+  const fillStyle = origin === 0
+    ? { left: 0, width: fillToThumb(percent) }
+    : {
+        left: fillToThumb(from),
+        width: `calc(${to - from}% + ${((from - to) / 100) * THUMB_W}px)`,
+      }
+  return (
+    <label className="flex items-center gap-2">
+      <span className="shrink-0 min-w-16 text-body-sm text-[#9ca3af]">{label}</span>
+      <div className="relative flex-1 h-[22px]">
+        <div className="absolute left-0 right-0 top-1/2 h-1 -translate-y-1/2 overflow-hidden rounded-full bg-[#3d3f4b]">
+          {active ? (
+            <div className="absolute top-0 h-full bg-[#466bd5]" style={fillStyle} />
+          ) : null}
+        </div>
+        <div
+          className="pointer-events-none absolute top-1/2 -translate-y-1/2 rounded-full bg-white"
+          style={{ width: THUMB_W, height: THUMB_H, left: thumbLeft(percent) }}
+        />
+        {children}
+      </div>
+      <span className="w-8 shrink-0 text-right font-mono text-body-sm tabular-nums text-[#e5e7eb]">{display}</span>
+    </label>
+  )
+}
+
 export function ParamSlider({ label, value, min = 0, max = 100, onChange }) {
   const percent = ((value - min) / (max - min)) * 100
   return (
-    <label className="space-y-1 block">
-      <div className="flex justify-between text-body-sm">
-        <span className="text-gray-400">{label}</span>
-        <span className="text-gray-200 font-medium text-label-sm font-mono">{value}</span>
-      </div>
-      <div className="relative flex items-center h-3">
-        <div className="w-full h-1.5 bg-[#252830] rounded-full overflow-hidden">
-          <div className="h-full bg-gray-200 rounded-full" style={{ width: `${percent}%` }} />
-        </div>
-        <input
-          type="range"
-          min={min}
-          max={max}
-          step={1}
-          value={value}
-          onChange={(event) => onChange(Number(event.target.value))}
-          className="absolute inset-0 w-full opacity-0 cursor-pointer"
-        />
-        <div
-          className="absolute -translate-x-1/2 w-3.5 h-3.5 rounded-full bg-[#111317] border-2 border-white shadow-sm pointer-events-none"
-          style={{ left: `${percent}%` }}
-        />
-      </div>
-    </label>
+    <SliderRow label={label} display={value} percent={percent}>
+      <input
+        type="range"
+        min={min}
+        max={max}
+        step={1}
+        value={value}
+        onChange={(event) => onChange(Number(event.target.value))}
+        className="absolute inset-0 w-full cursor-pointer opacity-0"
+      />
+    </SliderRow>
   )
 }
 
@@ -116,36 +144,16 @@ export function BipolarSlider({ label, value, onChange }) {
   const percent = ((value + 1) / 2) * 100
   const display = Math.round(value * 100)
   return (
-    <label className="space-y-1 block">
-      <div className="flex justify-between text-telemetry-xs text-gray-400">
-        <span>{label}</span>
-        <span className="text-gray-200 font-medium font-mono">{display}</span>
-      </div>
-      <div className="relative flex items-center h-3">
-        <div className="w-full h-1.5 bg-[#252830] rounded-full overflow-hidden">
-          <div
-            className="h-full bg-gray-200"
-            style={
-              value >= 0
-                ? { marginLeft: '50%', width: `${percent - 50}%` }
-                : { marginLeft: `${percent}%`, width: `${50 - percent}%` }
-            }
-          />
-        </div>
-        <input
-          type="range"
-          min={-100}
-          max={100}
-          step={1}
-          value={display}
-          onChange={(event) => onChange(Number(event.target.value) / 100)}
-          className="absolute inset-0 w-full opacity-0 cursor-pointer"
-        />
-        <div
-          className="absolute -translate-x-1/2 w-3.5 h-3.5 rounded-full bg-[#111317] border-2 border-white shadow-sm pointer-events-none"
-          style={{ left: `${percent}%` }}
-        />
-      </div>
-    </label>
+    <SliderRow label={label} display={display} percent={percent} origin={50}>
+      <input
+        type="range"
+        min={-100}
+        max={100}
+        step={1}
+        value={display}
+        onChange={(event) => onChange(Number(event.target.value) / 100)}
+        className="absolute inset-0 w-full cursor-pointer opacity-0"
+      />
+    </SliderRow>
   )
 }

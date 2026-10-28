@@ -19,6 +19,14 @@ import {
   ChromaKeyColor,
 } from 'facebetter'
 
+export const BG_PRESETS = [
+  { id: 'office', labelKey: 'bg.preset.office' },
+  { id: 'living', labelKey: 'bg.preset.living' },
+  { id: 'bookshelf', labelKey: 'bg.preset.bookshelf' },
+  { id: 'bedroom', labelKey: 'bg.preset.bedroom' },
+  { id: 'indoor', labelKey: 'bg.preset.indoor' },
+]
+
 export const FILTER_IDS = [
   'initial_heart', 'first_love', 'vivid', 'confession', 'milk_tea', 'mousse',
   'japanese', 'dawn', 'cookie', 'lively', 'pure', 'fair', 'snow', 'plain',
@@ -165,6 +173,10 @@ export const LIPSTICK_COLORS = [
   { id: LipstickColor.CoralOrange, labelKey: 'lipstick.coralOrange', swatch: 'from-[#b3391b] to-[#d65129]' },
   { id: LipstickColor.GentlePink, labelKey: 'lipstick.gentlePink', swatch: 'from-[#9d174d] to-[#f9a8d4]' },
   { id: LipstickColor.VitalityOrange, labelKey: 'lipstick.vitalityOrange', swatch: 'from-[#c2410c] to-[#fb923c]' },
+  { id: LipstickColor.Rosewood, labelKey: 'lipstick.rosewood', swatch: 'from-[#8f4a52] to-[#af626a]' },
+  { id: LipstickColor.BrickRed, labelKey: 'lipstick.brickRed', swatch: 'from-[#82301f] to-[#a33c2c]' },
+  { id: LipstickColor.Berry, labelKey: 'lipstick.berry', swatch: 'from-[#6e2238] to-[#8b2d49]' },
+  { id: LipstickColor.Nude, labelKey: 'lipstick.nude', swatch: 'from-[#9a6a58] to-[#c4917d]' },
 ]
 
 export const BLUSH_STYLES = [
@@ -183,6 +195,8 @@ export const BLUSH_COLORS = [
   { id: BlushColor.VividRed, labelKey: 'blushColor.vividRed', swatch: 'bg-[#be123c]/80' },
   { id: BlushColor.Berry, labelKey: 'blushColor.berry', swatch: 'bg-[#831843]/80' },
   { id: BlushColor.SunsetOrange, labelKey: 'blushColor.sunsetOrange', swatch: 'bg-[#c2410c]/80' },
+  { id: BlushColor.Peach, labelKey: 'blushColor.peach', swatch: 'bg-[#c96a4a]/80' },
+  { id: BlushColor.SakuraPink, labelKey: 'blushColor.sakuraPink', swatch: 'bg-[#c25b7a]/80' },
 ]
 
 export const CONTOUR_STYLES = [
@@ -209,6 +223,10 @@ export const EYESHADOW_COLORS = [
   { id: EyeShadowColor.Brown, labelKey: 'eyeshadowColor.brown', swatch: 'bg-[#78350f]' },
   { id: EyeShadowColor.Gold, labelKey: 'eyeshadowColor.gold', swatch: 'bg-[#a16207]' },
   { id: EyeShadowColor.Pink, labelKey: 'eyeshadowColor.pink', swatch: 'bg-[#9d174d]' },
+  { id: EyeShadowColor.Champagne, labelKey: 'eyeshadowColor.champagne', swatch: 'bg-[#a8835f]' },
+  { id: EyeShadowColor.Caramel, labelKey: 'eyeshadowColor.caramel', swatch: 'bg-[#9a4a1c]' },
+  { id: EyeShadowColor.Burgundy, labelKey: 'eyeshadowColor.burgundy', swatch: 'bg-[#6b1f2c]' },
+  { id: EyeShadowColor.Charcoal, labelKey: 'eyeshadowColor.charcoal', swatch: 'bg-[#3a3536]' },
 ]
 
 export const EYELINER_STYLES = [
@@ -221,10 +239,12 @@ export const EYELINER_STYLES = [
 ]
 
 export const EYELINER_COLORS = [
+  { id: EyeLinerColor.Black, labelKey: 'eyelinerColor.black', swatch: 'bg-[#0a0a0a]' },
+  { id: EyeLinerColor.Coffee, labelKey: 'eyelinerColor.coffee', swatch: 'bg-[#1c1917]' },
+  { id: EyeLinerColor.Chocolate, labelKey: 'eyelinerColor.chocolate', swatch: 'bg-[#431407]' },
+  { id: EyeLinerColor.Grey, labelKey: 'eyelinerColor.grey', swatch: 'bg-[#52525b]' },
   { id: EyeLinerColor.Burgundy, labelKey: 'eyelinerColor.burgundy', swatch: 'bg-[#7f1d1d]' },
   { id: EyeLinerColor.Plum, labelKey: 'eyelinerColor.plum', swatch: 'bg-[#581c87]' },
-  { id: EyeLinerColor.Chocolate, labelKey: 'eyelinerColor.chocolate', swatch: 'bg-[#431407]' },
-  { id: EyeLinerColor.Coffee, labelKey: 'eyelinerColor.coffee', swatch: 'bg-[#1c1917]' },
   { id: EyeLinerColor.Mauve, labelKey: 'eyelinerColor.mauve', swatch: 'bg-[#3f3f46]' },
 ]
 
@@ -242,8 +262,9 @@ export const EYEBROW_STYLES = [
 
 export const EYEBROW_COLORS = [
   { id: EyebrowColor.DarkBrown, labelKey: 'eyebrowColor.darkBrown', swatch: 'bg-[#44403c]' },
-  { id: EyebrowColor.Black, labelKey: 'eyebrowColor.black', swatch: 'bg-[#18181b]' },
+  { id: EyebrowColor.AshBrown, labelKey: 'eyebrowColor.ashBrown', swatch: 'bg-[#5c5049]' },
   { id: EyebrowColor.SoftBrown, labelKey: 'eyebrowColor.softBrown', swatch: 'bg-[#78716c]' },
+  { id: EyebrowColor.Black, labelKey: 'eyebrowColor.black', swatch: 'bg-[#27272a]' },
 ]
 
 export const EYELASH_STYLES = [
@@ -326,6 +347,13 @@ export function createDefaultParams() {
     whitening: 0,
     whiteningStyle: WhiteningStyle.ColdWhite,
     rosiness: 0,
+    blemish: 0,
+    clarity: 0,
+    brightness: 0,
+    contrast: 0,
+    saturation: 0,
+    colorTemperature: 0,
+    colorTint: 0,
     skinOnly: false,
     reshape,
     bodyReshape,
@@ -350,15 +378,17 @@ export function createDefaultParams() {
     eyelashColor: EyelashColor.Black,
     pupil: 0,
     pupilColor: PupilColor.Hazel,
+    teethWhiten: 0,
     filterId: null,
     filterIntensity: 0.8,
     stickerId: null,
     bgBlur: 0,
-    bgPreset: false,
+    bgPreset: null,
     chroma: null,
     chromaSimilarity: 0.4,
     chromaSmoothness: 0.1,
     chromaDesaturation: 0.1,
+    subjectOutline: false,
   }
 }
 
@@ -368,6 +398,13 @@ export function applyParams(engine, params, resources, prev = null) {
   engine.setWhitening(params.whitening)
   engine.setWhiteningStyle(params.whiteningStyle)
   engine.setRosiness(params.rosiness)
+  engine.setBlemish(params.blemish || 0)
+  engine.setClarity(params.clarity)
+  engine.setBrightness(params.brightness)
+  engine.setContrast(params.contrast)
+  engine.setSaturation(params.saturation)
+  engine.setColorTemperature(params.colorTemperature)
+  engine.setColorTint(params.colorTint)
   engine.setBeautySkinOnly(params.skinOnly)
 
   for (const [key, value] of Object.entries(params.reshape)) {
@@ -398,6 +435,7 @@ export function applyParams(engine, params, resources, prev = null) {
   engine.setEyelashColor(params.eyelashColor)
   engine.setPupil(params.pupil)
   engine.setPupilColor(params.pupilColor)
+  engine.setTeethWhiten(params.teethWhiten)
 
   const filterChanged = !prev || prev.filterId !== params.filterId
   if (filterChanged) {
@@ -450,10 +488,13 @@ export function applyParams(engine, params, resources, prev = null) {
   if (backgroundChanged) {
     if (params.bgBlur > 0) {
       engine.setVirtualBackgroundBlur(params.bgBlur)
-    } else if (params.bgPreset && resources.background) {
-      engine.setVirtualBackground(resources.background)
+    } else if (params.bgPreset && resources.backgrounds?.get(params.bgPreset)) {
+      engine.setVirtualBackground(resources.backgrounds.get(params.bgPreset))
     } else {
       engine.clearVirtualBackground()
     }
+  }
+  if (!prev || prev.subjectOutline !== params.subjectOutline) {
+    engine.setSubjectOutline(!!params.subjectOutline)
   }
 }
