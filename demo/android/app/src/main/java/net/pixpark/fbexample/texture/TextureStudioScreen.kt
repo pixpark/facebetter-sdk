@@ -95,8 +95,12 @@ fun TextureStudioScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(
+                        // The watermark sits at about 85% of the frame. A gradient across the lower half would gray out the white mark.
                         Brush.verticalGradient(
-                            listOf(Color.Black.copy(0.55f), Color.Transparent, Color.Black.copy(0.72f)),
+                            0f to Color.Black.copy(0.55f),
+                            0.18f to Color.Transparent,
+                            0.90f to Color.Transparent,
+                            1f to Color.Black.copy(0.55f),
                         ),
                     )
                     .statusBarsPadding()
@@ -110,6 +114,14 @@ fun TextureStudioScreen(
                     },
                 )
                 Hud(session)
+                if (!session.isComparing) {
+                    HintChip(
+                        session.t("preview.hold"),
+                        modifier = Modifier
+                            .align(Alignment.CenterHorizontally)
+                            .padding(top = 10.dp),
+                    )
+                }
                 Box(
                     modifier = Modifier
                         .weight(1f)
@@ -135,19 +147,6 @@ fun TextureStudioScreen(
                             .align(Alignment.CenterHorizontally)
                             .padding(bottom = 8.dp),
                     )
-                }
-                if (!session.isComparing) {
-                    Row(
-                        modifier = Modifier
-                            .align(Alignment.CenterHorizontally)
-                            .padding(bottom = 8.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        HintChip(session.t("preview.hold"))
-                        if (session.panelExpanded) {
-                            HintChip(session.t("preview.collapseHint"))
-                        }
-                    }
                 }
                 BeautyPanel(session)
             }
@@ -282,12 +281,12 @@ private fun Hud(session: TextureStudioSession) {
 }
 
 @Composable
-private fun HintChip(text: String) {
+private fun HintChip(text: String, modifier: Modifier = Modifier) {
     Text(
         text = text,
         color = Color.White.copy(0.55f),
         fontSize = 11.sp,
-        modifier = Modifier
+        modifier = modifier
             .background(Color.Black.copy(0.35f), RoundedCornerShape(50))
             .padding(horizontal = 10.dp, vertical = 5.dp),
     )

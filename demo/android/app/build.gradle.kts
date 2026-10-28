@@ -83,6 +83,9 @@ val copyFacebetterAssets by tasks.registering(Copy::class) {
     from(publicDir.resolve("background.jpg")) {
         into("facebetter")
     }
+    from(publicDir.resolve("backgrounds")) {
+        into("facebetter/backgrounds")
+    }
     from(publicDir) {
         include("resource_3d.fbd")
         include("resource_body.fbd")

@@ -25,6 +25,12 @@ data class StudioParams(
     val whitening: Float = 0f,
     val whiteningStyle: WhiteningStyle = WhiteningStyle.COLD_WHITE,
     val rosiness: Float = 0f,
+    val clarity: Float = 0f,
+    val brightness: Float = 0f,
+    val contrast: Float = 0f,
+    val saturation: Float = 0f,
+    val colorTemperature: Float = 0f,
+    val colorTint: Float = 0f,
     val skinOnly: Boolean = false,
     val reshape: Map<Reshape, Float> = BeautyCatalog.reshapeItems.associate { it.key to 0f },
     val bodyReshape: Map<BodyReshape, Float> = BeautyCatalog.bodyItems.associate { it.key to 0f },
@@ -49,15 +55,18 @@ data class StudioParams(
     val eyelashColor: EyelashColor = EyelashColor.BLACK,
     val pupil: Float = 0f,
     val pupilColor: PupilColor = PupilColor.HAZEL,
+    val teethWhiten: Float = 0f,
     val filterId: String? = null,
     val filterIntensity: Float = 0.8f,
     val stickerId: String? = null,
     val backgroundFill: BackgroundFill = BackgroundFill.OFF,
+    val bgPreset: String? = null,
     val bgBlur: Float = 0.5f,
     val chroma: ChromaKeyColor? = null,
     val chromaSimilarity: Float = 0.4f,
     val chromaSmoothness: Float = 0.1f,
     val chromaDesaturation: Float = 0.1f,
+    val subjectOutline: Boolean = false,
 ) {
     fun intensity(item: MakeupItem): Float = when (item) {
         MakeupItem.LIPSTICK -> lipstick
@@ -68,6 +77,7 @@ data class StudioParams(
         MakeupItem.EYEBROW -> eyebrow
         MakeupItem.EYELASH -> eyelash
         MakeupItem.PUPIL -> pupil
+        MakeupItem.TEETH -> teethWhiten
     }
 
     fun setIntensity(item: MakeupItem, value: Float): StudioParams = when (item) {
@@ -79,17 +89,98 @@ data class StudioParams(
         MakeupItem.EYEBROW -> copy(eyebrow = value)
         MakeupItem.EYELASH -> copy(eyelash = value)
         MakeupItem.PUPIL -> copy(pupil = value)
+        MakeupItem.TEETH -> copy(teethWhiten = value)
     }
 
     fun skinIntensity(item: SkinItem): Float = when (item) {
         SkinItem.SMOOTHING -> smoothing
         SkinItem.WHITENING -> whitening
         SkinItem.ROSINESS -> rosiness
+        SkinItem.CLARITY -> clarity
+    }
+
+    fun resetSkin(): StudioParams {
+        val fresh = StudioParams()
+        return copy(
+            smoothing = fresh.smoothing,
+            smoothingStyle = fresh.smoothingStyle,
+            whitening = fresh.whitening,
+            whiteningStyle = fresh.whiteningStyle,
+            rosiness = fresh.rosiness,
+            clarity = fresh.clarity,
+            skinOnly = fresh.skinOnly,
+        )
+    }
+
+    fun resetReshape(): StudioParams = copy(
+        reshape = BeautyCatalog.reshapeItems.associate { it.key to 0f },
+    )
+
+    fun resetBody(): StudioParams = copy(
+        bodyReshape = BeautyCatalog.bodyItems.associate { it.key to 0f },
+    )
+
+    fun resetMakeup(): StudioParams {
+        val fresh = StudioParams()
+        return copy(
+            lipstick = fresh.lipstick,
+            lipstickColor = fresh.lipstickColor,
+            blush = fresh.blush,
+            blushStyle = fresh.blushStyle,
+            blushColor = fresh.blushColor,
+            contour = fresh.contour,
+            contourStyle = fresh.contourStyle,
+            eyeshadow = fresh.eyeshadow,
+            eyeshadowStyle = fresh.eyeshadowStyle,
+            eyeshadowColor = fresh.eyeshadowColor,
+            eyeliner = fresh.eyeliner,
+            eyelinerStyle = fresh.eyelinerStyle,
+            eyelinerColor = fresh.eyelinerColor,
+            eyebrow = fresh.eyebrow,
+            eyebrowStyle = fresh.eyebrowStyle,
+            eyebrowColor = fresh.eyebrowColor,
+            eyelash = fresh.eyelash,
+            eyelashStyle = fresh.eyelashStyle,
+            eyelashColor = fresh.eyelashColor,
+            pupil = fresh.pupil,
+            pupilColor = fresh.pupilColor,
+            teethWhiten = fresh.teethWhiten,
+        )
+    }
+
+    fun resetColor(): StudioParams {
+        val fresh = StudioParams()
+        return copy(
+            brightness = fresh.brightness,
+            contrast = fresh.contrast,
+            saturation = fresh.saturation,
+            colorTemperature = fresh.colorTemperature,
+            colorTint = fresh.colorTint,
+            filterId = fresh.filterId,
+            filterIntensity = fresh.filterIntensity,
+        )
+    }
+
+    fun resetSticker(): StudioParams = copy(stickerId = null)
+
+    fun resetBackground(): StudioParams {
+        val fresh = StudioParams()
+        return copy(
+            backgroundFill = fresh.backgroundFill,
+            bgPreset = fresh.bgPreset,
+            bgBlur = fresh.bgBlur,
+            chroma = fresh.chroma,
+            chromaSimilarity = fresh.chromaSimilarity,
+            chromaSmoothness = fresh.chromaSmoothness,
+            chromaDesaturation = fresh.chromaDesaturation,
+            subjectOutline = fresh.subjectOutline,
+        )
     }
 
     fun setSkinIntensity(item: SkinItem, value: Float): StudioParams = when (item) {
         SkinItem.SMOOTHING -> copy(smoothing = value)
         SkinItem.WHITENING -> copy(whitening = value)
         SkinItem.ROSINESS -> copy(rosiness = value)
+        SkinItem.CLARITY -> copy(clarity = value)
     }
 }

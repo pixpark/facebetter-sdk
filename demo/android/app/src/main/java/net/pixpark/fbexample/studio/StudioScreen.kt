@@ -90,12 +90,16 @@ fun StudioScreen(
                     },
             )
 
+            // The watermark sits at about 85% of the frame. A gradient across the lower half would gray out the white mark.
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(
                         Brush.verticalGradient(
-                            listOf(Color.Black.copy(0.55f), Color.Transparent, Color.Black.copy(0.72f)),
+                            0f to Color.Black.copy(0.55f),
+                            0.18f to Color.Transparent,
+                            0.90f to Color.Transparent,
+                            1f to Color.Black.copy(0.55f),
                         ),
                     ),
             )
@@ -119,6 +123,14 @@ fun StudioScreen(
                         .align(Alignment.End)
                         .padding(horizontal = 12.dp, vertical = 6.dp),
                 )
+                if (!viewModel.isComparing) {
+                    HintChip(
+                        viewModel.t("preview.hold"),
+                        modifier = Modifier
+                            .align(Alignment.CenterHorizontally)
+                            .padding(top = 10.dp),
+                    )
+                }
                 Spacer(modifier = Modifier.weight(1f))
                 if (viewModel.statusKey.isNotEmpty()) {
                     StatusChip(
@@ -132,19 +144,6 @@ fun StudioScreen(
                             .align(Alignment.CenterHorizontally)
                             .padding(bottom = 8.dp),
                     )
-                }
-                if (!viewModel.isComparing) {
-                    Row(
-                        modifier = Modifier
-                            .align(Alignment.CenterHorizontally)
-                            .padding(bottom = 8.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        HintChip(viewModel.t("preview.hold"))
-                        if (viewModel.panelExpanded) {
-                            HintChip(viewModel.t("preview.collapseHint"))
-                        }
-                    }
                 }
                 BeautyPanel(viewModel = viewModel)
             }
@@ -331,12 +330,12 @@ private fun latencyColor(ms: Double): Color = when {
 }
 
 @Composable
-private fun HintChip(text: String) {
+private fun HintChip(text: String, modifier: Modifier = Modifier) {
     Text(
         text = text,
         color = Color.White.copy(0.55f),
         fontSize = 11.sp,
-        modifier = Modifier
+        modifier = modifier
             .background(Color.Black.copy(0.35f), RoundedCornerShape(50))
             .padding(horizontal = 10.dp, vertical = 5.dp),
     )

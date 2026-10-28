@@ -34,11 +34,13 @@ enum class SkinItem(val labelKey: String) {
     SMOOTHING("skin.smoothing"),
     WHITENING("skin.whitening"),
     ROSINESS("skin.rosiness"),
+    CLARITY("skin.clarity"),
 }
 
 enum class MakeupItem(val labelKey: String) {
     LIPSTICK("makeup.lipstick"),
     BLUSH("makeup.blush"),
+    TEETH("makeup.teeth"),
     CONTOUR("makeup.contour"),
     EYESHADOW("makeup.eyeshadow"),
     EYELINER("makeup.eyeliner"),
@@ -61,6 +63,16 @@ data class CatalogOption<T>(
 
 data class ReshapeItem(
     val key: Reshape,
+    val labelKey: String,
+)
+
+data class ReshapeGroup(
+    val id: String,
+    val items: List<ReshapeItem>,
+)
+
+data class BackgroundPreset(
+    val id: String,
     val labelKey: String,
 )
 
@@ -101,34 +113,46 @@ object BeautyCatalog {
         CatalogOption(WhiteningStyle.TAN, "whitening.tan"),
     )
 
-    val reshapeItems = listOf(
-        ReshapeItem(Reshape.FACE_THIN, "reshape.faceThin"),
-        ReshapeItem(Reshape.FACE_NARROW, "reshape.faceNarrow"),
-        ReshapeItem(Reshape.FACE_SMALL, "reshape.faceSmall"),
-        ReshapeItem(Reshape.FACE_SHORT, "reshape.faceShort"),
-        ReshapeItem(Reshape.FACE_V_SHAPE, "reshape.faceVShape"),
-        ReshapeItem(Reshape.CHEEKBONE, "reshape.cheekbone"),
-        ReshapeItem(Reshape.JAWBONE, "reshape.jawbone"),
-        ReshapeItem(Reshape.CHIN, "reshape.chin"),
-        ReshapeItem(Reshape.FOREHEAD, "reshape.forehead"),
-        ReshapeItem(Reshape.BROW_POSITION, "reshape.browPosition"),
-        ReshapeItem(Reshape.BROW_DISTANCE, "reshape.browDistance"),
-        ReshapeItem(Reshape.BROW_THICKNESS, "reshape.browThickness"),
-        ReshapeItem(Reshape.EYE_SIZE, "reshape.eyeSize"),
-        ReshapeItem(Reshape.EYE_ROUND, "reshape.eyeRound"),
-        ReshapeItem(Reshape.EYE_DISTANCE, "reshape.eyeDistance"),
-        ReshapeItem(Reshape.EYE_POSITION, "reshape.eyePosition"),
-        ReshapeItem(Reshape.EYE_ANGLE, "reshape.eyeAngle"),
-        ReshapeItem(Reshape.EYE_CORNER_OPEN, "reshape.eyeCornerOpen"),
-        ReshapeItem(Reshape.LOWER_EYELID, "reshape.lowerEyelid"),
-        ReshapeItem(Reshape.NOSE_SLIM, "reshape.noseSlim"),
-        ReshapeItem(Reshape.NOSE_LONG, "reshape.noseLong"),
-        ReshapeItem(Reshape.PHILTRUM, "reshape.philtrum"),
-        ReshapeItem(Reshape.MOUTH_SIZE, "reshape.mouthSize"),
-        ReshapeItem(Reshape.MOUTH_POSITION, "reshape.mouthPosition"),
-        ReshapeItem(Reshape.MOUTH_SMILE, "reshape.mouthSmile"),
-        ReshapeItem(Reshape.LIP_THICKNESS, "reshape.lipThickness"),
+    val reshapeGroups = listOf(
+        ReshapeGroup("face", listOf(
+            ReshapeItem(Reshape.FACE_THIN, "reshape.faceThin"),
+            ReshapeItem(Reshape.FACE_NARROW, "reshape.faceNarrow"),
+            ReshapeItem(Reshape.FACE_SMALL, "reshape.faceSmall"),
+            ReshapeItem(Reshape.FACE_SHORT, "reshape.faceShort"),
+            ReshapeItem(Reshape.FACE_V_SHAPE, "reshape.faceVShape"),
+            ReshapeItem(Reshape.CHEEKBONE, "reshape.cheekbone"),
+            ReshapeItem(Reshape.JAWBONE, "reshape.jawbone"),
+            ReshapeItem(Reshape.CHIN, "reshape.chin"),
+        )),
+        ReshapeGroup("brow", listOf(
+            ReshapeItem(Reshape.FOREHEAD, "reshape.forehead"),
+            ReshapeItem(Reshape.BROW_POSITION, "reshape.browPosition"),
+            ReshapeItem(Reshape.BROW_DISTANCE, "reshape.browDistance"),
+            ReshapeItem(Reshape.BROW_THICKNESS, "reshape.browThickness"),
+        )),
+        ReshapeGroup("eye", listOf(
+            ReshapeItem(Reshape.EYE_SIZE, "reshape.eyeSize"),
+            ReshapeItem(Reshape.EYE_ROUND, "reshape.eyeRound"),
+            ReshapeItem(Reshape.EYE_DISTANCE, "reshape.eyeDistance"),
+            ReshapeItem(Reshape.EYE_POSITION, "reshape.eyePosition"),
+            ReshapeItem(Reshape.EYE_ANGLE, "reshape.eyeAngle"),
+            ReshapeItem(Reshape.EYE_CORNER_OPEN, "reshape.eyeCornerOpen"),
+            ReshapeItem(Reshape.LOWER_EYELID, "reshape.lowerEyelid"),
+        )),
+        ReshapeGroup("nose", listOf(
+            ReshapeItem(Reshape.NOSE_SLIM, "reshape.noseSlim"),
+            ReshapeItem(Reshape.NOSE_LONG, "reshape.noseLong"),
+        )),
+        ReshapeGroup("mouth", listOf(
+            ReshapeItem(Reshape.PHILTRUM, "reshape.philtrum"),
+            ReshapeItem(Reshape.MOUTH_SIZE, "reshape.mouthSize"),
+            ReshapeItem(Reshape.MOUTH_POSITION, "reshape.mouthPosition"),
+            ReshapeItem(Reshape.MOUTH_SMILE, "reshape.mouthSmile"),
+            ReshapeItem(Reshape.LIP_THICKNESS, "reshape.lipThickness"),
+        )),
     )
+
+    val reshapeItems = reshapeGroups.flatMap { it.items }
 
     val bodyGroups = listOf(
         BodyReshapeGroup(
@@ -166,6 +190,10 @@ object BeautyCatalog {
         CatalogOption(LipstickColor.CORAL_ORANGE, "lipstick.coralOrange", Color(0xFFD65129)),
         CatalogOption(LipstickColor.GENTLE_PINK, "lipstick.gentlePink", Color(0xFFF9A8D4)),
         CatalogOption(LipstickColor.VITALITY_ORANGE, "lipstick.vitalityOrange", Color(0xFFFB923C)),
+        CatalogOption(LipstickColor.ROSEWOOD, "lipstick.rosewood", Color(0xFFAF626A)),
+        CatalogOption(LipstickColor.BRICK_RED, "lipstick.brickRed", Color(0xFFA33C2C)),
+        CatalogOption(LipstickColor.BERRY, "lipstick.berry", Color(0xFF8B2D49)),
+        CatalogOption(LipstickColor.NUDE, "lipstick.nude", Color(0xFFC4917D)),
     )
 
     val blushStyles = listOf(
@@ -184,6 +212,8 @@ object BeautyCatalog {
         CatalogOption(BlushColor.VIVID_RED, "blushColor.vividRed", Color(0xFFBE123C)),
         CatalogOption(BlushColor.BERRY, "blushColor.berry", Color(0xFF831843)),
         CatalogOption(BlushColor.SUNSET_ORANGE, "blushColor.sunsetOrange", Color(0xFFC2410C)),
+        CatalogOption(BlushColor.PEACH, "blushColor.peach", Color(0xFFC96A4A)),
+        CatalogOption(BlushColor.SAKURA_PINK, "blushColor.sakuraPink", Color(0xFFC25B7A)),
     )
 
     val contourStyles = listOf(
@@ -210,6 +240,10 @@ object BeautyCatalog {
         CatalogOption(EyeShadowColor.BROWN, "eyeshadowColor.brown", Color(0xFF78350F)),
         CatalogOption(EyeShadowColor.GOLD, "eyeshadowColor.gold", Color(0xFFA16207)),
         CatalogOption(EyeShadowColor.PINK, "eyeshadowColor.pink", Color(0xFF9D174D)),
+        CatalogOption(EyeShadowColor.CHAMPAGNE, "eyeshadowColor.champagne", Color(0xFFA8835F)),
+        CatalogOption(EyeShadowColor.CARAMEL, "eyeshadowColor.caramel", Color(0xFF9A4A1C)),
+        CatalogOption(EyeShadowColor.BURGUNDY, "eyeshadowColor.burgundy", Color(0xFF6B1F2C)),
+        CatalogOption(EyeShadowColor.CHARCOAL, "eyeshadowColor.charcoal", Color(0xFF3A3536)),
     )
 
     val eyelinerStyles = listOf(
@@ -222,10 +256,12 @@ object BeautyCatalog {
     )
 
     val eyelinerColors = listOf(
+        CatalogOption(EyeLinerColor.BLACK, "eyelinerColor.black", Color(0xFF0A0A0A)),
+        CatalogOption(EyeLinerColor.COFFEE, "eyelinerColor.coffee", Color(0xFF1C1917)),
+        CatalogOption(EyeLinerColor.CHOCOLATE, "eyelinerColor.chocolate", Color(0xFF431407)),
+        CatalogOption(EyeLinerColor.GREY, "eyelinerColor.grey", Color(0xFF52525B)),
         CatalogOption(EyeLinerColor.BURGUNDY, "eyelinerColor.burgundy", Color(0xFF7F1D1D)),
         CatalogOption(EyeLinerColor.PLUM, "eyelinerColor.plum", Color(0xFF581C87)),
-        CatalogOption(EyeLinerColor.CHOCOLATE, "eyelinerColor.chocolate", Color(0xFF431407)),
-        CatalogOption(EyeLinerColor.COFFEE, "eyelinerColor.coffee", Color(0xFF1C1917)),
         CatalogOption(EyeLinerColor.MAUVE, "eyelinerColor.mauve", Color(0xFF3F3F46)),
     )
 
@@ -243,8 +279,17 @@ object BeautyCatalog {
 
     val eyebrowColors = listOf(
         CatalogOption(EyebrowColor.DARK_BROWN, "eyebrowColor.darkBrown", Color(0xFF44403C)),
-        CatalogOption(EyebrowColor.BLACK, "eyebrowColor.black", Color(0xFF18181B)),
+        CatalogOption(EyebrowColor.ASH_BROWN, "eyebrowColor.ashBrown", Color(0xFF5C5049)),
         CatalogOption(EyebrowColor.SOFT_BROWN, "eyebrowColor.softBrown", Color(0xFF78716C)),
+        CatalogOption(EyebrowColor.BLACK, "eyebrowColor.black", Color(0xFF27272A)),
+    )
+
+    val backgroundPresets = listOf(
+        BackgroundPreset("office", "bg.preset.office"),
+        BackgroundPreset("living", "bg.preset.living"),
+        BackgroundPreset("bookshelf", "bg.preset.bookshelf"),
+        BackgroundPreset("bedroom", "bg.preset.bedroom"),
+        BackgroundPreset("indoor", "bg.preset.indoor"),
     )
 
     val eyelashStyles = listOf(

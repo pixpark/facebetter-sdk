@@ -21,6 +21,7 @@ class BeautyEngine(
     private var engine: BeautyEffectEngine? = null
     private var previous = StudioParams()
     private var backgroundBytes: ByteArray? = null
+    private val presetCache = mutableMapOf<String, ByteArray>()
 
     @Volatile
     var isReady: Boolean = false
@@ -155,6 +156,12 @@ class BeautyEngine(
         current.setWhitening(params.whitening)
         current.setWhiteningStyle(params.whiteningStyle)
         current.setRosiness(params.rosiness)
+        current.setClarity(params.clarity)
+        current.setBrightness(params.brightness)
+        current.setContrast(params.contrast)
+        current.setSaturation(params.saturation)
+        current.setColorTemperature(params.colorTemperature)
+        current.setColorTint(params.colorTint)
         current.setBeautySkinOnly(params.skinOnly)
 
         for (item in BeautyCatalog.reshapeItems) {
@@ -185,6 +192,7 @@ class BeautyEngine(
         current.setEyelashColor(params.eyelashColor)
         current.setPupil(params.pupil)
         current.setPupilColor(params.pupilColor)
+        current.setTeethWhiten(params.teethWhiten)
 
         if (prev.filterId != params.filterId) {
             val bytes = params.filterId?.let { assetBytes("facebetter/filters/portrait/$it/$it.fbd") }
@@ -238,11 +246,14 @@ class BeautyEngine(
             }
         }
 
-        if (prev.backgroundFill != params.backgroundFill || prev.bgBlur != params.bgBlur) {
+        if (prev.backgroundFill != params.backgroundFill || prev.bgBlur != params.bgBlur ||
+            prev.bgPreset != params.bgPreset
+        ) {
             when (params.backgroundFill) {
                 BackgroundFill.BLUR -> current.setVirtualBackgroundBlur(params.bgBlur)
                 BackgroundFill.IMAGE -> {
-                    val bytes = backgroundBytes
+                    val presetId = params.bgPreset ?: BeautyCatalog.backgroundPresets.firstOrNull()?.id
+                    val bytes = presetId?.let { presetBytes(it) } ?: backgroundBytes
                     if (bytes != null && bytes.isNotEmpty()) {
                         current.setVirtualBackground(bytes)
                     }
@@ -250,6 +261,16 @@ class BeautyEngine(
                 BackgroundFill.OFF -> current.clearVirtualBackground()
             }
         }
+        if (prev.subjectOutline != params.subjectOutline) {
+            current.setSubjectOutline(params.subjectOutline)
+        }
+    }
+
+    private fun presetBytes(id: String): ByteArray? {
+        presetCache[id]?.let { return it }
+        val bytes = assetBytes("facebetter/backgrounds/$id.jpg") ?: return null
+        presetCache[id] = bytes
+        return bytes
     }
 
     private fun assetBytes(path: String): ByteArray? {
