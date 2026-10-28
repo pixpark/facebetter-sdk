@@ -24,7 +24,7 @@ final class StudioModel: BeautySession {
   @Published var fps: Double = 0
   @Published var processMs: Double = 0
 
-  let preview = PreviewMTKView(frame: .zero, device: nil)
+  let preview = PreviewMTKView(frame: .zero)
 
   private let engine = BeautyEngine()
   private let camera = CameraSession()

@@ -1,30 +1,12 @@
-import CoreImage
-import MetalKit
 import SwiftUI
 
-final class PreviewMTKView: MTKView {
-  private let commandQueue: MTLCommandQueue
-  private let ciContext: CIContext
-  private let frameLock = NSLock()
-  private var currentPixelBuffer: CVPixelBuffer?
-  private var currentImage: CIImage?
-  private let colorSpace = CGColorSpaceCreateDeviceRGB()
-
-  override init(frame: CGRect, device: MTLDevice?) {
-    let resolved = device ?? MTLCreateSystemDefaultDevice()
-    guard let resolved, let commandQueue = resolved.makeCommandQueue() else {
-      fatalError("Facebetter requires Metal")
-    }
-    self.commandQueue = commandQueue
-    self.ciContext = CIContext(mtlDevice: resolved)
-    super.init(frame: frame, device: resolved)
-    framebufferOnly = false
-    colorPixelFormat = .bgra8Unorm
-    isPaused = true
-    enableSetNeedsDisplay = true
-    contentMode = .scaleAspectFit
+final class PreviewMTKView: UIView {
+  override init(frame: CGRect) {
+    super.init(frame: frame)
     backgroundColor = .black
     isOpaque = true
+    contentMode = .scaleAspectFit
+    layer.contentsGravity = .resizeAspect
   }
 
   required init(coder: NSCoder) {
@@ -32,83 +14,48 @@ final class PreviewMTKView: MTKView {
   }
 
   func display(pixelBuffer: CVPixelBuffer) {
-    frameLock.lock()
-    currentPixelBuffer = pixelBuffer
-    currentImage = nil
-    frameLock.unlock()
-    DispatchQueue.main.async { [weak self] in
-      self?.setNeedsDisplay()
-    }
+    guard let image = cgImage(from: pixelBuffer) else { return }
+    show(image)
   }
 
   func display(image: UIImage) {
     guard let cgImage = image.cgImage else { return }
-    frameLock.lock()
-    currentPixelBuffer = nil
-    currentImage = CIImage(cgImage: cgImage)
-    frameLock.unlock()
-    DispatchQueue.main.async { [weak self] in
-      self?.setNeedsDisplay()
-    }
+    show(cgImage)
   }
 
   func recoverAfterCover() {
     setNeedsLayout()
     layoutIfNeeded()
-    if let metal = layer as? CAMetalLayer {
-      let scale = window?.screen.scale ?? contentScaleFactor
-      let pixels = CGSize(width: bounds.width * scale, height: bounds.height * scale)
-      if pixels.width > 1, pixels.height > 1 {
-        metal.drawableSize = pixels
-      }
-    }
-    setNeedsDisplay()
   }
 
-  override func draw(_ rect: CGRect) {
-    autoreleasepool {
-      frameLock.lock()
-      let pixelBuffer = currentPixelBuffer
-      let still = currentImage
-      frameLock.unlock()
-
-      let source: CIImage?
-      if let pixelBuffer {
-        source = CIImage(cvPixelBuffer: pixelBuffer)
-      } else {
-        source = still
-      }
-
-      guard let source,
-            let drawable = currentDrawable,
-            let commandBuffer = commandQueue.makeCommandBuffer() else {
-        return
-      }
-
-      let targetSize = CGSize(width: drawableSize.width, height: drawableSize.height)
-      let scale = min(
-        targetSize.width / source.extent.width,
-        targetSize.height / source.extent.height
-      )
-      let scaled = source.transformed(by: CGAffineTransform(scaleX: scale, y: scale))
-      let translated = scaled.transformed(by: CGAffineTransform(
-        translationX: (targetSize.width - scaled.extent.width) / 2 - scaled.extent.minX,
-        y: (targetSize.height - scaled.extent.height) / 2 - scaled.extent.minY
-      ))
-      let targetBounds = CGRect(origin: .zero, size: targetSize)
-      let background = CIImage(color: .black).cropped(to: targetBounds)
-      let fitted = translated.composited(over: background)
-
-      ciContext.render(
-        fitted,
-        to: drawable.texture,
-        commandBuffer: commandBuffer,
-        bounds: targetBounds,
-        colorSpace: colorSpace
-      )
-      commandBuffer.present(drawable)
-      commandBuffer.commit()
+  private func show(_ image: CGImage) {
+    DispatchQueue.main.async { [weak self] in
+      self?.layer.contents = image
     }
+  }
+
+  private func cgImage(from pixelBuffer: CVPixelBuffer) -> CGImage? {
+    CVPixelBufferLockBaseAddress(pixelBuffer, .readOnly)
+    defer { CVPixelBufferUnlockBaseAddress(pixelBuffer, .readOnly) }
+    guard let base = CVPixelBufferGetBaseAddress(pixelBuffer) else { return nil }
+    let width = CVPixelBufferGetWidth(pixelBuffer)
+    let height = CVPixelBufferGetHeight(pixelBuffer)
+    let stride = CVPixelBufferGetBytesPerRow(pixelBuffer)
+    let bitmapInfo = CGBitmapInfo.byteOrder32Little.union(
+      CGBitmapInfo(rawValue: CGImageAlphaInfo.premultipliedFirst.rawValue)
+    )
+    guard let context = CGContext(
+      data: base,
+      width: width,
+      height: height,
+      bitsPerComponent: 8,
+      bytesPerRow: stride,
+      space: CGColorSpaceCreateDeviceRGB(),
+      bitmapInfo: bitmapInfo.rawValue
+    ) else {
+      return nil
+    }
+    return context.makeImage()
   }
 }
 
