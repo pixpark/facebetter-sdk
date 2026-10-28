@@ -149,6 +149,12 @@ final class BeautyEngine {
     engine.setWhitening(params.whitening)
     engine.setWhiteningStyle(params.whiteningStyle)
     engine.setRosiness(params.rosiness)
+    engine.setClarity(params.clarity)
+    engine.setBrightness(params.brightness)
+    engine.setContrast(params.contrast)
+    engine.setSaturation(params.saturation)
+    engine.setColorTemperature(params.colorTemperature)
+    engine.setColorTint(params.colorTint)
     engine.setBeautySkinOnly(params.skinOnly)
 
     for item in BeautyCatalog.reshapeItems {
@@ -179,6 +185,7 @@ final class BeautyEngine {
     engine.setEyelashColor(params.eyelashColor)
     engine.setPupil(params.pupil)
     engine.setPupilColor(params.pupilColor)
+    engine.setTeethWhiten(params.teethWhiten)
 
     if prev.filterID != params.filterID {
       if let filterID = params.filterID, let path = filterPath(filterID) {
@@ -231,6 +238,9 @@ final class BeautyEngine {
       case .off:
         engine.clearVirtualBackground()
       }
+    }
+    if prev.subjectOutline != params.subjectOutline {
+      engine.setSubjectOutline(params.subjectOutline)
     }
   }
 

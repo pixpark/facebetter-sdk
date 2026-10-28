@@ -30,6 +30,7 @@ enum SkinItem: String, CaseIterable, Identifiable {
   case smoothing
   case whitening
   case rosiness
+  case clarity
 
   var id: String { rawValue }
   var labelKey: String { "skin.\(rawValue)" }
@@ -38,6 +39,7 @@ enum SkinItem: String, CaseIterable, Identifiable {
 enum MakeupItem: String, CaseIterable, Identifiable {
   case lipstick
   case blush
+  case teeth
   case contour
   case eyeshadow
   case eyeliner

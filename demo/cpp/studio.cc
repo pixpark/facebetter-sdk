@@ -382,6 +382,18 @@ void Studio::ApplyToEngine(const Params& p, const Params* prev) {
     engine_->SetWhiteningStyle(p.whitening_style);
   if (changed(&Params::rosiness))
     engine_->SetRosiness(p.rosiness);
+  if (changed(&Params::clarity))
+    engine_->SetClarity(p.clarity);
+  if (changed(&Params::brightness))
+    engine_->SetBrightness(p.brightness);
+  if (changed(&Params::contrast))
+    engine_->SetContrast(p.contrast);
+  if (changed(&Params::saturation))
+    engine_->SetSaturation(p.saturation);
+  if (changed(&Params::color_temperature))
+    engine_->SetColorTemperature(p.color_temperature);
+  if (changed(&Params::color_tint))
+    engine_->SetColorTint(p.color_tint);
   if (changed(&Params::skin_only))
     engine_->SetBeautySkinOnly(p.skin_only);
 
@@ -438,6 +450,8 @@ void Studio::ApplyToEngine(const Params& p, const Params* prev) {
     engine_->SetPupil(p.pupil);
   if (changed(&Params::pupil_color))
     engine_->SetPupilColor(p.pupil_color);
+  if (changed(&Params::teeth_whiten))
+    engine_->SetTeethWhiten(p.teeth_whiten);
 
   const bool filter_changed = !prev || prev->filter_id != p.filter_id;
   if (filter_changed) {
@@ -504,6 +518,8 @@ void Studio::ApplyToEngine(const Params& p, const Params* prev) {
       engine_->ClearVirtualBackground();
     }
   }
+  if (changed(&Params::subject_outline))
+    engine_->SetSubjectOutline(p.subject_outline);
 }
 
 void Studio::Publish(RgbaBuffer processed,

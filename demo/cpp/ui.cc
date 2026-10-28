@@ -589,7 +589,7 @@ void DrawSkin(Studio& studio) {
   const bool reset_skin = ImGui::Button(T("skin.reset"), reset_sz);
   PopBtnFont();
   if (reset_skin) {
-    p.smoothing = p.whitening = p.rosiness = 0.f;
+    p.smoothing = p.whitening = p.rosiness = p.clarity = 0.f;
     studio.NotifyParamsChanged();
   }
   ImGui::PopStyleColor(2);
@@ -623,6 +623,8 @@ void DrawSkin(Studio& studio) {
   if (ParamSlider(T("skin.whitening"), &p.whitening))
     studio.NotifyParamsChanged();
   if (ParamSlider(T("skin.rosiness"), &p.rosiness))
+    studio.NotifyParamsChanged();
+  if (ParamSlider(T("skin.clarity"), &p.clarity))
     studio.NotifyParamsChanged();
   EndCard();
 }
@@ -815,6 +817,15 @@ void DrawMakeup(Studio& studio) {
               &p.blush_style, kBlushC, kBlushCk, 5, &p.blush_color, style_l,
               color_l);
 
+  ImGui::PushID("teeth");
+  ImGui::TextUnformatted(T("makeup.teeth"));
+  if (ParamSlider(T("makeup.intensity"), &p.teeth_whiten))
+    studio.NotifyParamsChanged();
+  ImGui::Spacing();
+  ImGui::Separator();
+  ImGui::Spacing();
+  ImGui::PopID();
+
   static const ContourStyle kConS[] = {
       ContourStyle::Natural, ContourStyle::Sculpt, ContourStyle::Glow,
       ContourStyle::Slim,    ContourStyle::Nose,   ContourStyle::Glam};
@@ -908,6 +919,18 @@ void DrawFilter(Studio& studio) {
   std::snprintf(extra, sizeof(extra), "%s %d%%", T("filter.intensity"),
                 static_cast<int>(std::lround(p.filter_intensity * 100)));
   CardTitle(T("filter.title"), extra);
+  ImGui::TextColored(kMuted, "%s", T("color.group.adjust"));
+  if (BipolarSlider(T("color.brightness"), &p.brightness))
+    studio.NotifyParamsChanged();
+  if (BipolarSlider(T("color.contrast"), &p.contrast))
+    studio.NotifyParamsChanged();
+  if (BipolarSlider(T("color.saturation"), &p.saturation))
+    studio.NotifyParamsChanged();
+  if (BipolarSlider(T("color.temperature"), &p.color_temperature))
+    studio.NotifyParamsChanged();
+  if (BipolarSlider(T("color.tint"), &p.color_tint))
+    studio.NotifyParamsChanged();
+  ImGui::TextColored(kMuted, "%s", T("color.group.filter"));
   const int n = static_cast<int>(filters.size()) + 1;
   ChipGrid(3, n, [&](int i, ImVec2 size) {
     if (i == 0) {
@@ -970,6 +993,10 @@ void DrawBackground(Studio& studio) {
   Params& p = studio.params();
   BeginCard("bg");
   CardTitle(T("bg.title"));
+  ImGui::TextColored(kMuted, "%s", T("bg.outline"));
+  ImGui::SameLine(ImGui::GetContentRegionAvail().x - 20);
+  if (Toggle("outline", &p.subject_outline))
+    studio.NotifyParamsChanged();
   ImGui::TextColored(kMuted, "%s", T("bg.effect"));
   const BgFill fills[] = {BgFill::Off, BgFill::Blur, BgFill::Preset};
   const char* fill_keys[] = {"bg.original", "bg.blur", "bg.preset"};

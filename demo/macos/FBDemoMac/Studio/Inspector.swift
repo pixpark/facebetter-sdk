@@ -127,6 +127,7 @@ private struct SkinPanel: View {
           studio.params.smoothing = 0
           studio.params.whitening = 0
           studio.params.rosiness = 0
+          studio.params.clarity = 0
         }
         .buttonStyle(.plain)
         .withoutFocusRing()
@@ -163,6 +164,7 @@ private struct SkinPanel: View {
       }
       ParamSlider(label: studio.t("skin.whitening"), value: $studio.params.whitening)
       ParamSlider(label: studio.t("skin.rosiness"), value: $studio.params.rosiness)
+      ParamSlider(label: studio.t("skin.clarity"), value: $studio.params.clarity)
     }
   }
 }
@@ -248,6 +250,11 @@ private struct MakeupPanel: View {
           get: { Int(studio.params.blushColor.rawValue) },
           set: { studio.params.blushColor = FBBlushColor(rawValue: $0) ?? .coralPink }
         )
+      )
+      divider
+      makeupBlock(
+        title: studio.t("makeup.teeth"),
+        intensity: $studio.params.teethWhiten
       )
       divider
       makeupBlock(
@@ -400,6 +407,18 @@ private struct FilterPanel: View {
         .font(.system(size: 10))
         .foregroundStyle(StudioColors.muted)
     } content: {
+      Text(studio.t("color.group.adjust"))
+        .font(.system(size: 10))
+        .foregroundStyle(StudioColors.muted)
+      BipolarSlider(label: studio.t("color.brightness"), value: $studio.params.brightness)
+      BipolarSlider(label: studio.t("color.contrast"), value: $studio.params.contrast)
+      BipolarSlider(label: studio.t("color.saturation"), value: $studio.params.saturation)
+      BipolarSlider(label: studio.t("color.temperature"), value: $studio.params.colorTemperature)
+      BipolarSlider(label: studio.t("color.tint"), value: $studio.params.colorTint)
+      Text(studio.t("color.group.filter"))
+        .font(.system(size: 10))
+        .foregroundStyle(StudioColors.muted)
+        .padding(.top, 4)
       ChipGrid(columns: 3, spacing: 8) {
         ChipButton(title: studio.t("filter.none"), active: studio.params.filterID == nil, fillWidth: true) {
           studio.params.filterID = nil
@@ -455,6 +474,13 @@ private struct BackgroundPanel: View {
 
   var body: some View {
     InspectorCard(title: studio.t("bg.title"), symbol: "person.crop.rectangle") {
+      Toggle(isOn: $studio.params.subjectOutline) {
+        Text(studio.t("bg.outline"))
+          .font(.system(size: 10))
+          .foregroundStyle(Color(hex: 0xE5E7EB))
+      }
+      .toggleStyle(.switch)
+      .controlSize(.mini)
       Text(studio.t("bg.effect"))
         .font(.system(size: 10))
         .foregroundStyle(StudioColors.muted)

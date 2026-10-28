@@ -6,6 +6,12 @@ struct BeautyParams: Equatable {
   var whitening: Float = 0
   var whiteningStyle: FBWhiteningStyle = .coldWhite
   var rosiness: Float = 0
+  var clarity: Float = 0
+  var brightness: Float = 0
+  var contrast: Float = 0
+  var saturation: Float = 0
+  var colorTemperature: Float = 0
+  var colorTint: Float = 0
   var skinOnly = false
   var reshape: [FBReshape: Float] = BeautyParams.emptyReshape()
   var bodyReshape: [FBBodyReshape: Float] = BeautyParams.emptyBodyReshape()
@@ -31,6 +37,7 @@ struct BeautyParams: Equatable {
   var eyelashColor: FBEyelashColor = .black
   var pupil: Float = 0
   var pupilColor: FBPupilColor = .hazel
+  var teethWhiten: Float = 0
 
   var filterID: String?
   var filterIntensity: Float = 0.8
@@ -42,6 +49,7 @@ struct BeautyParams: Equatable {
   var chromaSimilarity: Float = 0.4
   var chromaSmoothness: Float = 0.1
   var chromaDesaturation: Float = 0.1
+  var subjectOutline = false
 
   static func emptyReshape() -> [FBReshape: Float] {
     var values: [FBReshape: Float] = [:]

@@ -54,6 +54,12 @@ struct Params {
   float whitening = 0.f;
   WhiteningStyle whitening_style = WhiteningStyle::ColdWhite;
   float rosiness = 0.f;
+  float clarity = 0.f;
+  float brightness = 0.f;
+  float contrast = 0.f;
+  float saturation = 0.f;
+  float color_temperature = 0.f;
+  float color_tint = 0.f;
   bool skin_only = false;
 
   std::array<float, kReshapeCount> reshape{};
@@ -80,6 +86,7 @@ struct Params {
   EyelashColor eyelash_color = EyelashColor::Black;
   float pupil = 0.f;
   PupilColor pupil_color = PupilColor::Hazel;
+  float teeth_whiten = 0.f;
 
   std::string filter_id;
   float filter_intensity = 0.8f;
@@ -91,6 +98,7 @@ struct Params {
   float chroma_similarity = 0.4f;
   float chroma_smoothness = 0.1f;
   float chroma_desaturation = 0.1f;
+  bool subject_outline = false;
 
 };
 
