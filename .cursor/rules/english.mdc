@@ -1,0 +1,14 @@
+---
+description: fb-sdk is public. Commit messages and code comments stay in English.
+alwaysApply: true
+---
+
+# English only
+
+`fb-sdk` is the public demo repository.
+
+- Commit messages are English. One or two sentences, focused on why.
+- Code comments are English, including CMake comments.
+- User-facing locale strings stay in their language. Chinese copy in `L10n` / `i18n` is the product UI, not a comment.
+
+Do not apply this to `fb`. Engine commits stay in Chinese.

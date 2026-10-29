@@ -1,8 +1,8 @@
 # Facebetter Desktop C++ Demo (GLFW + ImGui)
 #
-# 客户默认：解压官方包到 sdk/（或 -DFACEBETTER_SDK_DIR=），然后
+# Customer default: unzip the official package into sdk/ (or -DFACEBETTER_SDK_DIR=), then
 #   cmake -B build && cmake --build build
-# 内部连编：fb 工程 -DFB_DEMO=ON，此时已存在 facebetter 目标，走 in-tree。
+# In-tree: the fb build with -DFB_DEMO=ON already defines the facebetter target.
 
 cmake_minimum_required(VERSION 3.16)
 project(facebetter_demo_cpp LANGUAGES CXX C)
@@ -14,7 +14,7 @@ find_package(OpenCV REQUIRED)
 message(STATUS "OpenCV ${OpenCV_VERSION}")
 
 # ---------------------------------------------------------------------------
-# 共享素材：与 iOS/Android/Web Demo 共用 demo/web/react/public
+# Shared assets: the same demo/web/react/public tree used by the iOS, Android, and web demos.
 # ---------------------------------------------------------------------------
 set(FB_DEMO_WEB_PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/../web/react/public")
 if(NOT EXISTS "${FB_DEMO_WEB_PUBLIC}/background.jpg")
@@ -31,7 +31,7 @@ set(FB_DEMO_BACKGROUND_PATH "${FB_DEMO_WEB_PUBLIC}/background.jpg")
 set(FB_DEMO_BACKGROUNDS_DIR "${FB_DEMO_WEB_PUBLIC}/backgrounds")
 
 # ---------------------------------------------------------------------------
-# SDK：in-tree（fb -DFB_DEMO=ON）或客户包 sdk/
+# SDK: in-tree (fb -DFB_DEMO=ON) or the customer package under sdk/.
 # ---------------------------------------------------------------------------
 if(TARGET facebetter)
   set(FB_DEMO_IN_TREE ON)
@@ -101,7 +101,7 @@ else()
 endif()
 
 # ---------------------------------------------------------------------------
-# GLFW / ImGui / glad / OpenGL（in-tree 用引擎 third_party，否则 FetchContent）
+# GLFW / ImGui / glad / OpenGL (in-tree uses the engine third_party; otherwise FetchContent).
 # ---------------------------------------------------------------------------
 if(NOT TARGET imgui OR NOT TARGET glad::glad)
   include(FetchContent)
@@ -156,7 +156,7 @@ if(NOT TARGET imgui OR NOT TARGET glad::glad)
 endif()
 
 # ---------------------------------------------------------------------------
-# 可执行文件
+# Executable
 # ---------------------------------------------------------------------------
 add_executable(facebetter_demo
   main.cpp
@@ -189,8 +189,8 @@ if(FB_DEMO_IN_TREE AND TARGET pack_bundle)
   add_dependencies(facebetter_demo pack_bundle)
 endif()
 
-# 资源路径：引擎 fopen 直接打开 resource.fbd 文件。
-# FB_DEMO_PORTABLE：路径相对可执行文件目录，供 --package-demo 打包。
+# Resource path: the engine fopen()s the resource.fbd file directly.
+# FB_DEMO_PORTABLE: paths are relative to the executable directory for --package-demo.
 option(FB_DEMO_PORTABLE "Bake demo asset paths relative to the executable" OFF)
 if(FB_DEMO_PORTABLE)
   set(_fb_res "resource/resource.fbd")
@@ -266,7 +266,7 @@ mnn_framework=${_mnn_cmake}
 ")
 endif()
 
-# 客户包：把运行时库拷到可执行文件旁，并设 RPATH
+# Customer package: copy the runtime library next to the executable and set RPATH.
 if(NOT FB_DEMO_IN_TREE AND FB_DEMO_RUNTIME_LIB)
   get_filename_component(_fb_runtime_ext "${FB_DEMO_RUNTIME_LIB}" EXT)
   if(NOT _fb_runtime_ext STREQUAL ".a")
