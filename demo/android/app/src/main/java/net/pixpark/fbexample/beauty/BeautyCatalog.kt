@@ -32,9 +32,9 @@ enum class BeautyTab(val labelKey: String) {
 
 enum class SkinItem(val labelKey: String) {
     SMOOTHING("skin.smoothing"),
-    BLEMISH("skin.blemish"),
     WHITENING("skin.whitening"),
     ROSINESS("skin.rosiness"),
+    BLEMISH("skin.blemish"),
     CLARITY("skin.clarity"),
 }
 
