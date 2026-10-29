@@ -28,6 +28,8 @@ using facebetter::LogConfig;
 using facebetter::LogLevel;
 
 constexpr int kMaxEdge = 1280;
+// Cap camera ProcessImage rate so the demo does not burn CPU chasing uncapped capture.
+constexpr auto kCameraFrameInterval = std::chrono::milliseconds(33);  // ~30 fps
 
 #ifndef FB_DEMO_RESOURCE_DIR
 #define FB_DEMO_RESOURCE_DIR "./out"
@@ -630,6 +632,7 @@ void Studio::WorkerLoop() {
     };
 
     if (source == Source::Camera) {
+      const auto frame_started = std::chrono::steady_clock::now();
       if (!capture.isOpened()) {
         capture.open(0);
         if (!capture.isOpened())
@@ -643,6 +646,7 @@ void Studio::WorkerLoop() {
         }
         capture.set(cv::CAP_PROP_FRAME_WIDTH, 1280);
         capture.set(cv::CAP_PROP_FRAME_HEIGHT, 720);
+        capture.set(cv::CAP_PROP_FPS, 30);
         SetStatus("status.cameraOn");
       }
       capture >> camera_bgr;
@@ -652,6 +656,10 @@ void Studio::WorkerLoop() {
       }
       cv::flip(camera_bgr, camera_bgr, 1);
       process(FromBgr(camera_bgr), FrameType::Video);
+      const auto elapsed = std::chrono::steady_clock::now() - frame_started;
+      if (elapsed < kCameraFrameInterval) {
+        std::this_thread::sleep_for(kCameraFrameInterval - elapsed);
+      }
     } else if (source == Source::Image) {
       if (!still.empty())
         process(still, FrameType::Image);

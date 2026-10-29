@@ -169,7 +169,8 @@ int main() {
   glfwSetDropCallback(window, OnDrop);
 
   while (!glfwWindowShouldClose(window)) {
-    glfwWaitEventsTimeout(studio.IsCamera() ? 0.016 : 0.25);
+    // Camera ~30fps cadence; still/idle sleeps longer. Input still wakes immediately.
+    glfwWaitEventsTimeout(studio.IsCamera() ? 0.033 : 0.25);
     studio.UploadGpu();
 
     ImGui_ImplOpenGL3_NewFrame();

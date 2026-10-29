@@ -2,7 +2,7 @@
 
 GLFW + Dear ImGui 的 Facebetter Demo 界面，演示 C++ API。启动后先进入空态，从预览区打开图片或相机，也可打开示例图片或拖入图片后导出 PNG。滤镜和贴纸与 `demo/web/react` 共用，请保留完整仓库再编译。
 
-主线程用 vsync + `glfwWaitEventsTimeout`，处理线程用条件变量背压，静止画面时 CPU 接近空闲。
+主线程用 vsync + `glfwWaitEventsTimeout`，处理线程用条件变量背压；相机处理约锁 30fps，静止画面时 CPU 接近空闲。
 
 ## 准备 SDK
 
