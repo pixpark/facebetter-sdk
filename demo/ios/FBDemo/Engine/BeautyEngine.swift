@@ -174,6 +174,7 @@ final class BeautyEngine {
     engine.setWhitening(params.whitening)
     engine.setWhiteningStyle(params.whiteningStyle)
     engine.setRosiness(params.rosiness)
+    engine.setBlemish(params.blemish)
     engine.setClarity(params.clarity)
     engine.setBrightness(params.brightness)
     engine.setContrast(params.contrast)
@@ -384,7 +385,7 @@ extension UIImage {
 
   convenience init?(pixelBuffer: CVPixelBuffer) {
     let image = CIImage(cvPixelBuffer: pixelBuffer)
-    let context = CIContext(options: [.useSoftwareRenderer: true])
+    let context = CIContext(options: [.useSoftwareRenderer: false])
     guard let cgImage = context.createCGImage(image, from: image.extent) else { return nil }
     self.init(cgImage: cgImage)
   }

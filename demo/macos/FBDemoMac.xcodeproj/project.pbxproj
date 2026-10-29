@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 46;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -46,7 +46,7 @@
 		9E85F1004C21DBA4A2807A97 /* UIComponents.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = UIComponents.swift; sourceTree = "<group>"; };
 		B9F184B7D4496E8621D862F7 /* CameraSession.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CameraSession.swift; sourceTree = "<group>"; };
 		C0E8F1E0A45801177C388601 /* FBDemoMac-Bridging-Header.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "FBDemoMac-Bridging-Header.h"; sourceTree = "<group>"; };
-		C738A29A97F7B9B16775267C /* face.jpg */ = {isa = PBXFileReference; includeInIndex = 1; path = face.jpg; sourceTree = "<group>"; };
+		C738A29A97F7B9B16775267C /* face.jpg */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.jpeg; path = face.jpg; sourceTree = "<group>"; };
 		C976240012FC941455CC0067 /* BeautyParams.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BeautyParams.swift; sourceTree = "<group>"; };
 		CC0D86B15DD68D079C080E63 /* Viewport.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Viewport.swift; sourceTree = "<group>"; };
 		D50E63CE7EB8E75C65586D20 /* TopBar.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TopBar.swift; sourceTree = "<group>"; };
@@ -85,7 +85,6 @@
 				5A3E45610FD3C124396C4B44 /* FacebetterConfig.plist */,
 				C738A29A97F7B9B16775267C /* face.jpg */,
 			);
-			name = Resources;
 			path = Resources;
 			sourceTree = "<group>";
 		};
@@ -94,7 +93,6 @@
 			children = (
 				B9F184B7D4496E8621D862F7 /* CameraSession.swift */,
 			);
-			name = Camera;
 			path = Camera;
 			sourceTree = "<group>";
 		};
@@ -111,7 +109,6 @@
 			children = (
 				2043146FC2E34BAECE33B506 /* BeautyEngine.swift */,
 			);
-			name = Engine;
 			path = Engine;
 			sourceTree = "<group>";
 		};
@@ -122,7 +119,6 @@
 				C976240012FC941455CC0067 /* BeautyParams.swift */,
 				078D533A2F1AC947A33E5D37 /* BeautySession.swift */,
 			);
-			name = Beauty;
 			path = Beauty;
 			sourceTree = "<group>";
 		};
@@ -132,7 +128,6 @@
 				11BA83A37FF6853E55A9D19D /* Pods-FBDemoMac.release.xcconfig */,
 				56FFFEF4508AAB2DECD8469A /* Pods-FBDemoMac.debug.xcconfig */,
 			);
-			name = Pods;
 			path = Pods;
 			sourceTree = "<group>";
 		};
@@ -149,7 +144,6 @@
 			children = (
 				DE5B80EC96A1806FDE082407 /* L10n.swift */,
 			);
-			name = App;
 			path = App;
 			sourceTree = "<group>";
 		};
@@ -177,7 +171,6 @@
 				29F02EC2000E7A208BB1C98B /* Resources */,
 				73E5969BA30A663D4964E08B /* Assets.xcassets */,
 			);
-			name = FBDemoMac;
 			path = FBDemoMac;
 			sourceTree = "<group>";
 		};
@@ -192,7 +185,6 @@
 				9E85F1004C21DBA4A2807A97 /* UIComponents.swift */,
 				CC0D86B15DD68D079C080E63 /* Viewport.swift */,
 			);
-			name = Studio;
 			path = Studio;
 			sourceTree = "<group>";
 		};
@@ -237,8 +229,6 @@
 				Base,
 			);
 			mainGroup = 18E9C9CED1223AE4908B18BC;
-			minimizedProjectReferenceProxies = 0;
-			preferredProjectObjectVersion = 77;
 			productRefGroup = 645FB7C9ADAE6E2C2FE486C4 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -301,7 +291,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "set -e\nDEST=\"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/Facebetter\"\nSRC=\"${SRCROOT}/../web/react/public\"\nmkdir -p \"${DEST}/filters\" \"${DEST}/stickers\"\nrsync -a \"${SRC}/assets/filters/\" \"${DEST}/filters/\"\nrsync -a \"${SRC}/stickers/\" \"${DEST}/stickers/\"\ncp \"${SRC}/background.jpg\" \"${DEST}/background.jpg\"\nif [ -f \"${SRC}/resource_3d.fbd\" ]; then\n  cp \"${SRC}/resource_3d.fbd\" \"${DEST}/resource_3d.fbd\"\nfi\nif [ -f \"${SRC}/resource_body.fbd\" ]; then\n  cp \"${SRC}/resource_body.fbd\" \"${DEST}/resource_body.fbd\"\nfi\nif [ -f \"${SRC}/assets/filters/filter_mapping.json\" ]; then\n  cp \"${SRC}/assets/filters/filter_mapping.json\" \"${DEST}/filter_mapping.json\"\nfi\nif [ -f \"${SRC}/face.jpg\" ]; then\n  cp \"${SRC}/face.jpg\" \"${DEST}/face.jpg\"\nfi\n";
+			shellScript = "set -e\nDEST=\"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/Facebetter\"\nSRC=\"${SRCROOT}/../web/react/public\"\nmkdir -p \"${DEST}/filters\" \"${DEST}/stickers\"\nrsync -a \"${SRC}/assets/filters/\" \"${DEST}/filters/\"\nrsync -a \"${SRC}/stickers/\" \"${DEST}/stickers/\"\ncp \"${SRC}/background.jpg\" \"${DEST}/background.jpg\"\nif [ -d \"${SRC}/backgrounds\" ]; then\n  mkdir -p \"${DEST}/backgrounds\"\n  rsync -a \"${SRC}/backgrounds/\" \"${DEST}/backgrounds/\"\nfi\nif [ -f \"${SRC}/resource_3d.fbd\" ]; then\n  cp \"${SRC}/resource_3d.fbd\" \"${DEST}/resource_3d.fbd\"\nfi\nif [ -f \"${SRC}/resource_body.fbd\" ]; then\n  cp \"${SRC}/resource_body.fbd\" \"${DEST}/resource_body.fbd\"\nfi\nif [ -f \"${SRC}/assets/filters/filter_mapping.json\" ]; then\n  cp \"${SRC}/assets/filters/filter_mapping.json\" \"${DEST}/filter_mapping.json\"\nfi\nif [ -f \"${SRC}/face.jpg\" ]; then\n  cp \"${SRC}/face.jpg\" \"${DEST}/face.jpg\"\nfi\n";
 		};
 		FBA60516D1686F1FDB5CA92A /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -480,10 +470,14 @@
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = FBDemoMac/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				INFOPLIST_KEY_CFBundleDisplayName = Facebetter;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				MARKETING_VERSION = 2.0.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.pixpark.FBDemoMac;
+				PRODUCT_BUNDLE_IDENTIFIER = net.pixpark.macdemo;
 				SDKROOT = macosx;
 				SWIFT_OBJC_BRIDGING_HEADER = "FBDemoMac/FBDemoMac-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
@@ -505,10 +499,14 @@
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = FBDemoMac/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				INFOPLIST_KEY_CFBundleDisplayName = Facebetter;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				MARKETING_VERSION = 2.0.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.pixpark.FBDemoMac;
+				PRODUCT_BUNDLE_IDENTIFIER = net.pixpark.macdemo;
 				SDKROOT = macosx;
 				SWIFT_OBJC_BRIDGING_HEADER = "FBDemoMac/FBDemoMac-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;

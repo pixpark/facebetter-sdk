@@ -6,6 +6,7 @@ struct BeautyParams: Equatable {
   var whitening: Float = 0
   var whiteningStyle: FBWhiteningStyle = .coldWhite
   var rosiness: Float = 0
+  var blemish: Float = 0
   var clarity: Float = 0
   var brightness: Float = 0
   var contrast: Float = 0
@@ -45,6 +46,7 @@ struct BeautyParams: Equatable {
 
   var backgroundFill: BackgroundFill = .off
   var bgBlur: Float = 0.5
+  var bgPreset: String?
   var chroma: FBChromaKeyColor?
   var chromaSimilarity: Float = 0.4
   var chromaSmoothness: Float = 0.1

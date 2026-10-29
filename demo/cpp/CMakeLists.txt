@@ -28,6 +28,7 @@ set(FB_DEMO_STICKER_SCREEN_DIR "${FB_DEMO_WEB_PUBLIC}/stickers/screen")
 set(FB_DEMO_STICKER3D_DIR "${FB_DEMO_WEB_PUBLIC}/stickers/3d")
 set(FB_DEMO_FILTER_DIR "${FB_DEMO_WEB_PUBLIC}/assets/filters/portrait")
 set(FB_DEMO_BACKGROUND_PATH "${FB_DEMO_WEB_PUBLIC}/background.jpg")
+set(FB_DEMO_BACKGROUNDS_DIR "${FB_DEMO_WEB_PUBLIC}/backgrounds")
 
 # ---------------------------------------------------------------------------
 # SDK：in-tree（fb -DFB_DEMO=ON）或客户包 sdk/
@@ -177,6 +178,12 @@ endif()
 if(MSVC)
   target_compile_options(facebetter_demo PRIVATE /utf-8)
 endif()
+if(APPLE)
+  # A bare executable has no bundle id, so licensing falls back to the process name.
+  # Embedding this plist in __TEXT,__info_plist makes CFBundleGetIdentifier return it.
+  target_link_options(facebetter_demo PRIVATE
+    "LINKER:-sectcreate,__TEXT,__info_plist,${CMAKE_CURRENT_SOURCE_DIR}/Info.plist")
+endif()
 
 if(FB_DEMO_IN_TREE AND TARGET pack_bundle)
   add_dependencies(facebetter_demo pack_bundle)
@@ -192,6 +199,7 @@ if(FB_DEMO_PORTABLE)
   set(_fb_sticker3d "assets/stickers/3d")
   set(_fb_filter "assets/filters/portrait")
   set(_fb_bg "assets/background.jpg")
+  set(_fb_bg_dir "assets/backgrounds")
   set(_fb_face "assets/face.jpg")
   set(_fb_icon_font "fonts/MaterialIcons-Regular.ttf")
   target_compile_definitions(facebetter_demo PRIVATE FB_DEMO_PORTABLE)
@@ -211,6 +219,7 @@ else()
   file(TO_CMAKE_PATH "${FB_DEMO_STICKER3D_DIR}" _fb_sticker3d)
   file(TO_CMAKE_PATH "${FB_DEMO_FILTER_DIR}" _fb_filter)
   file(TO_CMAKE_PATH "${FB_DEMO_BACKGROUND_PATH}" _fb_bg)
+  file(TO_CMAKE_PATH "${FB_DEMO_BACKGROUNDS_DIR}" _fb_bg_dir)
   set(FB_DEMO_FACE_PATH "${FB_DEMO_WEB_PUBLIC}/face.jpg")
   file(TO_CMAKE_PATH "${FB_DEMO_FACE_PATH}" _fb_face)
   set(FB_DEMO_ICON_FONT
@@ -224,6 +233,7 @@ target_compile_definitions(facebetter_demo PRIVATE
   FB_DEMO_STICKER3D_DIR="${_fb_sticker3d}"
   FB_DEMO_FILTER_DIR="${_fb_filter}"
   FB_DEMO_BACKGROUND_PATH="${_fb_bg}"
+  FB_DEMO_BACKGROUNDS_DIR="${_fb_bg_dir}"
   FB_DEMO_FACE_PATH="${_fb_face}"
   FB_DEMO_ICON_FONT="${_fb_icon_font}")
 

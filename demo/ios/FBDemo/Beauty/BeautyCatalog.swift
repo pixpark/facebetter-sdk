@@ -29,6 +29,7 @@ enum BeautyTab: String, CaseIterable, Identifiable {
 
 enum SkinItem: String, CaseIterable, Identifiable {
   case smoothing
+  case blemish
   case whitening
   case rosiness
   case clarity

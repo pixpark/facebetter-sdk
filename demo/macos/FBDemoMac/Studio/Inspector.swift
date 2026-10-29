@@ -21,7 +21,6 @@ struct Inspector: View {
         }
         .padding(16)
       }
-      footer
     }
     .frame(width: 380)
     .background(StudioColors.panel)
@@ -90,18 +89,39 @@ struct Inspector: View {
     }
   }
 
-  private var footer: some View {
-    HStack {
-      PillButton(title: studio.t("console.reset"), symbol: "arrow.counterclockwise") {
-        studio.reset()
+}
+
+private struct SectionHead: View {
+  let title: String
+  var rule = false
+
+  var body: some View {
+    VStack(alignment: .leading, spacing: 8) {
+      if rule {
+        Rectangle().fill(StudioColors.cardBorder).frame(height: 1)
       }
-      Spacer()
+      Text(title)
+        .font(.system(size: 12, weight: .medium))
+        .foregroundStyle(Color(hex: 0xE5E7EB))
     }
-    .padding(12)
-    .background(Color(hex: 0x16181F))
-    .overlay(alignment: .top) {
-      Rectangle().fill(StudioColors.border).frame(height: 1)
+  }
+}
+
+private struct CardReset: View {
+  let label: String
+  let action: () -> Void
+
+  var body: some View {
+    Button(action: action) {
+      Image(systemName: "arrow.clockwise")
+        .font(.system(size: 12, weight: .semibold))
+        .foregroundStyle(StudioColors.muted)
+        .frame(width: 28, height: 28)
+        .contentShape(Rectangle())
     }
+    .buttonStyle(.plain)
+    .withoutFocusRing()
+    .help(label)
   }
 }
 
@@ -110,6 +130,18 @@ private struct SkinPanel: View {
 
   var body: some View {
     InspectorCard(title: studio.t("skin.title"), symbol: "camera.macro") {
+      CardReset(label: studio.t("console.reset")) {
+        let fresh = BeautyParams()
+        studio.params.smoothing = fresh.smoothing
+        studio.params.smoothingStyle = fresh.smoothingStyle
+        studio.params.whitening = fresh.whitening
+        studio.params.whiteningStyle = fresh.whiteningStyle
+        studio.params.rosiness = fresh.rosiness
+        studio.params.blemish = fresh.blemish
+        studio.params.clarity = fresh.clarity
+        studio.params.skinOnly = fresh.skinOnly
+      }
+    } content: {
       Toggle(isOn: $studio.params.skinOnly) {
         Text(studio.t("skin.skinOnly"))
           .font(.system(size: 10))
@@ -117,24 +149,11 @@ private struct SkinPanel: View {
       }
       .toggleStyle(.switch)
       .controlSize(.mini)
-    } content: {
-      HStack {
-        Text(studio.t("skin.smoothingStyle"))
-          .font(.system(size: 10))
-          .foregroundStyle(StudioColors.muted)
-        Spacer()
-        Button(studio.t("skin.reset")) {
-          studio.params.smoothing = 0
-          studio.params.whitening = 0
-          studio.params.rosiness = 0
-          studio.params.clarity = 0
-        }
-        .buttonStyle(.plain)
-        .withoutFocusRing()
+
+      SectionHead(title: studio.t("skin.group.smooth"), rule: true)
+      Text(studio.t("skin.smoothingStyle"))
         .font(.system(size: 10))
         .foregroundStyle(StudioColors.muted)
-      }
-
       ChipGrid(columns: 3, spacing: 6) {
         ForEach(BeautyCatalog.smoothingStyles) { item in
           ChipButton(
@@ -147,10 +166,9 @@ private struct SkinPanel: View {
         }
       }
       ParamSlider(label: studio.t("skin.smoothing"), value: $studio.params.smoothing)
+      ParamSlider(label: studio.t("skin.blemish"), value: $studio.params.blemish)
 
-      Text(studio.t("skin.whiteningTone"))
-        .font(.system(size: 10))
-        .foregroundStyle(StudioColors.muted)
+      SectionHead(title: studio.t("skin.group.tone"), rule: true)
       ChipGrid(columns: 5, spacing: 4) {
         ForEach(BeautyCatalog.whiteningStyles) { item in
           ChipButton(
@@ -164,6 +182,8 @@ private struct SkinPanel: View {
       }
       ParamSlider(label: studio.t("skin.whitening"), value: $studio.params.whitening)
       ParamSlider(label: studio.t("skin.rosiness"), value: $studio.params.rosiness)
+
+      SectionHead(title: studio.t("skin.group.clarity"), rule: true)
       ParamSlider(label: studio.t("skin.clarity"), value: $studio.params.clarity)
     }
   }
@@ -173,18 +193,21 @@ private struct ReshapePanel: View {
   @ObservedObject var studio: StudioModel
 
   var body: some View {
-    ForEach(BeautyCatalog.reshapeGroups) { group in
-      InspectorCard(title: studio.t("reshape.\(group.id)"), symbol: "face.smiling") {
-        VStack(spacing: 12) {
-          ForEach(group.items) { item in
-            BipolarSlider(
-              label: studio.t(item.labelKey),
-              value: Binding(
-                get: { studio.params.reshape[item.key] ?? 0 },
-                set: { studio.params.reshape[item.key] = $0 }
-              )
+    InspectorCard(title: studio.t("tab.reshape"), symbol: "face.smiling") {
+      CardReset(label: studio.t("console.reset")) {
+        studio.params.reshape = BeautyParams.emptyReshape()
+      }
+    } content: {
+      ForEach(Array(BeautyCatalog.reshapeGroups.enumerated()), id: \.element.id) { index, group in
+        SectionHead(title: studio.t("reshape.\(group.id)"), rule: index > 0)
+        ForEach(group.items) { item in
+          BipolarSlider(
+            label: studio.t(item.labelKey),
+            value: Binding(
+              get: { studio.params.reshape[item.key] ?? 0 },
+              set: { studio.params.reshape[item.key] = $0 }
             )
-          }
+          )
         }
       }
     }
@@ -195,18 +218,21 @@ private struct BodyPanel: View {
   @ObservedObject var studio: StudioModel
 
   var body: some View {
-    ForEach(BeautyCatalog.bodyGroups) { group in
-      InspectorCard(title: studio.t("reshape.\(group.id)"), symbol: "figure.stand") {
-        VStack(spacing: 12) {
-          ForEach(group.items) { item in
-            ParamSlider(
-              label: studio.t(item.labelKey),
-              value: Binding(
-                get: { studio.params.bodyReshape[item.key] ?? 0 },
-                set: { studio.params.bodyReshape[item.key] = $0 }
-              )
+    InspectorCard(title: studio.t("tab.body"), symbol: "figure.stand") {
+      CardReset(label: studio.t("console.reset")) {
+        studio.params.bodyReshape = BeautyParams.emptyBodyReshape()
+      }
+    } content: {
+      ForEach(Array(BeautyCatalog.bodyGroups.enumerated()), id: \.element.id) { index, group in
+        SectionHead(title: studio.t("reshape.\(group.id)"), rule: index > 0)
+        ForEach(group.items) { item in
+          ParamSlider(
+            label: studio.t(item.labelKey),
+            value: Binding(
+              get: { studio.params.bodyReshape[item.key] ?? 0 },
+              set: { studio.params.bodyReshape[item.key] = $0 }
             )
-          }
+          )
         }
       }
     }
@@ -218,14 +244,41 @@ private struct MakeupPanel: View {
 
   var body: some View {
     InspectorCard(title: studio.t("makeup.title"), symbol: "paintbrush.pointed") {
-      Text(studio.t("makeup.fullSet"))
-        .font(.system(size: 10))
-        .foregroundStyle(Color(hex: 0xD1D5DB))
-        .padding(.horizontal, 8)
-        .padding(.vertical, 3)
-        .background(Color.white.opacity(0.05))
-        .overlay(Capsule().stroke(Color.white.opacity(0.10)))
-        .clipShape(Capsule())
+      HStack(spacing: 8) {
+        Text(studio.t("makeup.fullSet"))
+          .font(.system(size: 10))
+          .foregroundStyle(Color(hex: 0xD1D5DB))
+          .padding(.horizontal, 8)
+          .padding(.vertical, 3)
+          .background(Color.white.opacity(0.05))
+          .overlay(Capsule().stroke(Color.white.opacity(0.10)))
+          .clipShape(Capsule())
+        CardReset(label: studio.t("console.reset")) {
+          let fresh = BeautyParams()
+          studio.params.lipstick = fresh.lipstick
+          studio.params.lipstickColor = fresh.lipstickColor
+          studio.params.blush = fresh.blush
+          studio.params.blushStyle = fresh.blushStyle
+          studio.params.blushColor = fresh.blushColor
+          studio.params.teethWhiten = fresh.teethWhiten
+          studio.params.contour = fresh.contour
+          studio.params.contourStyle = fresh.contourStyle
+          studio.params.eyeshadow = fresh.eyeshadow
+          studio.params.eyeshadowStyle = fresh.eyeshadowStyle
+          studio.params.eyeshadowColor = fresh.eyeshadowColor
+          studio.params.eyeliner = fresh.eyeliner
+          studio.params.eyelinerStyle = fresh.eyelinerStyle
+          studio.params.eyelinerColor = fresh.eyelinerColor
+          studio.params.eyebrow = fresh.eyebrow
+          studio.params.eyebrowStyle = fresh.eyebrowStyle
+          studio.params.eyebrowColor = fresh.eyebrowColor
+          studio.params.eyelash = fresh.eyelash
+          studio.params.eyelashStyle = fresh.eyelashStyle
+          studio.params.eyelashColor = fresh.eyelashColor
+          studio.params.pupil = fresh.pupil
+          studio.params.pupilColor = fresh.pupilColor
+        }
+      }
     } content: {
       makeupBlock(
         title: studio.t("makeup.lipstick"),
@@ -254,7 +307,10 @@ private struct MakeupPanel: View {
       divider
       makeupBlock(
         title: studio.t("makeup.teeth"),
-        intensity: $studio.params.teethWhiten
+        intensity: $studio.params.teethWhiten,
+        styles: [(0, "makeup.teethWhiten")],
+        styleValue: .constant(0),
+        styleCaption: ""
       )
       divider
       makeupBlock(
@@ -279,7 +335,8 @@ private struct MakeupPanel: View {
         colorValue: Binding(
           get: { Int(studio.params.eyeshadowColor.rawValue) },
           set: { studio.params.eyeshadowColor = FBEyeShadowColor(rawValue: $0) ?? .plum }
-        )
+        ),
+        colorColumns: 4
       )
       divider
       makeupBlock(
@@ -294,7 +351,8 @@ private struct MakeupPanel: View {
         colorValue: Binding(
           get: { Int(studio.params.eyelinerColor.rawValue) },
           set: { studio.params.eyelinerColor = FBEyeLinerColor(rawValue: $0) ?? .coffee }
-        )
+        ),
+        colorColumns: 4
       )
       divider
       makeupBlock(
@@ -309,7 +367,8 @@ private struct MakeupPanel: View {
         colorValue: Binding(
           get: { Int(studio.params.eyebrowColor.rawValue) },
           set: { studio.params.eyebrowColor = FBEyebrowColor(rawValue: $0) ?? .darkBrown }
-        )
+        ),
+        colorColumns: 4
       )
       divider
       makeupBlock(
@@ -352,7 +411,8 @@ private struct MakeupPanel: View {
     styleValue: Binding<Int>? = nil,
     colors: [(Int, String, Color?)] = [],
     colorValue: Binding<Int>? = nil,
-    styleCaption: String? = nil
+    styleCaption: String? = nil,
+    colorColumns: Int = 3
   ) -> some View {
     VStack(alignment: .leading, spacing: 10) {
       Text(title)
@@ -360,9 +420,12 @@ private struct MakeupPanel: View {
         .foregroundStyle(Color(hex: 0xD1D5DB))
 
       if !styles.isEmpty, let styleValue {
-        Text(styleCaption ?? studio.t("makeup.style"))
-          .font(.system(size: 10))
-          .foregroundStyle(StudioColors.muted)
+        let caption = styleCaption ?? studio.t("makeup.style")
+        if !caption.isEmpty {
+          Text(caption)
+            .font(.system(size: 10))
+            .foregroundStyle(StudioColors.muted)
+        }
         ChipGrid(columns: 4, spacing: 6) {
           ForEach(styles, id: \.0) { item in
             ChipButton(
@@ -380,7 +443,7 @@ private struct MakeupPanel: View {
         Text(studio.t("makeup.color"))
           .font(.system(size: 10))
           .foregroundStyle(StudioColors.muted)
-        ChipGrid(columns: 3, spacing: 6) {
+        ChipGrid(columns: colorColumns, spacing: 6) {
           ForEach(colors, id: \.0) { item in
             SwatchButton(
               title: studio.t(item.1),
@@ -402,23 +465,33 @@ private struct FilterPanel: View {
   @ObservedObject var studio: StudioModel
 
   var body: some View {
-    InspectorCard(title: studio.t("filter.title"), symbol: "camera.filters") {
-      Text("\(studio.t("filter.intensityValue")) \(Int((studio.params.filterIntensity * 100).rounded()))%")
-        .font(.system(size: 10))
-        .foregroundStyle(StudioColors.muted)
+    InspectorCard(title: studio.t("tab.filter"), symbol: "camera.filters") {
+      HStack(spacing: 8) {
+        Text("\(studio.t("filter.intensityValue")) \(Int((studio.params.filterIntensity * 100).rounded()))%")
+          .font(.system(size: 10))
+          .foregroundStyle(StudioColors.muted)
+        CardReset(label: studio.t("console.reset")) {
+          let fresh = BeautyParams()
+          studio.params.brightness = fresh.brightness
+          studio.params.contrast = fresh.contrast
+          studio.params.saturation = fresh.saturation
+          studio.params.colorTemperature = fresh.colorTemperature
+          studio.params.colorTint = fresh.colorTint
+          studio.params.filterID = fresh.filterID
+          studio.params.filterIntensity = fresh.filterIntensity
+        }
+      }
     } content: {
-      Text(studio.t("color.group.adjust"))
-        .font(.system(size: 10))
-        .foregroundStyle(StudioColors.muted)
+      SectionHead(title: studio.t("color.group.adjust"))
       BipolarSlider(label: studio.t("color.brightness"), value: $studio.params.brightness)
       BipolarSlider(label: studio.t("color.contrast"), value: $studio.params.contrast)
       BipolarSlider(label: studio.t("color.saturation"), value: $studio.params.saturation)
       BipolarSlider(label: studio.t("color.temperature"), value: $studio.params.colorTemperature)
       BipolarSlider(label: studio.t("color.tint"), value: $studio.params.colorTint)
-      Text(studio.t("color.group.filter"))
-        .font(.system(size: 10))
-        .foregroundStyle(StudioColors.muted)
-        .padding(.top, 4)
+      SectionHead(title: studio.t("color.group.filter"), rule: true)
+      ParamSlider(label: studio.t("filter.intensity"), value: $studio.params.filterIntensity)
+        .disabled(studio.params.filterID == nil)
+        .opacity(studio.params.filterID == nil ? 0.4 : 1)
       ChipGrid(columns: 3, spacing: 8) {
         ChipButton(title: studio.t("filter.none"), active: studio.params.filterID == nil, fillWidth: true) {
           studio.params.filterID = nil
@@ -429,9 +502,6 @@ private struct FilterPanel: View {
           }
         }
       }
-      ParamSlider(label: studio.t("filter.intensity"), value: $studio.params.filterIntensity)
-        .disabled(studio.params.filterID == nil)
-        .opacity(studio.params.filterID == nil ? 0.4 : 1)
     }
   }
 }
@@ -441,6 +511,10 @@ private struct StickerPanel: View {
 
   var body: some View {
     InspectorCard(title: studio.t("sticker.title"), symbol: "sparkles") {
+      CardReset(label: studio.t("console.reset")) {
+        studio.params.stickerID = nil
+      }
+    } content: {
       VStack(alignment: .leading, spacing: 8) {
         ChipGrid(columns: 3, spacing: 6) {
           ChipButton(title: studio.t("sticker.none"), active: studio.params.stickerID == nil, fillWidth: true) {
@@ -474,6 +548,18 @@ private struct BackgroundPanel: View {
 
   var body: some View {
     InspectorCard(title: studio.t("bg.title"), symbol: "person.crop.rectangle") {
+      CardReset(label: studio.t("console.reset")) {
+        let fresh = BeautyParams()
+        studio.params.backgroundFill = fresh.backgroundFill
+        studio.params.bgBlur = fresh.bgBlur
+        studio.params.bgPreset = fresh.bgPreset
+        studio.params.chroma = fresh.chroma
+        studio.params.chromaSimilarity = fresh.chromaSimilarity
+        studio.params.chromaSmoothness = fresh.chromaSmoothness
+        studio.params.chromaDesaturation = fresh.chromaDesaturation
+        studio.params.subjectOutline = fresh.subjectOutline
+      }
+    } content: {
       Toggle(isOn: $studio.params.subjectOutline) {
         Text(studio.t("bg.outline"))
           .font(.system(size: 10))
@@ -492,11 +578,33 @@ private struct BackgroundPanel: View {
             fillWidth: true
           ) {
             studio.params.backgroundFill = fill
+            if fill == .blur, studio.params.bgBlur <= 0 {
+              studio.params.bgBlur = 0.5
+            }
+            if fill == .image, studio.params.bgPreset == nil {
+              studio.params.bgPreset = "office"
+            }
           }
         }
       }
       if studio.params.backgroundFill == .blur {
         ParamSlider(label: studio.t("bg.blurAmount"), value: $studio.params.bgBlur)
+      }
+      if studio.params.backgroundFill == .image {
+        Text(studio.t("bg.presets"))
+          .font(.system(size: 10))
+          .foregroundStyle(StudioColors.muted)
+        ChipGrid(columns: 3, spacing: 6) {
+          ForEach(BeautyCatalog.backgroundPresets, id: \.id) { item in
+            ChipButton(
+              title: studio.t(item.labelKey),
+              active: studio.params.bgPreset == item.id,
+              fillWidth: true
+            ) {
+              studio.params.bgPreset = item.id
+            }
+          }
+        }
       }
 
       Text(studio.t("bg.cutout"))

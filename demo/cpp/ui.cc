@@ -38,6 +38,7 @@ constexpr const char kIconSticker[] = "\xEE\x99\x9F";     // U+E65F auto_awesome
 constexpr const char kIconBackground[] = "\xEE\x8E\xA5";  // U+E3A5 blur_on
 constexpr const char kIconAddPhoto[] = "\xEE\x90\xB9";    // U+E439 add_photo_alternate
 constexpr const char kIconCamera[] = "\xEE\x90\x92";      // U+E412 photo_camera
+constexpr const char kIconRefresh[] = "\xEE\x97\x95";     // U+E5D5 refresh
 
 namespace {
 
@@ -250,33 +251,75 @@ void EndCard() {
   ImGui::Spacing();
 }
 
-void CardTitle(const char* title, const char* extra = nullptr) {
+bool CardTitle(const char* title, const char* extra = nullptr) {
+  ImGui::AlignTextToFramePadding();
   ImGui::TextUnformatted(title);
+  const float btn = UiPx(28.f);
+  const float right = ImGui::GetWindowContentRegionMax().x;
+  const float reset_x = right - btn;
   if (extra) {
-    ImGui::SameLine(ImGui::GetWindowContentRegionMax().x -
-                    ImGui::CalcTextSize(extra).x);
+    ImGui::SameLine(reset_x - ImGui::CalcTextSize(extra).x - UiPx(8));
+    ImGui::AlignTextToFramePadding();
     ImGui::TextColored(kMuted, "%s", extra);
   }
+  ImGui::SameLine(reset_x);
+  ImGui::PushID("card_reset");
+  const bool clicked = ImGui::InvisibleButton("##reset", ImVec2(btn, btn));
+  const bool hovered = ImGui::IsItemHovered();
+  if (hovered)
+    ImGui::SetTooltip("%s", T("console.reset"));
+  const ImVec2 rmin = ImGui::GetItemRectMin();
+  ImDrawList* dl = ImGui::GetWindowDrawList();
+  if (hovered)
+    dl->AddRectFilled(rmin, ImVec2(rmin.x + btn, rmin.y + btn),
+                      IM_COL32(255, 255, 255, 13), 6.f);
+  if (g_icon_font) {
+    const float icon_px = LogicalPx(g_icon_font);
+    const ImVec2 ts =
+        g_icon_font->CalcTextSizeA(icon_px, 1e9f, 0.f, kIconRefresh);
+    dl->AddText(g_icon_font, icon_px,
+                ImVec2(rmin.x + (btn - ts.x) * 0.5f,
+                       rmin.y + (btn - ts.y) * 0.5f),
+                hovered ? IM_COL32(255, 255, 255, 255)
+                        : IM_COL32(156, 163, 175, 255),
+                kIconRefresh);
+  }
+  ImGui::PopID();
   ImGui::Dummy(ImVec2(0, 2));
   ImGui::PushStyleColor(ImGuiCol_Separator, Rgba(38, 42, 53));
   ImGui::Separator();
   ImGui::PopStyleColor();
   ImGui::Spacing();
+  return clicked;
+}
+
+void SectionHead(const char* title, bool rule) {
+  if (rule) {
+    ImGui::Spacing();
+    ImGui::PushStyleColor(ImGuiCol_Separator, Rgba(38, 42, 53));
+    ImGui::Separator();
+    ImGui::PopStyleColor();
+    ImGui::Spacing();
+  }
+  ImGui::TextUnformatted(title);
+  ImGui::Spacing();
 }
 
 bool SliderBar(int* value, int vmin, int vmax, bool bipolar) {
-  const float kHitH = UiPx(14.f);
-  const float kTrackH = UiPx(6.f);
-  const float kGrabR = UiPx(7.f);
+  const float kHitH = UiPx(22.f);
+  const float kTrackH = UiPx(4.f);
+  const float kThumbW = UiPx(22.f);
+  const float kThumbH = UiPx(11.f);
   const ImVec2 p = ImGui::GetCursorScreenPos();
   const float w = ImGui::GetContentRegionAvail().x;
+  const float travel = std::max(w - kThumbW, 1.f);
   ImGui::InvisibleButton("##s", ImVec2(w, kHitH));
   bool changed = false;
   if (ImGui::IsItemActive()) {
-    const float t =
-        std::clamp((ImGui::GetIO().MousePos.x - p.x) / std::max(w, 1.f), 0.f, 1.f);
+    const float u = std::clamp(
+        (ImGui::GetIO().MousePos.x - p.x - kThumbW * 0.5f) / travel, 0.f, 1.f);
     const int nv =
-        vmin + static_cast<int>(std::lround(t * static_cast<float>(vmax - vmin)));
+        vmin + static_cast<int>(std::lround(u * static_cast<float>(vmax - vmin)));
     if (nv != *value) {
       *value = nv;
       changed = true;
@@ -285,33 +328,32 @@ bool SliderBar(int* value, int vmin, int vmax, bool bipolar) {
   const float t = static_cast<float>(*value - vmin) /
                   static_cast<float>(std::max(1, vmax - vmin));
   const float cy = p.y + kHitH * 0.5f;
+  const float thumb_x = p.x + t * travel;
+  const float thumb_cx = thumb_x + kThumbW * 0.5f;
   const ImVec2 t0(p.x, cy - kTrackH * 0.5f);
   const ImVec2 t1(p.x + w, cy + kTrackH * 0.5f);
-  const float gx = p.x + t * w;
   ImDrawList* dl = ImGui::GetWindowDrawList();
-  dl->AddRectFilled(t0, t1, IM_COL32(37, 40, 48, 255), 99.f);
-  dl->PushClipRect(t0, t1, true);
-  const ImU32 fill = IM_COL32(229, 231, 235, 255);
-  if (bipolar) {
-    const float mid = p.x + w * 0.5f;
-    if (gx >= mid)
-      dl->AddRectFilled(ImVec2(mid, t0.y), ImVec2(gx, t1.y), fill);
-    else
-      dl->AddRectFilled(ImVec2(gx, t0.y), ImVec2(mid, t1.y), fill);
-  } else {
-    dl->AddRectFilled(t0, ImVec2(gx, t1.y), fill, 99.f);
+  dl->AddRectFilled(t0, t1, IM_COL32(61, 63, 75, 255), 99.f);
+  const int origin = bipolar ? 0 : vmin;
+  if (*value != origin) {
+    const float origin_x = bipolar ? p.x + w * 0.5f : p.x;
+    const float x0 = std::min(origin_x, thumb_cx);
+    const float x1 = std::max(origin_x, thumb_cx);
+    dl->PushClipRect(t0, t1, true);
+    dl->AddRectFilled(ImVec2(x0, t0.y), ImVec2(x1, t1.y),
+                      IM_COL32(70, 107, 213, 255));
+    dl->PopClipRect();
   }
-  dl->PopClipRect();
-  const float grab_x = std::clamp(gx, p.x + kGrabR, p.x + w - kGrabR);
-  dl->AddCircleFilled(ImVec2(grab_x, cy), kGrabR, IM_COL32(17, 19, 23, 255), 24);
-  dl->AddCircle(ImVec2(grab_x, cy), kGrabR, IM_COL32(255, 255, 255, 255), 24, 2.f);
+  dl->AddRectFilled(ImVec2(thumb_x, cy - kThumbH * 0.5f),
+                    ImVec2(thumb_x + kThumbW, cy + kThumbH * 0.5f),
+                    IM_COL32(255, 255, 255, 255), kThumbH * 0.5f);
   return changed;
 }
 
-bool ParamSlider(const char* label, float* value) {
+bool ParamSlider(const char* label, float* value, const char* id = nullptr) {
   int iv = static_cast<int>(std::lround(*value * 100.f));
   iv = std::clamp(iv, 0, 100);
-  ImGui::PushID(label);
+  ImGui::PushID(id != nullptr ? id : label);
   ImGui::TextColored(kMuted, "%s", label);
   ImGui::SameLine(ImGui::GetContentRegionAvail().x - 8);
   ImGui::Text("%d", iv);
@@ -322,10 +364,10 @@ bool ParamSlider(const char* label, float* value) {
   return changed;
 }
 
-bool BipolarSlider(const char* label, float* value) {
+bool BipolarSlider(const char* label, float* value, const char* id = nullptr) {
   int iv = static_cast<int>(std::lround(*value * 100.f));
   iv = std::clamp(iv, -100, 100);
-  ImGui::PushID(label);
+  ImGui::PushID(id != nullptr ? id : label);
   ImGui::TextColored(kMuted, "%s", label);
   ImGui::SameLine(ImGui::GetContentRegionAvail().x - 16);
   ImGui::Text("%d", iv);
@@ -377,9 +419,20 @@ float PillWidth(const char* label) {
 void DrawTopBar(Studio& studio) {
   ImGui::PushStyleColor(ImGuiCol_ChildBg, kTop);
   ImGui::PushStyleColor(ImGuiCol_Border, kBorder);
-  ImGui::BeginChild("topbar", ImVec2(-1, UiPx(48)), ImGuiChildFlags_Border,
+  const float bar_h = UiPx(48);
+  ImGui::BeginChild("topbar", ImVec2(-1, bar_h), ImGuiChildFlags_Border,
                     ImGuiWindowFlags_NoScrollbar);
-  ImGui::SetCursorPos(ImVec2(UiPx(16), (UiPx(48) - UiPx(28.f)) * 0.5f));
+  const float full_w = ImGui::GetContentRegionAvail().x;
+  const float view_w = std::max(0.f, full_w - InspectorWidth());
+  const float y = (bar_h - UiPx(28.f)) * 0.5f;
+  const float gap = UiPx(8.f);
+  const bool idle = studio.IsIdle();
+  const char* open_label = idle ? T("nav.openImage") : T("nav.replaceImage");
+  const ImVec2 export_sz = LockedButtonSize(T("nav.export"), ImVec2(0, 0));
+  const float actions_w =
+      PillWidth(open_label) + gap + PillWidth(T("nav.camera")) + gap + export_sz.x;
+
+  ImGui::SetCursorPos(ImVec2(UiPx(16), y));
   ImGui::AlignTextToFramePadding();
   ImGui::TextUnformatted("Facebetter");
   ImGui::SameLine();
@@ -393,30 +446,52 @@ void DrawTopBar(Studio& studio) {
   PopBtnFont();
   ImGui::PopStyleVar(2);
   ImGui::PopStyleColor(2);
+  const float brand_end =
+      ImGui::GetItemRectMax().x - ImGui::GetWindowPos().x + UiPx(12.f);
 
-  ImGui::SameLine();
-  ImGui::Dummy(ImVec2(8, 0));
-  ImGui::SameLine();
-  const bool idle = studio.IsIdle();
-  if (Pill(idle ? T("nav.openImage") : T("nav.replaceImage"), false))
+  float actions_x = (view_w - actions_w) * 0.5f;
+  const float actions_max = view_w - actions_w - UiPx(8.f);
+  if (actions_x < brand_end)
+    actions_x = brand_end;
+  if (actions_x > actions_max)
+    actions_x = std::max(brand_end, actions_max);
+  ImGui::SetCursorPos(ImVec2(actions_x, y));
+  if (Pill(open_label, false))
     PickImage(studio);
-  ImGui::SameLine();
+  ImGui::SameLine(0, gap);
   if (Pill(T("nav.camera"), studio.IsCamera())) {
     if (studio.IsCamera())
       studio.StopCamera();
     else
       studio.StartCamera();
   }
+  ImGui::SameLine(0, gap);
+  if (idle) {
+    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0.20f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1, 1, 1, 0.20f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(1, 1, 1, 0.20f));
+    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 1, 1, 0.40f));
+  } else {
+    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 1));
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, Rgba(229, 231, 235));
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, Rgba(229, 231, 235));
+    ImGui::PushStyleColor(ImGuiCol_Text, Rgba(10, 10, 10));
+  }
+  ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 14.f);
+  PushBtnFont();
+  const bool export_clicked = ImGui::Button(T("nav.export"), export_sz);
+  PopBtnFont();
+  if (export_clicked && !idle) {
+    const std::string path = SavePngDialog();
+    if (!path.empty())
+      studio.ExportPng(path);
+  }
+  ImGui::PopStyleVar();
+  ImGui::PopStyleColor(4);
 
-  const float gap = 8.f;
   const float lang_w = UiPx(78.f);
-  const float cluster =
-      PillWidth(T("nav.website")) + gap + lang_w + gap +
-      PillWidth(T("nav.export"));
-  ImGui::SameLine();
-  ImGui::Dummy(ImVec2(std::max(8.f, ImGui::GetContentRegionAvail().x - cluster - 16.f),
-                      0));
-  ImGui::SameLine();
+  const float side_w = PillWidth(T("nav.website")) + gap + lang_w;
+  ImGui::SetCursorPos(ImVec2(full_w - UiPx(20.f) - side_w, y));
   if (Pill(T("nav.website"), false))
     OpenUrl(SiteUrl());
   ImGui::SameLine(0, gap);
@@ -437,31 +512,6 @@ void DrawTopBar(Studio& studio) {
   ImGui::EndChild();
   ImGui::PopStyleColor();
   ImGui::PopStyleVar(3);
-
-  ImGui::SameLine(0, gap);
-  if (idle) {
-    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0.20f));
-    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1, 1, 1, 0.20f));
-    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(1, 1, 1, 0.20f));
-    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 1, 1, 0.40f));
-  } else {
-    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 1));
-    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, Rgba(229, 231, 235));
-    ImGui::PushStyleColor(ImGuiCol_ButtonActive, Rgba(229, 231, 235));
-    ImGui::PushStyleColor(ImGuiCol_Text, Rgba(10, 10, 10));
-  }
-  ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 14.f);
-  const ImVec2 export_sz = LockedButtonSize(T("nav.export"), ImVec2(0, 0));
-  PushBtnFont();
-  const bool export_clicked = ImGui::Button(T("nav.export"), export_sz);
-  PopBtnFont();
-  if (export_clicked && !idle) {
-    const std::string path = SavePngDialog();
-    if (!path.empty())
-      studio.ExportPng(path);
-  }
-  ImGui::PopStyleVar();
-  ImGui::PopStyleColor(4);
 
   ImGui::EndChild();
   ImGui::PopStyleColor(2);
@@ -574,26 +624,25 @@ void DrawViewport(Studio& studio) {
 void DrawSkin(Studio& studio) {
   Params& p = studio.params();
   BeginCard("skin");
-  CardTitle(T("skin.title"));
+  if (CardTitle(T("skin.title"))) {
+    const Params fresh;
+    p.smoothing = fresh.smoothing;
+    p.smoothing_style = fresh.smoothing_style;
+    p.whitening = fresh.whitening;
+    p.whitening_style = fresh.whitening_style;
+    p.rosiness = fresh.rosiness;
+    p.blemish = fresh.blemish;
+    p.clarity = fresh.clarity;
+    p.skin_only = fresh.skin_only;
+    studio.NotifyParamsChanged();
+  }
   ImGui::TextColored(kMuted, "%s", T("skin.skinOnly"));
   ImGui::SameLine(ImGui::GetContentRegionAvail().x - 20);
   if (Toggle("skinonly", &p.skin_only))
     studio.NotifyParamsChanged();
-  ImGui::TextColored(kMuted, "%s", T("skin.smoothingStyle"));
-  ImGui::SameLine(ImGui::GetWindowContentRegionMax().x -
-                  ImGui::CalcTextSize(T("skin.reset")).x);
-  ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
-  ImGui::PushStyleColor(ImGuiCol_Text, kMuted);
-  const ImVec2 reset_sz = LockedButtonSize(T("skin.reset"), ImVec2(0, 0));
-  PushBtnFont();
-  const bool reset_skin = ImGui::Button(T("skin.reset"), reset_sz);
-  PopBtnFont();
-  if (reset_skin) {
-    p.smoothing = p.whitening = p.rosiness = p.clarity = 0.f;
-    studio.NotifyParamsChanged();
-  }
-  ImGui::PopStyleColor(2);
 
+  SectionHead(T("skin.group.smooth"), true);
+  ImGui::TextColored(kMuted, "%s", T("skin.smoothingStyle"));
   const SmoothingStyle styles[] = {
       SmoothingStyle::Texture, SmoothingStyle::Natural, SmoothingStyle::Smooth};
   const char* style_keys[] = {"smoothing.texture", "smoothing.natural",
@@ -604,10 +653,12 @@ void DrawSkin(Studio& studio) {
       studio.NotifyParamsChanged();
     }
   });
-  if (ParamSlider(T("skin.smoothing"), &p.smoothing))
+  if (ParamSlider(T("skin.smoothing"), &p.smoothing, "skin.smoothing"))
+    studio.NotifyParamsChanged();
+  if (ParamSlider(T("skin.blemish"), &p.blemish, "skin.blemish"))
     studio.NotifyParamsChanged();
 
-  ImGui::TextColored(kMuted, "%s", T("skin.whiteningTone"));
+  SectionHead(T("skin.group.tone"), true);
   const WhiteningStyle tones[] = {
       WhiteningStyle::ColdWhite, WhiteningStyle::PinkWhite,
       WhiteningStyle::WarmWhite, WhiteningStyle::Wheat, WhiteningStyle::Tan};
@@ -620,11 +671,13 @@ void DrawSkin(Studio& studio) {
       studio.NotifyParamsChanged();
     }
   });
-  if (ParamSlider(T("skin.whitening"), &p.whitening))
+  if (ParamSlider(T("skin.whitening"), &p.whitening, "skin.whitening"))
     studio.NotifyParamsChanged();
-  if (ParamSlider(T("skin.rosiness"), &p.rosiness))
+  if (ParamSlider(T("skin.rosiness"), &p.rosiness, "skin.rosiness"))
     studio.NotifyParamsChanged();
-  if (ParamSlider(T("skin.clarity"), &p.clarity))
+
+  SectionHead(T("skin.group.clarity"), true);
+  if (ParamSlider(T("skin.clarity"), &p.clarity, "skin.clarity"))
     studio.NotifyParamsChanged();
   EndCard();
 }
@@ -681,9 +734,14 @@ void DrawReshape(Studio& studio) {
       {"reshape.eye", kEye, 7},   {"reshape.nose", kNose, 2},
       {"reshape.mouth", kMouth, 5},
   };
-  for (const Group& g : groups) {
-    BeginCard(g.key);
-    CardTitle(T(g.key));
+  BeginCard("reshape");
+  if (CardTitle(T("tab.reshape"))) {
+    p.reshape.fill(0.f);
+    studio.NotifyParamsChanged();
+  }
+  for (int gi = 0; gi < 5; ++gi) {
+    const Group& g = groups[gi];
+    SectionHead(T(g.key), gi > 0);
     ImGui::PushID(g.key);
     for (int i = 0; i < g.count; ++i) {
       float& v = p.reshape[static_cast<size_t>(g.items[i].param)];
@@ -691,8 +749,8 @@ void DrawReshape(Studio& studio) {
         studio.NotifyParamsChanged();
     }
     ImGui::PopID();
-    EndCard();
   }
+  EndCard();
 }
 
 void DrawBody(Studio& studio) {
@@ -726,9 +784,14 @@ void DrawBody(Studio& studio) {
       {"reshape.bodyArm", kArm, 2},
       {"reshape.bodyLeg", kLeg, 3},
   };
-  for (const Group& g : groups) {
-    BeginCard(g.key);
-    CardTitle(T(g.key));
+  BeginCard("body");
+  if (CardTitle(T("tab.body"))) {
+    p.body_reshape.fill(0.f);
+    studio.NotifyParamsChanged();
+  }
+  for (int gi = 0; gi < 3; ++gi) {
+    const Group& g = groups[gi];
+    SectionHead(T(g.key), gi > 0);
     ImGui::PushID(g.key);
     for (int i = 0; i < g.count; ++i) {
       float& v = p.body_reshape[static_cast<size_t>(g.items[i].param)];
@@ -736,8 +799,8 @@ void DrawBody(Studio& studio) {
         studio.NotifyParamsChanged();
     }
     ImGui::PopID();
-    EndCard();
   }
+  EndCard();
 }
 
 template <typename StyleT, typename ColorT>
@@ -753,7 +816,8 @@ void MakeupBlock(Studio& studio,
                  int color_n,
                  ColorT* color_value,
                  const char* style_label,
-                 const char* color_label) {
+                 const char* color_label,
+                 int color_columns = 0) {
   ImGui::PushID(title);
   ImGui::TextUnformatted(title);
   if (styles && style_n > 0) {
@@ -767,7 +831,9 @@ void MakeupBlock(Studio& studio,
   }
   if (colors && color_n > 0) {
     ImGui::TextColored(kMuted, "%s", color_label);
-    ChipGrid(color_n > 3 ? 3 : color_n, color_n, [&](int i, ImVec2 size) {
+    const int cols =
+        color_columns > 0 ? color_columns : (color_n > 3 ? 3 : color_n);
+    ChipGrid(cols, color_n, [&](int i, ImVec2 size) {
       if (Chip(T(color_keys[i]), *color_value == colors[i], size)) {
         *color_value = colors[i];
         studio.NotifyParamsChanged();
@@ -785,19 +851,48 @@ void MakeupBlock(Studio& studio,
 void DrawMakeup(Studio& studio) {
   Params& p = studio.params();
   BeginCard("makeup");
-  CardTitle(T("makeup.title"), T("makeup.fullSet"));
+  if (CardTitle(T("makeup.title"), T("makeup.fullSet"))) {
+    const Params fresh;
+    p.lipstick = fresh.lipstick;
+    p.lipstick_color = fresh.lipstick_color;
+    p.blush = fresh.blush;
+    p.blush_style = fresh.blush_style;
+    p.blush_color = fresh.blush_color;
+    p.teeth_whiten = fresh.teeth_whiten;
+    p.contour = fresh.contour;
+    p.contour_style = fresh.contour_style;
+    p.eyeshadow = fresh.eyeshadow;
+    p.eyeshadow_style = fresh.eyeshadow_style;
+    p.eyeshadow_color = fresh.eyeshadow_color;
+    p.eyeliner = fresh.eyeliner;
+    p.eyeliner_style = fresh.eyeliner_style;
+    p.eyeliner_color = fresh.eyeliner_color;
+    p.eyebrow = fresh.eyebrow;
+    p.eyebrow_style = fresh.eyebrow_style;
+    p.eyebrow_color = fresh.eyebrow_color;
+    p.eyelash = fresh.eyelash;
+    p.eyelash_style = fresh.eyelash_style;
+    p.eyelash_color = fresh.eyelash_color;
+    p.pupil = fresh.pupil;
+    p.pupil_color = fresh.pupil_color;
+    studio.NotifyParamsChanged();
+  }
   const char* style_l = T("makeup.style");
   const char* color_l = T("makeup.color");
 
   static const LipstickColor kLipC[] = {
-      LipstickColor::Rouge,       LipstickColor::RetroRed,
-      LipstickColor::Peach,       LipstickColor::CoralOrange,
-      LipstickColor::GentlePink,  LipstickColor::VitalityOrange};
+      LipstickColor::Rouge,      LipstickColor::RetroRed,
+      LipstickColor::Peach,      LipstickColor::CoralOrange,
+      LipstickColor::GentlePink, LipstickColor::VitalityOrange,
+      LipstickColor::Rosewood,   LipstickColor::BrickRed,
+      LipstickColor::Berry,      LipstickColor::Nude};
   static const char* kLipCk[] = {
-      "lipstick.rouge",        "lipstick.retroRed", "lipstick.peach",
-      "lipstick.coralOrange",  "lipstick.gentlePink", "lipstick.vitalityOrange"};
+      "lipstick.rouge",       "lipstick.retroRed",      "lipstick.peach",
+      "lipstick.coralOrange", "lipstick.gentlePink",    "lipstick.vitalityOrange",
+      "lipstick.rosewood",    "lipstick.brickRed",      "lipstick.berry",
+      "lipstick.nude"};
   MakeupBlock(studio, T("makeup.lipstick"), &p.lipstick, static_cast<LipstickColor*>(nullptr),
-              nullptr, 0, &p.lipstick_color, kLipC, kLipCk, 6, &p.lipstick_color,
+              nullptr, 0, &p.lipstick_color, kLipC, kLipCk, 10, &p.lipstick_color,
               style_l, color_l);
 
   static const BlushStyle kBlushS[] = {
@@ -809,16 +904,21 @@ void DrawMakeup(Studio& studio) {
       "blush.classic",   "blush.doll",  "blush.rose"};
   static const BlushColor kBlushC[] = {
       BlushColor::CoralPink, BlushColor::DustyRose, BlushColor::VividRed,
-      BlushColor::Berry, BlushColor::SunsetOrange};
+      BlushColor::Berry, BlushColor::SunsetOrange, BlushColor::Peach,
+      BlushColor::SakuraPink};
   static const char* kBlushCk[] = {
       "blushColor.coralPink", "blushColor.dustyRose", "blushColor.vividRed",
-      "blushColor.berry", "blushColor.sunsetOrange"};
+      "blushColor.berry", "blushColor.sunsetOrange", "blushColor.peach",
+      "blushColor.sakuraPink"};
   MakeupBlock(studio, T("makeup.blush"), &p.blush, kBlushS, kBlushSk, 7,
-              &p.blush_style, kBlushC, kBlushCk, 5, &p.blush_color, style_l,
+              &p.blush_style, kBlushC, kBlushCk, 7, &p.blush_color, style_l,
               color_l);
 
   ImGui::PushID("teeth");
   ImGui::TextUnformatted(T("makeup.teeth"));
+  ChipGrid(3, 1, [&](int, ImVec2 size) {
+    Chip(T("makeup.teethWhiten"), true, size);
+  });
   if (ParamSlider(T("makeup.intensity"), &p.teeth_whiten))
     studio.NotifyParamsChanged();
   ImGui::Spacing();
@@ -845,12 +945,15 @@ void DrawMakeup(Studio& studio) {
       "eyeshadow.glow", "eyeshadow.drama",  "eyeshadow.warm"};
   static const EyeShadowColor kEsC[] = {
       EyeShadowColor::Plum, EyeShadowColor::Brown, EyeShadowColor::Gold,
-      EyeShadowColor::Pink};
-  static const char* kEsCk[] = {"eyeshadowColor.plum", "eyeshadowColor.brown",
-                                "eyeshadowColor.gold", "eyeshadowColor.pink"};
+      EyeShadowColor::Pink, EyeShadowColor::Champagne, EyeShadowColor::Caramel,
+      EyeShadowColor::Burgundy, EyeShadowColor::Charcoal};
+  static const char* kEsCk[] = {
+      "eyeshadowColor.plum", "eyeshadowColor.brown", "eyeshadowColor.gold",
+      "eyeshadowColor.pink", "eyeshadowColor.champagne", "eyeshadowColor.caramel",
+      "eyeshadowColor.burgundy", "eyeshadowColor.charcoal"};
   MakeupBlock(studio, T("makeup.eyeshadow"), &p.eyeshadow, kEsS, kEsSk, 7,
-              &p.eyeshadow_style, kEsC, kEsCk, 4, &p.eyeshadow_color, style_l,
-              color_l);
+              &p.eyeshadow_style, kEsC, kEsCk, 8, &p.eyeshadow_color, style_l,
+              color_l, 4);
 
   static const EyeLinerStyle kElS[] = {
       EyeLinerStyle::Classic, EyeLinerStyle::Flick, EyeLinerStyle::CatEye,
@@ -859,14 +962,16 @@ void DrawMakeup(Studio& studio) {
                                 "eyeliner.catEye",  "eyeliner.natural",
                                 "eyeliner.bold",    "eyeliner.soft"};
   static const EyeLinerColor kElC[] = {
-      EyeLinerColor::Burgundy, EyeLinerColor::Plum, EyeLinerColor::Chocolate,
-      EyeLinerColor::Coffee, EyeLinerColor::Mauve};
+      EyeLinerColor::Black, EyeLinerColor::Coffee, EyeLinerColor::Chocolate,
+      EyeLinerColor::Grey, EyeLinerColor::Burgundy, EyeLinerColor::Plum,
+      EyeLinerColor::Mauve};
   static const char* kElCk[] = {
-      "eyelinerColor.burgundy", "eyelinerColor.plum", "eyelinerColor.chocolate",
-      "eyelinerColor.coffee", "eyelinerColor.mauve"};
+      "eyelinerColor.black", "eyelinerColor.coffee", "eyelinerColor.chocolate",
+      "eyelinerColor.grey", "eyelinerColor.burgundy", "eyelinerColor.plum",
+      "eyelinerColor.mauve"};
   MakeupBlock(studio, T("makeup.eyeliner"), &p.eyeliner, kElS, kElSk, 6,
-              &p.eyeliner_style, kElC, kElCk, 5, &p.eyeliner_color, style_l,
-              color_l);
+              &p.eyeliner_style, kElC, kElCk, 7, &p.eyeliner_color, style_l,
+              color_l, 4);
 
   static const EyebrowStyle kEbS[] = {
       EyebrowStyle::Natural,   EyebrowStyle::Soft,     EyebrowStyle::Feathered,
@@ -877,12 +982,14 @@ void DrawMakeup(Studio& studio) {
       "eyebrow.mist",    "eyebrow.arched", "eyebrow.powder",
       "eyebrow.wild",    "eyebrow.full",   "eyebrow.straight"};
   static const EyebrowColor kEbC[] = {
-      EyebrowColor::DarkBrown, EyebrowColor::Black, EyebrowColor::SoftBrown};
-  static const char* kEbCk[] = {"eyebrowColor.darkBrown", "eyebrowColor.black",
-                                "eyebrowColor.softBrown"};
+      EyebrowColor::DarkBrown, EyebrowColor::AshBrown, EyebrowColor::SoftBrown,
+      EyebrowColor::Black};
+  static const char* kEbCk[] = {
+      "eyebrowColor.darkBrown", "eyebrowColor.ashBrown",
+      "eyebrowColor.softBrown", "eyebrowColor.black"};
   MakeupBlock(studio, T("makeup.eyebrow"), &p.eyebrow, kEbS, kEbSk, 9,
-              &p.eyebrow_style, kEbC, kEbCk, 3, &p.eyebrow_color, style_l,
-              color_l);
+              &p.eyebrow_style, kEbC, kEbCk, 4, &p.eyebrow_color, style_l,
+              color_l, 4);
 
   static const EyelashStyle kLaS[] = {
       EyelashStyle::Classic, EyelashStyle::Manga,     EyelashStyle::Winged,
@@ -918,8 +1025,18 @@ void DrawFilter(Studio& studio) {
   char extra[32];
   std::snprintf(extra, sizeof(extra), "%s %d%%", T("filter.intensity"),
                 static_cast<int>(std::lround(p.filter_intensity * 100)));
-  CardTitle(T("filter.title"), extra);
-  ImGui::TextColored(kMuted, "%s", T("color.group.adjust"));
+  if (CardTitle(T("tab.filter"), extra)) {
+    const Params fresh;
+    p.brightness = fresh.brightness;
+    p.contrast = fresh.contrast;
+    p.saturation = fresh.saturation;
+    p.color_temperature = fresh.color_temperature;
+    p.color_tint = fresh.color_tint;
+    p.filter_id = fresh.filter_id;
+    p.filter_intensity = fresh.filter_intensity;
+    studio.NotifyParamsChanged();
+  }
+  SectionHead(T("color.group.adjust"), false);
   if (BipolarSlider(T("color.brightness"), &p.brightness))
     studio.NotifyParamsChanged();
   if (BipolarSlider(T("color.contrast"), &p.contrast))
@@ -930,7 +1047,9 @@ void DrawFilter(Studio& studio) {
     studio.NotifyParamsChanged();
   if (BipolarSlider(T("color.tint"), &p.color_tint))
     studio.NotifyParamsChanged();
-  ImGui::TextColored(kMuted, "%s", T("color.group.filter"));
+  SectionHead(T("color.group.filter"), true);
+  if (ParamSlider(T("filter.intensity"), &p.filter_intensity))
+    studio.NotifyParamsChanged();
   const int n = static_cast<int>(filters.size()) + 1;
   ChipGrid(3, n, [&](int i, ImVec2 size) {
     if (i == 0) {
@@ -946,8 +1065,6 @@ void DrawFilter(Studio& studio) {
       studio.NotifyParamsChanged();
     }
   });
-  if (ParamSlider(T("filter.intensity"), &p.filter_intensity))
-    studio.NotifyParamsChanged();
   EndCard();
 }
 
@@ -976,7 +1093,10 @@ void DrawStickerGroup(Studio& studio, StickerKind kind, const char* title_key) {
 void DrawSticker(Studio& studio) {
   Params& p = studio.params();
   BeginCard("sticker");
-  CardTitle(T("sticker.title"));
+  if (CardTitle(T("sticker.title"))) {
+    p.sticker_id.clear();
+    studio.NotifyParamsChanged();
+  }
   ChipGrid(3, 1, [&](int, ImVec2 size) {
     if (Chip(T("sticker.none"), p.sticker_id.empty(), size)) {
       p.sticker_id.clear();
@@ -992,25 +1112,52 @@ void DrawSticker(Studio& studio) {
 void DrawBackground(Studio& studio) {
   Params& p = studio.params();
   BeginCard("bg");
-  CardTitle(T("bg.title"));
+  if (CardTitle(T("bg.title"))) {
+    const Params fresh;
+    p.bg_fill = fresh.bg_fill;
+    p.bg_blur = fresh.bg_blur;
+    p.bg_preset = fresh.bg_preset;
+    p.chroma = fresh.chroma;
+    p.chroma_similarity = fresh.chroma_similarity;
+    p.chroma_smoothness = fresh.chroma_smoothness;
+    p.chroma_desaturation = fresh.chroma_desaturation;
+    p.subject_outline = fresh.subject_outline;
+    studio.NotifyParamsChanged();
+  }
   ImGui::TextColored(kMuted, "%s", T("bg.outline"));
   ImGui::SameLine(ImGui::GetContentRegionAvail().x - 20);
   if (Toggle("outline", &p.subject_outline))
     studio.NotifyParamsChanged();
   ImGui::TextColored(kMuted, "%s", T("bg.effect"));
   const BgFill fills[] = {BgFill::Off, BgFill::Blur, BgFill::Preset};
-  const char* fill_keys[] = {"bg.original", "bg.blur", "bg.preset"};
+  const char* fill_keys[] = {"bg.original", "bg.blur", "bg.image"};
   ChipGrid(3, 3, [&](int i, ImVec2 size) {
     if (Chip(T(fill_keys[i]), p.bg_fill == fills[i], size)) {
       p.bg_fill = fills[i];
       if (p.bg_fill == BgFill::Blur && p.bg_blur <= 0.f)
         p.bg_blur = 0.5f;
+      if (p.bg_fill == BgFill::Preset && p.bg_preset.empty())
+        p.bg_preset = "office";
       studio.NotifyParamsChanged();
     }
   });
   if (p.bg_fill == BgFill::Blur &&
       ParamSlider(T("bg.blurAmount"), &p.bg_blur)) {
     studio.NotifyParamsChanged();
+  }
+  if (p.bg_fill == BgFill::Preset) {
+    ImGui::TextColored(kMuted, "%s", T("bg.presets"));
+    const char* preset_ids[] = {"office", "living", "bookshelf", "bedroom",
+                                "indoor"};
+    const char* preset_keys[] = {
+        "bg.preset.office", "bg.preset.living", "bg.preset.bookshelf",
+        "bg.preset.bedroom", "bg.preset.indoor"};
+    ChipGrid(3, 5, [&](int i, ImVec2 size) {
+      if (Chip(T(preset_keys[i]), p.bg_preset == preset_ids[i], size)) {
+        p.bg_preset = preset_ids[i];
+        studio.NotifyParamsChanged();
+      }
+    });
   }
   ImGui::TextColored(kMuted, "%s", T("bg.cutout"));
   const char* chroma_keys[] = {"bg.portrait", "bg.green", "bg.blue", "bg.red"};
@@ -1218,8 +1365,8 @@ void LoadStudioFonts(float framebuffer_scale, float ui_scale) {
     icon_cfg.PixelSnapH = true;
     static const ImWchar icon_ranges[] = {
         0xE3A5, 0xE3A5, 0xE3AE, 0xE3AE, 0xE40A, 0xE40A, 0xE412, 0xE412,
-        0xE439, 0xE439, 0xE65F, 0xE65F, 0xE84E, 0xE84E, 0xE87C, 0xE87C,
-        0xEB4C, 0xEB4C, 0};
+        0xE439, 0xE439, 0xE5D5, 0xE5D5, 0xE65F, 0xE65F, 0xE84E, 0xE84E,
+        0xE87C, 0xE87C, 0xEB4C, 0xEB4C, 0};
     g_icon_font = io.Fonts->AddFontFromFileTTF(
         FB_DEMO_ICON_FONT, kIconFontPx * raster, &icon_cfg, icon_ranges);
   }

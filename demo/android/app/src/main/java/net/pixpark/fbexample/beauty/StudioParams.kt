@@ -25,6 +25,7 @@ data class StudioParams(
     val whitening: Float = 0f,
     val whiteningStyle: WhiteningStyle = WhiteningStyle.COLD_WHITE,
     val rosiness: Float = 0f,
+    val blemish: Float = 0f,
     val clarity: Float = 0f,
     val brightness: Float = 0f,
     val contrast: Float = 0f,
@@ -94,6 +95,7 @@ data class StudioParams(
 
     fun skinIntensity(item: SkinItem): Float = when (item) {
         SkinItem.SMOOTHING -> smoothing
+        SkinItem.BLEMISH -> blemish
         SkinItem.WHITENING -> whitening
         SkinItem.ROSINESS -> rosiness
         SkinItem.CLARITY -> clarity
@@ -107,6 +109,7 @@ data class StudioParams(
             whitening = fresh.whitening,
             whiteningStyle = fresh.whiteningStyle,
             rosiness = fresh.rosiness,
+            blemish = fresh.blemish,
             clarity = fresh.clarity,
             skinOnly = fresh.skinOnly,
         )
@@ -179,6 +182,7 @@ data class StudioParams(
 
     fun setSkinIntensity(item: SkinItem, value: Float): StudioParams = when (item) {
         SkinItem.SMOOTHING -> copy(smoothing = value)
+        SkinItem.BLEMISH -> copy(blemish = value)
         SkinItem.WHITENING -> copy(whitening = value)
         SkinItem.ROSINESS -> copy(rosiness = value)
         SkinItem.CLARITY -> copy(clarity = value)

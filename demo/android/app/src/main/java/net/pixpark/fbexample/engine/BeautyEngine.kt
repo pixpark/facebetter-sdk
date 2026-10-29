@@ -156,6 +156,7 @@ class BeautyEngine(
         current.setWhitening(params.whitening)
         current.setWhiteningStyle(params.whiteningStyle)
         current.setRosiness(params.rosiness)
+        current.setBlemish(params.blemish)
         current.setClarity(params.clarity)
         current.setBrightness(params.brightness)
         current.setContrast(params.contrast)

@@ -54,6 +54,7 @@ struct Params {
   float whitening = 0.f;
   WhiteningStyle whitening_style = WhiteningStyle::ColdWhite;
   float rosiness = 0.f;
+  float blemish = 0.f;
   float clarity = 0.f;
   float brightness = 0.f;
   float contrast = 0.f;
@@ -94,6 +95,7 @@ struct Params {
 
   BgFill bg_fill = BgFill::Off;
   float bg_blur = 0.5f;
+  std::string bg_preset;
   int chroma = 0;  // 0 portrait, 1 green, 2 blue, 3 red
   float chroma_similarity = 0.4f;
   float chroma_smoothness = 0.1f;
@@ -179,6 +181,7 @@ class Studio {
   std::string sticker_screen_dir_;
   std::string sticker3d_dir_;
   std::string background_path_;
+  std::string backgrounds_dir_;
 
   std::thread worker_;
   mutable std::mutex mu_;

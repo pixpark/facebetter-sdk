@@ -149,6 +149,7 @@ final class BeautyEngine {
     engine.setWhitening(params.whitening)
     engine.setWhiteningStyle(params.whiteningStyle)
     engine.setRosiness(params.rosiness)
+    engine.setBlemish(params.blemish)
     engine.setClarity(params.clarity)
     engine.setBrightness(params.brightness)
     engine.setContrast(params.contrast)
@@ -227,12 +228,17 @@ final class BeautyEngine {
       }
     }
 
-    if prev.backgroundFill != params.backgroundFill || prev.bgBlur != params.bgBlur {
+    if prev.backgroundFill != params.backgroundFill || prev.bgBlur != params.bgBlur
+      || prev.bgPreset != params.bgPreset {
       switch params.backgroundFill {
       case .blur:
         engine.setVirtualBackgroundBlur(params.bgBlur)
       case .image:
-        if let backgroundImageData, !backgroundImageData.isEmpty {
+        let presetID = params.bgPreset ?? "office"
+        let presetURL = resourceRoot.appendingPathComponent("backgrounds/\(presetID).jpg")
+        if let data = try? Data(contentsOf: presetURL), !data.isEmpty {
+          engine.setVirtualBackgroundWith(data)
+        } else if let backgroundImageData, !backgroundImageData.isEmpty {
           engine.setVirtualBackgroundWith(backgroundImageData)
         }
       case .off:

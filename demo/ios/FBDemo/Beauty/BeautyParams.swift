@@ -6,6 +6,7 @@ struct BeautyParams: Equatable {
   var whitening: Float = 0
   var whiteningStyle: FBWhiteningStyle = .coldWhite
   var rosiness: Float = 0
+  var blemish: Float = 0
   var clarity: Float = 0
   var brightness: Float = 0
   var contrast: Float = 0
@@ -89,6 +90,7 @@ struct BeautyParams: Equatable {
     whitening = fresh.whitening
     whiteningStyle = fresh.whiteningStyle
     rosiness = fresh.rosiness
+    blemish = fresh.blemish
     clarity = fresh.clarity
     skinOnly = fresh.skinOnly
   }

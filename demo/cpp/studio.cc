@@ -47,6 +47,9 @@ constexpr int kMaxEdge = 1280;
 #ifndef FB_DEMO_BACKGROUND_PATH
 #define FB_DEMO_BACKGROUND_PATH "./assets/background.jpg"
 #endif
+#ifndef FB_DEMO_BACKGROUNDS_DIR
+#define FB_DEMO_BACKGROUNDS_DIR "./assets/backgrounds"
+#endif
 #ifndef FB_DEMO_FACE_PATH
 #define FB_DEMO_FACE_PATH "./assets/face.jpg"
 #endif
@@ -161,6 +164,7 @@ bool Studio::Init(GLFWwindow* window) {
   sticker_screen_dir_ = FB_DEMO_STICKER_SCREEN_DIR;
   sticker3d_dir_ = FB_DEMO_STICKER3D_DIR;
   background_path_ = FB_DEMO_BACKGROUND_PATH;
+  backgrounds_dir_ = FB_DEMO_BACKGROUNDS_DIR;
   ScanAssets();
 
   LogConfig log_cfg;
@@ -382,6 +386,8 @@ void Studio::ApplyToEngine(const Params& p, const Params* prev) {
     engine_->SetWhiteningStyle(p.whitening_style);
   if (changed(&Params::rosiness))
     engine_->SetRosiness(p.rosiness);
+  if (changed(&Params::blemish))
+    engine_->SetBlemish(p.blemish);
   if (changed(&Params::clarity))
     engine_->SetClarity(p.clarity);
   if (changed(&Params::brightness))
@@ -508,12 +514,18 @@ void Studio::ApplyToEngine(const Params& p, const Params* prev) {
   }
 
   const bool bg_changed =
-      !prev || prev->bg_fill != p.bg_fill || prev->bg_blur != p.bg_blur;
+      !prev || prev->bg_fill != p.bg_fill || prev->bg_blur != p.bg_blur ||
+      prev->bg_preset != p.bg_preset;
   if (bg_changed) {
     if (p.bg_fill == BgFill::Blur) {
       engine_->SetVirtualBackgroundBlur(p.bg_blur);
     } else if (p.bg_fill == BgFill::Preset) {
-      engine_->SetVirtualBackground(background_path_);
+      const std::string id = p.bg_preset.empty() ? "office" : p.bg_preset;
+      std::string path = backgrounds_dir_ + "/" + id + ".jpg";
+      std::ifstream preset(path, std::ios::binary);
+      if (!preset)
+        path = background_path_;
+      engine_->SetVirtualBackground(path);
     } else {
       engine_->ClearVirtualBackground();
     }

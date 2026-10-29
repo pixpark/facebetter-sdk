@@ -5,74 +5,75 @@ struct TopBar: View {
   @ObservedObject var studio: StudioModel
 
   var body: some View {
-    HStack(spacing: 12) {
-      HStack(spacing: 8) {
-        Image(systemName: "sparkles")
-          .foregroundStyle(Color(hex: 0xE5E7EB))
-        Text("Facebetter")
-          .font(.system(size: 15, weight: .semibold))
-          .foregroundStyle(Color(hex: 0xF3F4F6))
-        Text("Demo")
-          .font(.system(size: 11))
-          .foregroundStyle(StudioColors.muted)
-          .padding(.horizontal, 8)
-          .padding(.vertical, 3)
-          .background(Color(hex: 0x181A20))
-          .overlay(Capsule().stroke(Color.white.opacity(0.10), lineWidth: 1))
-          .clipShape(Capsule())
-      }
+    HStack(spacing: 0) {
+      ZStack {
+        HStack(spacing: 8) {
+          Image(systemName: "sparkles")
+            .foregroundStyle(Color(hex: 0xE5E7EB))
+          Text("Facebetter")
+            .font(.system(size: 15, weight: .semibold))
+            .foregroundStyle(Color(hex: 0xF3F4F6))
+          Text("Demo")
+            .font(.system(size: 11))
+            .foregroundStyle(StudioColors.muted)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 3)
+            .background(Color(hex: 0x181A20))
+            .overlay(Capsule().stroke(Color.white.opacity(0.10), lineWidth: 1))
+            .clipShape(Capsule())
+          Spacer()
+        }
 
-      Rectangle()
-        .fill(Color.white.opacity(0.10))
-        .frame(width: 1, height: 16)
-
-      PillButton(
-        title: studio.t(studio.source == .idle ? "nav.openImage" : "nav.replaceImage"),
-        symbol: "photo.on.rectangle"
-      ) {
-        studio.pickImage()
-      }
-
-      PillButton(
-        title: studio.t("nav.camera"),
-        symbol: "camera",
-        active: studio.source == .camera
-      ) {
-        studio.startCamera()
-      }
-
-      Spacer()
-
-      PillButton(
-        title: studio.t("nav.website"),
-        symbol: "arrow.up.right.square"
-      ) {
-        if let url = URL(string: studio.locale == .zh
-                          ? "https://facebetter.net/zh/"
-                          : "https://facebetter.net/") {
-          NSWorkspace.shared.open(url)
+        HStack(spacing: 8) {
+          PillButton(
+            title: studio.t(studio.source == .idle ? "nav.openImage" : "nav.replaceImage"),
+            symbol: "photo.badge.plus"
+          ) {
+            studio.pickImage()
+          }
+          PillButton(
+            title: studio.t("nav.camera"),
+            symbol: "camera",
+            active: studio.source == .camera
+          ) {
+            studio.startCamera()
+          }
+          PillButton(
+            title: studio.t("nav.export"),
+            symbol: "square.and.arrow.down",
+            emphasis: true,
+            disabled: studio.source == .idle
+          ) {
+            studio.exportImage()
+          }
         }
       }
+      .padding(.horizontal, 24)
+      .frame(maxWidth: .infinity)
 
-      HStack(spacing: 2) {
-        localeButton(.zh, title: studio.t("nav.langZh"))
-        localeButton(.en, title: studio.t("nav.langEn"))
+      HStack(spacing: 12) {
+        PillButton(
+          title: studio.t("nav.website"),
+          symbol: "arrow.up.right.square"
+        ) {
+          if let url = URL(string: studio.locale == .zh
+                            ? "https://facebetter.net/zh/"
+                            : "https://facebetter.net/") {
+            NSWorkspace.shared.open(url)
+          }
+        }
+        HStack(spacing: 2) {
+          localeButton(.zh, title: studio.t("nav.langZh"))
+          localeButton(.en, title: studio.t("nav.langEn"))
+        }
+        .padding(2)
+        .background(Color(hex: 0x181A20))
+        .overlay(Capsule().stroke(Color.white.opacity(0.10), lineWidth: 1))
+        .clipShape(Capsule())
       }
-      .padding(2)
-      .background(Color(hex: 0x181A20))
-      .overlay(Capsule().stroke(Color.white.opacity(0.10), lineWidth: 1))
-      .clipShape(Capsule())
-
-      PillButton(
-        title: studio.t("nav.export"),
-        symbol: "square.and.arrow.down",
-        emphasis: true,
-        disabled: studio.source == .idle
-      ) {
-        studio.exportImage()
-      }
+      .padding(.horizontal, 20)
+      .frame(width: 380, alignment: .trailing)
     }
-    .padding(.horizontal, 24)
     .frame(height: 48)
     .background(StudioColors.topBar)
     .overlay(alignment: .bottom) {

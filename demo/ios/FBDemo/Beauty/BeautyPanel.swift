@@ -135,6 +135,7 @@ private struct SkinSection: View {
       get: {
         switch studio.selectedSkin {
         case .smoothing: return studio.params.smoothing
+        case .blemish: return studio.params.blemish
         case .whitening: return studio.params.whitening
         case .rosiness: return studio.params.rosiness
         case .clarity: return studio.params.clarity
@@ -143,6 +144,7 @@ private struct SkinSection: View {
       set: { value in
         switch studio.selectedSkin {
         case .smoothing: studio.params.smoothing = value
+        case .blemish: studio.params.blemish = value
         case .whitening: studio.params.whitening = value
         case .rosiness: studio.params.rosiness = value
         case .clarity: studio.params.clarity = value
