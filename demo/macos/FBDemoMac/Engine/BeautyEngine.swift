@@ -4,8 +4,12 @@ import Foundation
 
 final class BeautyEngine {
   private let lock = NSLock()
+  // Serializes parameter writes. Does not cover processImage, so intensity
+  // changes are not stuck behind the frame currently being drawn.
+  private let applyLock = NSLock()
   private var engine: FBBeautyEffectEngine?
   private var previous = BeautyParams()
+  private var appliedOnce = false
   private var resourceRoot: URL
   private var backgroundImageData: Data?
 
@@ -23,9 +27,14 @@ final class BeautyEngine {
   }
 
   func apply(_ params: BeautyParams) {
+    applyLock.lock()
+    defer { applyLock.unlock() }
     lock.lock()
-    defer { lock.unlock() }
-    applyLocked(params)
+    let current = engine
+    let ready = isReady
+    lock.unlock()
+    guard let current, ready else { return }
+    applyLocked(params, engine: current)
   }
 
   func process(_ pixelBuffer: CVPixelBuffer, asImage: Bool, bypass: Bool) -> CVPixelBuffer? {
@@ -57,18 +66,25 @@ final class BeautyEngine {
   }
 
   func start() {
+    applyLock.lock()
     lock.lock()
-    defer { lock.unlock() }
+    defer {
+      lock.unlock()
+      applyLock.unlock()
+    }
     startLocked()
   }
 
   func shutdown() {
+    applyLock.lock()
     lock.lock()
     engine = nil
     isReady = false
     previous = BeautyParams()
+    appliedOnce = false
     statusKey = "status.initializing"
     lock.unlock()
+    applyLock.unlock()
   }
 
   private func startLocked() {
@@ -130,7 +146,7 @@ final class BeautyEngine {
 
     backgroundImageData = try? Data(contentsOf: resourceRoot.appendingPathComponent("background.jpg"))
     if created.responds(to: NSSelectorFromString("setSmoothing:")) {
-      applyLocked(BeautyParams())
+      applyLocked(BeautyParams(), engine: created)
     } else {
       isReady = false
       statusKey = "status.sdkMismatch"
@@ -138,16 +154,19 @@ final class BeautyEngine {
     }
   }
 
-  private func applyLocked(_ params: BeautyParams) {
-    guard let engine else { return }
+  private func applyLocked(_ params: BeautyParams, engine: FBBeautyEffectEngine) {
     guard engine.responds(to: NSSelectorFromString("setSmoothing:")) else { return }
     let prev = previous
+    let force = !appliedOnce
+    appliedOnce = true
     previous = params
 
     engine.setSmoothing(params.smoothing)
     engine.setSmoothingStyle(params.smoothingStyle)
     engine.setWhitening(params.whitening)
-    engine.setWhiteningStyle(params.whiteningStyle)
+    if force || prev.whiteningStyle != params.whiteningStyle {
+      engine.setWhiteningStyle(params.whiteningStyle)
+    }
     engine.setRosiness(params.rosiness)
     engine.setBlemish(params.blemish)
     engine.setClarity(params.clarity)
@@ -166,26 +185,52 @@ final class BeautyEngine {
     }
 
     engine.setLipstick(params.lipstick)
-    engine.setLipstickColor(params.lipstickColor)
+    if force || prev.lipstickColor != params.lipstickColor {
+      engine.setLipstickColor(params.lipstickColor)
+    }
     engine.setBlush(params.blush)
-    engine.setBlushStyle(params.blushStyle)
-    engine.setBlushColor(params.blushColor)
+    if force || prev.blushStyle != params.blushStyle {
+      engine.setBlushStyle(params.blushStyle)
+    }
+    if force || prev.blushColor != params.blushColor {
+      engine.setBlushColor(params.blushColor)
+    }
     engine.setContour(params.contour)
-    engine.setContourStyle(params.contourStyle)
+    if force || prev.contourStyle != params.contourStyle {
+      engine.setContourStyle(params.contourStyle)
+    }
     engine.setEyeShadow(params.eyeshadow)
-    engine.setEyeShadowStyle(params.eyeshadowStyle)
-    engine.setEyeShadowColor(params.eyeshadowColor)
+    if force || prev.eyeshadowStyle != params.eyeshadowStyle {
+      engine.setEyeShadowStyle(params.eyeshadowStyle)
+    }
+    if force || prev.eyeshadowColor != params.eyeshadowColor {
+      engine.setEyeShadowColor(params.eyeshadowColor)
+    }
     engine.setEyeLiner(params.eyeliner)
-    engine.setEyeLinerStyle(params.eyelinerStyle)
-    engine.setEyeLinerColor(params.eyelinerColor)
+    if force || prev.eyelinerStyle != params.eyelinerStyle {
+      engine.setEyeLinerStyle(params.eyelinerStyle)
+    }
+    if force || prev.eyelinerColor != params.eyelinerColor {
+      engine.setEyeLinerColor(params.eyelinerColor)
+    }
     engine.setEyebrow(params.eyebrow)
-    engine.setEyebrowStyle(params.eyebrowStyle)
-    engine.setEyebrowColor(params.eyebrowColor)
+    if force || prev.eyebrowStyle != params.eyebrowStyle {
+      engine.setEyebrowStyle(params.eyebrowStyle)
+    }
+    if force || prev.eyebrowColor != params.eyebrowColor {
+      engine.setEyebrowColor(params.eyebrowColor)
+    }
     engine.setEyelash(params.eyelash)
-    engine.setEyelashStyle(params.eyelashStyle)
-    engine.setEyelashColor(params.eyelashColor)
+    if force || prev.eyelashStyle != params.eyelashStyle {
+      engine.setEyelashStyle(params.eyelashStyle)
+    }
+    if force || prev.eyelashColor != params.eyelashColor {
+      engine.setEyelashColor(params.eyelashColor)
+    }
     engine.setPupil(params.pupil)
-    engine.setPupilColor(params.pupilColor)
+    if force || prev.pupilColor != params.pupilColor {
+      engine.setPupilColor(params.pupilColor)
+    }
     engine.setTeethWhiten(params.teethWhiten)
 
     if prev.filterID != params.filterID {
@@ -214,22 +259,20 @@ final class BeautyEngine {
       }
     }
 
-    if prev.chroma != params.chroma
-      || prev.chromaSimilarity != params.chromaSimilarity
-      || prev.chromaSmoothness != params.chromaSmoothness
-      || prev.chromaDesaturation != params.chromaDesaturation {
+    if force || prev.chroma != params.chroma {
       if let chroma = params.chroma {
         engine.setChromaKey(chroma)
-        engine.setChromaKeySimilarity(params.chromaSimilarity)
-        engine.setChromaKeySmoothness(params.chromaSmoothness)
-        engine.setChromaKeyDesaturation(params.chromaDesaturation)
       } else {
         engine.clearChromaKey()
       }
     }
+    if params.chroma != nil {
+      engine.setChromaKeySimilarity(params.chromaSimilarity)
+      engine.setChromaKeySmoothness(params.chromaSmoothness)
+      engine.setChromaKeyDesaturation(params.chromaDesaturation)
+    }
 
-    if prev.backgroundFill != params.backgroundFill || prev.bgBlur != params.bgBlur
-      || prev.bgPreset != params.bgPreset {
+    if force || prev.backgroundFill != params.backgroundFill || prev.bgPreset != params.bgPreset {
       switch params.backgroundFill {
       case .blur:
         engine.setVirtualBackgroundBlur(params.bgBlur)
@@ -244,6 +287,8 @@ final class BeautyEngine {
       case .off:
         engine.clearVirtualBackground()
       }
+    } else if params.backgroundFill == .blur && prev.bgBlur != params.bgBlur {
+      engine.setVirtualBackgroundBlur(params.bgBlur)
     }
     if prev.subjectOutline != params.subjectOutline {
       engine.setSubjectOutline(params.subjectOutline)

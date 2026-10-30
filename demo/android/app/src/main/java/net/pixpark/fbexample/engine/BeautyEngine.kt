@@ -18,8 +18,12 @@ class BeautyEngine(
     private val context: Context,
 ) {
     private val lock = ReentrantLock()
+    // Serializes parameter writes. Does not cover processImage, so intensity
+    // changes are not stuck behind the frame currently being drawn.
+    private val applyLock = ReentrantLock()
     private var engine: BeautyEffectEngine? = null
     private var previous = StudioParams()
+    private var appliedOnce = false
     private var backgroundBytes: ByteArray? = null
     private val presetCache = mutableMapOf<String, ByteArray>()
 
@@ -34,6 +38,7 @@ class BeautyEngine(
     var onEvent: ((String) -> Unit)? = null
 
     fun start() {
+        applyLock.withLock {
         lock.withLock {
             if (engine != null) {
                 return
@@ -88,7 +93,7 @@ class BeautyEngine(
                     context.assets.open("facebetter/background.jpg").use { it.readBytes() }
                 }.getOrNull()
 
-                applyLocked(StudioParams())
+                applyLocked(created, StudioParams())
             } catch (error: Throwable) {
                 Log.e(TAG, "Failed to start engine", error)
                 isReady = false
@@ -100,10 +105,14 @@ class BeautyEngine(
                 onEvent?.invoke(statusKey)
             }
         }
+        }
     }
 
     fun apply(params: StudioParams) {
-        lock.withLock { applyLocked(params) }
+        applyLock.withLock {
+            val current = lock.withLock { engine?.takeIf { isReady } } ?: return
+            applyLocked(current, params)
+        }
     }
 
     fun process(input: ImageFrame, asImage: Boolean, bypass: Boolean): ImageFrame? {
@@ -137,24 +146,30 @@ class BeautyEngine(
     }
 
     fun release() {
-        lock.withLock {
-            engine?.release()
-            engine = null
-            isReady = false
-            previous = StudioParams()
-            statusKey = "status.initializing"
+        applyLock.withLock {
+            lock.withLock {
+                engine?.release()
+                engine = null
+                isReady = false
+                previous = StudioParams()
+                appliedOnce = false
+                statusKey = "status.initializing"
+            }
         }
     }
 
-    private fun applyLocked(params: StudioParams) {
-        val current = engine ?: return
+    private fun applyLocked(current: BeautyEffectEngine, params: StudioParams) {
         val prev = previous
+        val force = !appliedOnce
+        appliedOnce = true
         previous = params
 
         current.setSmoothing(params.smoothing)
         current.setSmoothingStyle(params.smoothingStyle)
         current.setWhitening(params.whitening)
-        current.setWhiteningStyle(params.whiteningStyle)
+        if (force || prev.whiteningStyle != params.whiteningStyle) {
+            current.setWhiteningStyle(params.whiteningStyle)
+        }
         current.setRosiness(params.rosiness)
         current.setBlemish(params.blemish)
         current.setClarity(params.clarity)
@@ -173,26 +188,52 @@ class BeautyEngine(
         }
 
         current.setLipstick(params.lipstick)
-        current.setLipstickColor(params.lipstickColor)
+        if (force || prev.lipstickColor != params.lipstickColor) {
+            current.setLipstickColor(params.lipstickColor)
+        }
         current.setBlush(params.blush)
-        current.setBlushStyle(params.blushStyle)
-        current.setBlushColor(params.blushColor)
+        if (force || prev.blushStyle != params.blushStyle) {
+            current.setBlushStyle(params.blushStyle)
+        }
+        if (force || prev.blushColor != params.blushColor) {
+            current.setBlushColor(params.blushColor)
+        }
         current.setContour(params.contour)
-        current.setContourStyle(params.contourStyle)
+        if (force || prev.contourStyle != params.contourStyle) {
+            current.setContourStyle(params.contourStyle)
+        }
         current.setEyeShadow(params.eyeshadow)
-        current.setEyeShadowStyle(params.eyeshadowStyle)
-        current.setEyeShadowColor(params.eyeshadowColor)
+        if (force || prev.eyeshadowStyle != params.eyeshadowStyle) {
+            current.setEyeShadowStyle(params.eyeshadowStyle)
+        }
+        if (force || prev.eyeshadowColor != params.eyeshadowColor) {
+            current.setEyeShadowColor(params.eyeshadowColor)
+        }
         current.setEyeLiner(params.eyeliner)
-        current.setEyeLinerStyle(params.eyelinerStyle)
-        current.setEyeLinerColor(params.eyelinerColor)
+        if (force || prev.eyelinerStyle != params.eyelinerStyle) {
+            current.setEyeLinerStyle(params.eyelinerStyle)
+        }
+        if (force || prev.eyelinerColor != params.eyelinerColor) {
+            current.setEyeLinerColor(params.eyelinerColor)
+        }
         current.setEyebrow(params.eyebrow)
-        current.setEyebrowStyle(params.eyebrowStyle)
-        current.setEyebrowColor(params.eyebrowColor)
+        if (force || prev.eyebrowStyle != params.eyebrowStyle) {
+            current.setEyebrowStyle(params.eyebrowStyle)
+        }
+        if (force || prev.eyebrowColor != params.eyebrowColor) {
+            current.setEyebrowColor(params.eyebrowColor)
+        }
         current.setEyelash(params.eyelash)
-        current.setEyelashStyle(params.eyelashStyle)
-        current.setEyelashColor(params.eyelashColor)
+        if (force || prev.eyelashStyle != params.eyelashStyle) {
+            current.setEyelashStyle(params.eyelashStyle)
+        }
+        if (force || prev.eyelashColor != params.eyelashColor) {
+            current.setEyelashColor(params.eyelashColor)
+        }
         current.setPupil(params.pupil)
-        current.setPupilColor(params.pupilColor)
+        if (force || prev.pupilColor != params.pupilColor) {
+            current.setPupilColor(params.pupilColor)
+        }
         current.setTeethWhiten(params.teethWhiten)
 
         if (prev.filterId != params.filterId) {
@@ -231,25 +272,21 @@ class BeautyEngine(
             }
         }
 
-        if (prev.chroma != params.chroma ||
-            prev.chromaSimilarity != params.chromaSimilarity ||
-            prev.chromaSmoothness != params.chromaSmoothness ||
-            prev.chromaDesaturation != params.chromaDesaturation
-        ) {
+        if (force || prev.chroma != params.chroma) {
             val chroma = params.chroma
             if (chroma != null) {
                 current.setChromaKey(chroma)
-                current.setChromaKeySimilarity(params.chromaSimilarity)
-                current.setChromaKeySmoothness(params.chromaSmoothness)
-                current.setChromaKeyDesaturation(params.chromaDesaturation)
             } else {
                 current.clearChromaKey()
             }
         }
+        if (params.chroma != null) {
+            current.setChromaKeySimilarity(params.chromaSimilarity)
+            current.setChromaKeySmoothness(params.chromaSmoothness)
+            current.setChromaKeyDesaturation(params.chromaDesaturation)
+        }
 
-        if (prev.backgroundFill != params.backgroundFill || prev.bgBlur != params.bgBlur ||
-            prev.bgPreset != params.bgPreset
-        ) {
+        if (force || prev.backgroundFill != params.backgroundFill || prev.bgPreset != params.bgPreset) {
             when (params.backgroundFill) {
                 BackgroundFill.BLUR -> current.setVirtualBackgroundBlur(params.bgBlur)
                 BackgroundFill.IMAGE -> {
@@ -261,6 +298,8 @@ class BeautyEngine(
                 }
                 BackgroundFill.OFF -> current.clearVirtualBackground()
             }
+        } else if (params.backgroundFill == BackgroundFill.BLUR && prev.bgBlur != params.bgBlur) {
+            current.setVirtualBackgroundBlur(params.bgBlur)
         }
         if (prev.subjectOutline != params.subjectOutline) {
             current.setSubjectOutline(params.subjectOutline)

@@ -393,10 +393,11 @@ export function createDefaultParams() {
 }
 
 export function applyParams(engine, params, resources, prev = null) {
+  const changed = (key) => !prev || prev[key] !== params[key]
   engine.setSmoothing(params.smoothing)
   engine.setSmoothingStyle(params.smoothingStyle)
   engine.setWhitening(params.whitening)
-  engine.setWhiteningStyle(params.whiteningStyle)
+  if (changed('whiteningStyle')) engine.setWhiteningStyle(params.whiteningStyle)
   engine.setRosiness(params.rosiness)
   engine.setBlemish(params.blemish || 0)
   engine.setClarity(params.clarity)
@@ -415,26 +416,26 @@ export function applyParams(engine, params, resources, prev = null) {
   }
 
   engine.setLipstick(params.lipstick)
-  engine.setLipstickColor(params.lipstickColor)
+  if (changed('lipstickColor')) engine.setLipstickColor(params.lipstickColor)
   engine.setBlush(params.blush)
-  engine.setBlushStyle(params.blushStyle)
-  engine.setBlushColor(params.blushColor)
+  if (changed('blushStyle')) engine.setBlushStyle(params.blushStyle)
+  if (changed('blushColor')) engine.setBlushColor(params.blushColor)
   engine.setContour(params.contour)
-  engine.setContourStyle(params.contourStyle)
+  if (changed('contourStyle')) engine.setContourStyle(params.contourStyle)
   engine.setEyeShadow(params.eyeshadow)
-  engine.setEyeShadowStyle(params.eyeshadowStyle)
-  engine.setEyeShadowColor(params.eyeshadowColor)
+  if (changed('eyeshadowStyle')) engine.setEyeShadowStyle(params.eyeshadowStyle)
+  if (changed('eyeshadowColor')) engine.setEyeShadowColor(params.eyeshadowColor)
   engine.setEyeLiner(params.eyeliner)
-  engine.setEyeLinerStyle(params.eyelinerStyle)
-  engine.setEyeLinerColor(params.eyelinerColor)
+  if (changed('eyelinerStyle')) engine.setEyeLinerStyle(params.eyelinerStyle)
+  if (changed('eyelinerColor')) engine.setEyeLinerColor(params.eyelinerColor)
   engine.setEyebrow(params.eyebrow)
-  engine.setEyebrowStyle(params.eyebrowStyle)
-  engine.setEyebrowColor(params.eyebrowColor)
+  if (changed('eyebrowStyle')) engine.setEyebrowStyle(params.eyebrowStyle)
+  if (changed('eyebrowColor')) engine.setEyebrowColor(params.eyebrowColor)
   engine.setEyelash(params.eyelash)
-  engine.setEyelashStyle(params.eyelashStyle)
-  engine.setEyelashColor(params.eyelashColor)
+  if (changed('eyelashStyle')) engine.setEyelashStyle(params.eyelashStyle)
+  if (changed('eyelashColor')) engine.setEyelashColor(params.eyelashColor)
   engine.setPupil(params.pupil)
-  engine.setPupilColor(params.pupilColor)
+  if (changed('pupilColor')) engine.setPupilColor(params.pupilColor)
   engine.setTeethWhiten(params.teethWhiten)
 
   const filterChanged = !prev || prev.filterId !== params.filterId
@@ -464,28 +465,21 @@ export function applyParams(engine, params, resources, prev = null) {
     }
   }
 
-  const chromaChanged =
-    !prev ||
-    prev.chroma !== params.chroma ||
-    prev.chromaSimilarity !== params.chromaSimilarity ||
-    prev.chromaSmoothness !== params.chromaSmoothness ||
-    prev.chromaDesaturation !== params.chromaDesaturation
-  if (chromaChanged) {
+  if (changed('chroma')) {
     if (params.chroma === null || params.chroma === undefined) {
       engine.clearChromaKey()
     } else {
       engine.setChromaKey(params.chroma)
-      engine.setChromaKeySimilarity(params.chromaSimilarity)
-      engine.setChromaKeySmoothness(params.chromaSmoothness)
-      engine.setChromaKeyDesaturation(params.chromaDesaturation)
     }
   }
+  if (params.chroma !== null && params.chroma !== undefined) {
+    engine.setChromaKeySimilarity(params.chromaSimilarity)
+    engine.setChromaKeySmoothness(params.chromaSmoothness)
+    engine.setChromaKeyDesaturation(params.chromaDesaturation)
+  }
 
-  const backgroundChanged =
-    !prev ||
-    prev.bgBlur !== params.bgBlur ||
-    prev.bgPreset !== params.bgPreset
-  if (backgroundChanged) {
+  const backgroundModeChanged = !prev || prev.bgPreset !== params.bgPreset || (prev.bgBlur > 0) !== (params.bgBlur > 0)
+  if (backgroundModeChanged) {
     if (params.bgBlur > 0) {
       engine.setVirtualBackgroundBlur(params.bgBlur)
     } else if (params.bgPreset && resources.backgrounds?.get(params.bgPreset)) {
@@ -493,6 +487,8 @@ export function applyParams(engine, params, resources, prev = null) {
     } else {
       engine.clearVirtualBackground()
     }
+  } else if (params.bgBlur > 0 && prev.bgBlur !== params.bgBlur) {
+    engine.setVirtualBackgroundBlur(params.bgBlur)
   }
   if (!prev || prev.subjectOutline !== params.subjectOutline) {
     engine.setSubjectOutline(!!params.subjectOutline)
