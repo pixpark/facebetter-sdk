@@ -12,17 +12,12 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.core.content.ContextCompat
 import net.pixpark.fbexample.camera.CameraController
-import net.pixpark.fbexample.texture.TextureStudioScreen
 
 class StudioActivity : ComponentActivity() {
     private val viewModel: StudioViewModel by viewModels()
     private lateinit var camera: CameraController
-    private var textureOpen by mutableStateOf(false)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,7 +25,7 @@ class StudioActivity : ComponentActivity() {
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
         camera = CameraController(this) { image, front ->
-            if (!textureOpen && viewModel.source == StudioSource.CAMERA) {
+            if (viewModel.cameraInput == CameraInput.CPU && viewModel.source == StudioSource.CAMERA) {
                 viewModel.processCameraFrame(image, front)
             } else {
                 image.close()
@@ -41,12 +36,12 @@ class StudioActivity : ComponentActivity() {
             val permissionLauncher = rememberLauncherForActivityResult(
                 ActivityResultContracts.RequestPermission(),
             ) { granted ->
-                if (granted) {
-                    if (!textureOpen) {
-                        camera.start(this)
+                if (granted && viewModel.source == StudioSource.CAMERA) {
+                    startActiveCamera()
+                    if (viewModel.cameraInput == CameraInput.CPU) {
                         viewModel.backToCamera()
                     }
-                } else {
+                } else if (!granted) {
                     viewModel.notifyCameraDenied()
                 }
             }
@@ -59,64 +54,52 @@ class StudioActivity : ComponentActivity() {
                 }
             }
 
-            LaunchedEffect(viewModel.source, textureOpen) {
-                if (textureOpen) {
+            LaunchedEffect(viewModel.source, viewModel.cameraInput) {
+                if (viewModel.source != StudioSource.CAMERA) {
                     camera.stop()
-                } else if (viewModel.source == StudioSource.CAMERA) {
+                    return@LaunchedEffect
+                }
+                if (!hasCameraPermission()) {
+                    permissionLauncher.launch(Manifest.permission.CAMERA)
+                    return@LaunchedEffect
+                }
+                startActiveCamera()
+            }
+
+            StudioScreen(
+                viewModel = viewModel,
+                onPickImage = {
+                    picker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                },
+                onStartCamera = {
                     if (hasCameraPermission()) {
-                        camera.start(this@StudioActivity)
+                        viewModel.backToCamera()
+                        startActiveCamera()
                     } else {
                         permissionLauncher.launch(Manifest.permission.CAMERA)
                     }
-                } else {
-                    camera.stop()
-                }
-            }
-
-            if (textureOpen) {
-                TextureStudioScreen(
-                    locale = viewModel.locale,
-                    onClose = {
-                        // Stop happens in TextureStudioScreen before this; resume after dispose.
-                        textureOpen = false
-                    },
-                    onStopped = {
-                        viewModel.resumeAfterExternalTexture()
-                    },
-                )
-            } else {
-                StudioScreen(
-                    viewModel = viewModel,
-                    onPickImage = {
-                        picker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-                    },
-                    onStartCamera = {
-                        if (hasCameraPermission()) {
-                            viewModel.backToCamera()
-                            camera.start(this)
-                        } else {
-                            permissionLauncher.launch(Manifest.permission.CAMERA)
-                        }
-                    },
-                    onFlipCamera = {
-                        if (hasCameraPermission()) {
-                            camera.flip(this)
-                        }
-                    },
-                    onOpenTexture = {
-                        camera.stop()
-                        viewModel.suspendForExternalTexture()
-                        textureOpen = true
-                    },
-                    onFinish = { finish() },
-                )
-            }
+                },
+                onFlipCamera = {
+                    if (!hasCameraPermission()) {
+                        return@StudioScreen
+                    }
+                    if (viewModel.cameraInput == CameraInput.GL_TEXTURE) {
+                        viewModel.glController.flipCamera()
+                    } else {
+                        camera.flip(this)
+                    }
+                },
+                onFinish = { finish() },
+            )
         }
     }
 
     override fun onStart() {
         super.onStart()
-        if (!textureOpen && viewModel.source == StudioSource.CAMERA && hasCameraPermission()) {
+        if (viewModel.source == StudioSource.CAMERA &&
+            viewModel.cameraInput == CameraInput.CPU &&
+            hasCameraPermission()
+        ) {
             camera.start(this)
         }
     }
@@ -129,6 +112,14 @@ class StudioActivity : ComponentActivity() {
     override fun onDestroy() {
         camera.stop()
         super.onDestroy()
+    }
+
+    private fun startActiveCamera() {
+        if (viewModel.cameraInput == CameraInput.GL_TEXTURE) {
+            camera.stop()
+        } else {
+            camera.start(this)
+        }
     }
 
     private fun hasCameraPermission(): Boolean {

@@ -33,6 +33,7 @@ import net.pixpark.fbexample.engine.BeautyEngine
 import net.pixpark.fbexample.engine.MediaStoreSaver
 import net.pixpark.fbexample.engine.scaledIfNeeded
 import net.pixpark.fbexample.engine.toDisplayBitmap
+import net.pixpark.fbexample.texture.GlTextureController
 import net.pixpark.facebetter.BeautyParams.Reshape
 import net.pixpark.facebetter.BeautyParams.BodyReshape
 import java.util.concurrent.atomic.AtomicBoolean
@@ -57,6 +58,10 @@ class StudioViewModel(application: Application) : AndroidViewModel(application),
         private set
     var source by mutableStateOf(StudioSource.CAMERA)
         private set
+    var cameraInput by mutableStateOf(CameraInput.CPU)
+        private set
+    var applyOnUIThread by mutableStateOf(true)
+        private set
     var isComparing by mutableStateOf(false)
         private set
     var statusKey by mutableStateOf("status.initializing")
@@ -79,7 +84,17 @@ class StudioViewModel(application: Application) : AndroidViewModel(application),
     private var processMsAccum = 0.0
     private var lastFpsAt = SystemClock.elapsedRealtime()
 
+    val glController = GlTextureController(
+        context = application,
+        engine = engine,
+        params = { params },
+        applyOnUiThread = { applyOnUIThread },
+        onStatus = { key -> mainHandler.post { flash(key) } },
+        onFrame = { costMs -> mainHandler.post { updateFps(costMs) } },
+    )
+
     init {
+        glController.onCapture = { bitmap -> saveBitmap(bitmap) }
         engine.onEvent = { key ->
             viewModelScope.launch(Dispatchers.Main) {
                 engineReady.set(key == "status.ready")
@@ -108,16 +123,7 @@ class StudioViewModel(application: Application) : AndroidViewModel(application),
     override fun updateParams(transform: StudioParams.() -> StudioParams) {
         val next = params.transform()
         params = next
-        engine.apply(next)
-        if (source == StudioSource.IMAGE) {
-            reprocessStill()
-        }
-    }
-
-    fun reset() {
-        params = StudioParams()
-        engine.apply(params)
-        flash("status.reset")
+        applyCurrentParams()
         if (source == StudioSource.IMAGE) {
             reprocessStill()
         }
@@ -126,6 +132,7 @@ class StudioViewModel(application: Application) : AndroidViewModel(application),
     fun setCompareMode(value: Boolean) {
         isComparing = value
         compareFlag.set(value)
+        glController.setComparing(value)
         if (source == StudioSource.IMAGE) {
             reprocessStill()
         }
@@ -137,7 +144,36 @@ class StudioViewModel(application: Application) : AndroidViewModel(application),
             saveBitmap(bitmap)
             return
         }
+        if (cameraInput == CameraInput.GL_TEXTURE) {
+            glController.requestCapture()
+            return
+        }
         captureFlag.set(true)
+    }
+
+    fun selectCameraInput(mode: CameraInput) {
+        if (mode == cameraInput) {
+            return
+        }
+        if (source == StudioSource.CAMERA) {
+            if (mode == CameraInput.GL_TEXTURE) {
+                engine.release()
+                engineReady.set(false)
+            } else {
+                glController.stopPreview()
+                engine.start()
+                engine.apply(params)
+                engineReady.set(engine.isReady)
+            }
+        }
+        cameraInput = mode
+        flash(if (mode == CameraInput.GL_TEXTURE) "status.inputGl" else "status.inputCpu")
+    }
+
+    fun toggleApplyThread() {
+        applyOnUIThread = !applyOnUIThread
+        applyCurrentParams()
+        flash(if (applyOnUIThread) "status.applyOnUI" else "status.applyOnGL")
     }
 
     fun loadImage(uri: Uri) {
@@ -146,6 +182,12 @@ class StudioViewModel(application: Application) : AndroidViewModel(application),
                 BitmapFactory.decodeStream(it)
             }?.scaledIfNeeded() ?: return@launch
             originalStill = loaded
+            if (cameraInput == CameraInput.GL_TEXTURE) {
+                glController.stopPreview()
+                engine.start()
+                engine.apply(params)
+                engineReady.set(engine.isReady)
+            }
             source = StudioSource.IMAGE
             reprocessStill()
             viewModelScope.launch(Dispatchers.Main) { flash("status.imageLoaded") }
@@ -155,25 +197,11 @@ class StudioViewModel(application: Application) : AndroidViewModel(application),
     fun backToCamera() {
         originalStill = null
         source = StudioSource.CAMERA
+        if (cameraInput == CameraInput.GL_TEXTURE) {
+            engine.release()
+            engineReady.set(false)
+        }
         flash("status.cameraOn")
-    }
-
-    fun suspendForExternalTexture() {
-        engineReady.set(false)
-        engine.release()
-    }
-
-    fun resumeAfterExternalTexture() {
-        locale = detectStudioLocale(getApplication())
-        engine.start()
-        engine.apply(params)
-        engineReady.set(engine.isReady)
-        if (source == StudioSource.IMAGE) {
-            reprocessStill()
-        }
-        if (engine.statusKey.isNotEmpty()) {
-            flash(engine.statusKey)
-        }
     }
 
     override fun filterLabel(id: String): String {
@@ -182,6 +210,10 @@ class StudioViewModel(application: Application) : AndroidViewModel(application),
     }
 
     fun processCameraFrame(image: ImageProxy, frontFacing: Boolean) {
+        if (cameraInput != CameraInput.CPU || source != StudioSource.CAMERA) {
+            image.close()
+            return
+        }
         try {
             val input = image.toImageFrame(frontFacing) ?: return
             try {
@@ -211,8 +243,17 @@ class StudioViewModel(application: Application) : AndroidViewModel(application),
     }
 
     override fun onCleared() {
+        glController.stopPreview()
         engine.release()
         super.onCleared()
+    }
+
+    private fun applyCurrentParams() {
+        if (cameraInput == CameraInput.GL_TEXTURE && glController.active) {
+            glController.apply(params)
+        } else if (cameraInput != CameraInput.GL_TEXTURE || source == StudioSource.IMAGE) {
+            engine.apply(params)
+        }
     }
 
     private fun reprocessStill() {

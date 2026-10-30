@@ -68,6 +68,8 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -92,13 +94,14 @@ fun BeautyPanel(viewModel: BeautySession) {
                 RoundedCornerShape(topStart = 18.dp, topEnd = 18.dp),
             ),
     ) {
+        CollapseHandle(viewModel)
         AnimatedVisibility(
             visible = viewModel.panelExpanded,
             enter = expandVertically(),
             exit = shrinkVertically(),
         ) {
             Column(
-                modifier = Modifier.padding(top = 10.dp, bottom = 6.dp),
+                modifier = Modifier.padding(bottom = 6.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 when (viewModel.tab) {
@@ -115,9 +118,35 @@ fun BeautyPanel(viewModel: BeautySession) {
         TabBar(
             viewModel,
             modifier = Modifier.padding(
-                top = if (viewModel.panelExpanded) 4.dp else 10.dp,
+                top = if (viewModel.panelExpanded) 4.dp else 0.dp,
                 bottom = 10.dp,
             ),
+        )
+    }
+}
+
+@Composable
+private fun CollapseHandle(viewModel: BeautySession) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+            ) { viewModel.panelExpanded = !viewModel.panelExpanded }
+            .semantics {
+                contentDescription = viewModel.t(
+                    if (viewModel.panelExpanded) "panel.collapse" else "panel.expand",
+                )
+            }
+            .padding(vertical = 8.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        Box(
+            modifier = Modifier
+                .width(36.dp)
+                .height(5.dp)
+                .background(Color.White.copy(0.45f), RoundedCornerShape(50)),
         )
     }
 }

@@ -26,8 +26,9 @@ import androidx.compose.material.icons.outlined.IosShare
 import androidx.compose.material.icons.outlined.Language
 import androidx.compose.material.icons.outlined.Layers
 import androidx.compose.material.icons.outlined.PhotoLibrary
-import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.Videocam
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -36,6 +37,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -45,23 +47,27 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import net.pixpark.fbexample.AppLocale
 import net.pixpark.fbexample.beauty.BeautyPanel
+import net.pixpark.fbexample.texture.TexturePreviewView
 import kotlin.math.roundToInt
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StudioScreen(
     viewModel: StudioViewModel,
     onPickImage: () -> Unit,
     onStartCamera: () -> Unit,
     onFlipCamera: () -> Unit,
-    onOpenTexture: () -> Unit,
     onFinish: () -> Unit,
 ) {
+    var showInput by remember { mutableStateOf(false) }
+
     BackHandler {
         if (viewModel.panelExpanded) {
             viewModel.panelExpanded = false
@@ -76,8 +82,7 @@ fun StudioScreen(
                 .fillMaxSize()
                 .background(Color.Black),
         ) {
-            PreviewPane(
-                bitmap = viewModel.previewBitmap,
+            Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .pointerInput(Unit) {
@@ -88,7 +93,26 @@ fun StudioScreen(
                             viewModel.setCompareMode(false)
                         }
                     },
-            )
+            ) {
+                if (viewModel.source == StudioSource.CAMERA &&
+                    viewModel.cameraInput == CameraInput.GL_TEXTURE
+                ) {
+                    val lifecycleOwner = LocalLifecycleOwner.current
+                    AndroidView(
+                        factory = { context ->
+                            TexturePreviewView(context).also {
+                                viewModel.glController.attach(it, lifecycleOwner)
+                            }
+                        },
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                    DisposableEffect(lifecycleOwner) {
+                        onDispose { viewModel.glController.stopPreview() }
+                    }
+                } else {
+                    PreviewPane(bitmap = viewModel.previewBitmap, modifier = Modifier.fillMaxSize())
+                }
+            }
 
             // The watermark sits at about 85% of the frame. A gradient across the lower half would gray out the white mark.
             Box(
@@ -115,14 +139,9 @@ fun StudioScreen(
                     onPickImage = onPickImage,
                     onStartCamera = onStartCamera,
                     onFlipCamera = onFlipCamera,
-                    onOpenTexture = onOpenTexture,
+                    onOpenInput = { showInput = true },
                 )
-                FpsBadge(
-                    viewModel = viewModel,
-                    modifier = Modifier
-                        .align(Alignment.End)
-                        .padding(horizontal = 12.dp, vertical = 6.dp),
-                )
+                InputRow(viewModel = viewModel)
                 if (!viewModel.isComparing) {
                     HintChip(
                         viewModel.t("preview.hold"),
@@ -146,6 +165,20 @@ fun StudioScreen(
                     )
                 }
                 BeautyPanel(viewModel = viewModel)
+            }
+            if (showInput) {
+                ModalBottomSheet(
+                    onDismissRequest = { showInput = false },
+                    containerColor = Color.Black,
+                ) {
+                    InputModeSheet(
+                        viewModel = viewModel,
+                        onPick = { mode ->
+                            viewModel.selectCameraInput(mode)
+                            showInput = false
+                        },
+                    )
+                }
             }
         }
     }
@@ -175,7 +208,7 @@ private fun TopBar(
     onPickImage: () -> Unit,
     onStartCamera: () -> Unit,
     onFlipCamera: () -> Unit,
-    onOpenTexture: () -> Unit,
+    onOpenInput: () -> Unit,
 ) {
     var languageOpen by remember { mutableStateOf(false) }
     Row(
@@ -208,12 +241,6 @@ private fun TopBar(
             )
         }
         TopIcon(
-            Icons.Outlined.Refresh,
-            viewModel.t("nav.reset"),
-            modifier = Modifier.weight(1f),
-            onClick = { viewModel.reset() },
-        )
-        TopIcon(
             Icons.Outlined.IosShare,
             viewModel.t("nav.export"),
             modifier = Modifier.weight(1f),
@@ -221,9 +248,10 @@ private fun TopBar(
         )
         TopIcon(
             Icons.Outlined.Layers,
-            viewModel.t("nav.texture"),
+            viewModel.t(viewModel.cameraInput.shortKey),
+            active = true,
             modifier = Modifier.weight(1f),
-            onClick = onOpenTexture,
+            onClick = onOpenInput,
         )
         Box(modifier = Modifier.weight(1f)) {
             TopIcon(
@@ -241,6 +269,83 @@ private fun TopBar(
                             viewModel.updateLocale(item)
                             languageOpen = false
                         },
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun InputRow(
+    viewModel: StudioViewModel,
+) {
+    val showThread = viewModel.cameraInput == CameraInput.GL_TEXTURE &&
+        viewModel.source == StudioSource.CAMERA
+    val showFps = viewModel.source == StudioSource.CAMERA && viewModel.fps > 0
+    if (!showThread && !showFps) {
+        return
+    }
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 12.dp, vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        if (showThread) {
+            Surface(
+                onClick = { viewModel.toggleApplyThread() },
+                shape = RoundedCornerShape(50),
+                color = Color.White.copy(0.12f),
+                contentColor = Color.White,
+            ) {
+                Text(
+                    text = viewModel.t(
+                        if (viewModel.applyOnUIThread) "texture.applyUI" else "texture.applyGL",
+                    ),
+                    fontSize = 11.sp,
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 5.dp),
+                )
+            }
+        }
+        Spacer(modifier = Modifier.weight(1f))
+        FpsBadge(viewModel = viewModel)
+    }
+}
+
+@Composable
+private fun InputModeSheet(
+    viewModel: StudioViewModel,
+    onPick: (CameraInput) -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp, vertical = 8.dp)
+            .navigationBarsPadding(),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Text(viewModel.t("input.title"), color = Color.White, fontSize = 18.sp)
+        Text(viewModel.t("input.subtitle"), color = Color.White.copy(0.65f), fontSize = 14.sp)
+        CameraInput.entries.forEach { mode ->
+            val selected = viewModel.cameraInput == mode
+            Surface(
+                onClick = { onPick(mode) },
+                shape = RoundedCornerShape(14.dp),
+                color = Color.White.copy(if (selected) 0.12f else 0.06f),
+                contentColor = Color.White,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text(
+                        viewModel.t(if (mode == CameraInput.CPU) "input.cpu.title" else "input.gl.title"),
+                        fontSize = 15.sp,
+                    )
+                    Text(
+                        viewModel.t(if (mode == CameraInput.CPU) "input.cpu.detail" else "input.gl.detail"),
+                        color = Color.White.copy(0.6f),
+                        fontSize = 12.sp,
                     )
                 }
             }
