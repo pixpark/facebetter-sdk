@@ -91,7 +91,7 @@ val copyFacebetterAssets by tasks.registering(Copy::class) {
         include("resource_body.fbd")
         into("facebetter")
     }
-    from(publicDir.resolve("assets/filters/filter_mapping.json")) {
+    from(publicDir.resolve("filter_mapping.json")) {
         into("facebetter")
     }
 }
