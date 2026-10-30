@@ -1,6 +1,7 @@
 import SwiftUI
 
-final class PreviewMTKView: UIView {
+/// CPU-pixel and gallery preview. The buffer is already in memory, so a CGImage is safe.
+final class PixelPreview: UIView {
   override init(frame: CGRect) {
     super.init(frame: frame)
     backgroundColor = .black
@@ -21,11 +22,6 @@ final class PreviewMTKView: UIView {
   func display(image: UIImage) {
     guard let cgImage = image.cgImage else { return }
     show(cgImage)
-  }
-
-  func recoverAfterCover() {
-    setNeedsLayout()
-    layoutIfNeeded()
   }
 
   private func show(_ image: CGImage) {
@@ -59,12 +55,12 @@ final class PreviewMTKView: UIView {
   }
 }
 
-struct PreviewView: UIViewRepresentable {
-  let preview: PreviewMTKView
+struct PixelPreviewRepresentable: UIViewRepresentable {
+  let preview: PixelPreview
 
-  func makeUIView(context: Context) -> PreviewMTKView {
+  func makeUIView(context: Context) -> PixelPreview {
     preview
   }
 
-  func updateUIView(_ uiView: PreviewMTKView, context: Context) {}
+  func updateUIView(_ uiView: PixelPreview, context: Context) {}
 }

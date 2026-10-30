@@ -1,8 +1,10 @@
 import UIKit
 import SwiftUI
 
-/// External-texture preview: camera frame as GL_TEXTURE_2D → processImage → draw output.
-final class TexturePreviewView: UIView {
+/// Turns the camera buffer into a GL_TEXTURE_2D, asks GlTextureInput to process it,
+/// then draws the output texture in this context. The draw is ordered after the
+/// engine's GL commands, so the preview does not sample an unfinished texture.
+final class GlTexturePreview: UIView {
   let glQueue = DispatchQueue(label: "net.pixpark.fbstudio.texture.gl")
 
   var process: ((UInt32, Int32, Int32) -> UInt32)?
@@ -22,9 +24,6 @@ final class TexturePreviewView: UIView {
   private var needsResize = true
   private var busy = false
   private let busyLock = NSLock()
-  private var lastOutputTexture: GLuint = 0
-  private var lastWidth: Int32 = 0
-  private var lastHeight: Int32 = 0
   private var drawableLayer: CAEAGLLayer!
 
   override class var layerClass: AnyClass {
@@ -61,7 +60,7 @@ final class TexturePreviewView: UIView {
       guard !self.prepared else { return }
       let context = EAGLContext(api: .openGLES3)
       guard let context else {
-        NSLog("TexturePreviewView: failed to create EAGLContext")
+        NSLog("GlTexturePreview: failed to create EAGLContext")
         return
       }
       EAGLContext.setCurrent(context)
@@ -76,7 +75,7 @@ final class TexturePreviewView: UIView {
         &cache
       )
       guard cacheStatus == kCVReturnSuccess, let cache else {
-        NSLog("TexturePreviewView: CVOpenGLESTextureCacheCreate failed %d", cacheStatus)
+        NSLog("GlTexturePreview: CVOpenGLESTextureCacheCreate failed %d", cacheStatus)
         return
       }
       self.textureCache = cache
@@ -138,10 +137,12 @@ final class TexturePreviewView: UIView {
     }
   }
 
-  func captureImage() -> UIImage? {
+  /// Export runs on this context. The GL engine cannot take a CVPixelBuffer, so the
+  /// photo goes through the CPU pixel path and waits for the still.
+  func captureStill(_ pixelBuffer: CVPixelBuffer, engine: BeautyEngine) -> UIImage? {
     var image: UIImage?
     runOnGLSync {
-      image = self.readLastOutput()
+      image = CpuPixelInput.image(from: pixelBuffer, engine: engine)
     }
     return image
   }
@@ -190,9 +191,6 @@ final class TexturePreviewView: UIView {
       }
     }
 
-    lastOutputTexture = outputTexture
-    lastWidth = width
-    lastHeight = height
     draw(texture: outputTexture, imageWidth: width, imageHeight: height)
     context.presentRenderbuffer(Int(GL_RENDERBUFFER))
     CVOpenGLESTextureCacheFlush(cache, 0)
@@ -296,7 +294,7 @@ final class TexturePreviewView: UIView {
     var ok: GLint = 0
     glGetProgramiv(program, GLenum(GL_LINK_STATUS), &ok)
     if ok == GL_FALSE {
-      NSLog("TexturePreviewView: program link failed")
+      NSLog("GlTexturePreview: program link failed")
       glDeleteProgram(program)
       program = 0
       return
@@ -321,7 +319,7 @@ final class TexturePreviewView: UIView {
       if logLength > 0 {
         var log = [GLchar](repeating: 0, count: Int(logLength))
         glGetShaderInfoLog(shader, logLength, nil, &log)
-        NSLog("TexturePreviewView shader: %s", log)
+        NSLog("GlTexturePreview shader: %s", log)
       }
       glDeleteShader(shader)
       return 0
@@ -373,66 +371,15 @@ final class TexturePreviewView: UIView {
       glDeleteBuffers(1, &uvVbo)
       uvVbo = 0
     }
-    lastOutputTexture = 0
-  }
-
-  private func readLastOutput() -> UIImage? {
-    guard lastOutputTexture != 0, lastWidth > 0, lastHeight > 0 else { return nil }
-    let width = Int(lastWidth)
-    let height = Int(lastHeight)
-    var fbo: GLuint = 0
-    glGenFramebuffers(1, &fbo)
-    glBindFramebuffer(GLenum(GL_FRAMEBUFFER), fbo)
-    glFramebufferTexture2D(
-      GLenum(GL_FRAMEBUFFER),
-      GLenum(GL_COLOR_ATTACHMENT0),
-      GLenum(GL_TEXTURE_2D),
-      lastOutputTexture,
-      0
-    )
-    defer {
-      glBindFramebuffer(GLenum(GL_FRAMEBUFFER), framebuffer)
-      glDeleteFramebuffers(1, &fbo)
-    }
-    guard glCheckFramebufferStatus(GLenum(GL_FRAMEBUFFER)) == GLenum(GL_FRAMEBUFFER_COMPLETE) else {
-      return nil
-    }
-    var pixels = [GLubyte](repeating: 0, count: width * height * 4)
-    glReadPixels(0, 0, GLsizei(width), GLsizei(height), GLenum(GL_RGBA), GLenum(GL_UNSIGNED_BYTE), &pixels)
-    var flipped = [GLubyte](repeating: 0, count: pixels.count)
-    let stride = width * 4
-    for row in 0..<height {
-      let src = (height - 1 - row) * stride
-      let dst = row * stride
-      flipped.replaceSubrange(dst..<(dst + stride), with: pixels[src..<(src + stride)])
-    }
-    let data = Data(flipped)
-    guard let provider = CGDataProvider(data: data as CFData),
-          let bitmap = CGImage(
-            width: width,
-            height: height,
-            bitsPerComponent: 8,
-            bitsPerPixel: 32,
-            bytesPerRow: stride,
-            space: CGColorSpaceCreateDeviceRGB(),
-            bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.premultipliedLast.rawValue),
-            provider: provider,
-            decode: nil,
-            shouldInterpolate: true,
-            intent: .defaultIntent
-          ) else {
-      return nil
-    }
-    return UIImage(cgImage: bitmap)
   }
 }
 
-struct TexturePreviewRepresentable: UIViewRepresentable {
-  let preview: TexturePreviewView
+struct GlTexturePreviewRepresentable: UIViewRepresentable {
+  let preview: GlTexturePreview
 
-  func makeUIView(context: Context) -> TexturePreviewView {
+  func makeUIView(context: Context) -> GlTexturePreview {
     preview
   }
 
-  func updateUIView(_ uiView: TexturePreviewView, context: Context) {}
+  func updateUIView(_ uiView: GlTexturePreview, context: Context) {}
 }

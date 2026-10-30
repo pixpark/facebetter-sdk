@@ -6,13 +6,13 @@ struct BeautyPanel: View {
 
   var body: some View {
     VStack(spacing: 0) {
+      collapseHandle
       if studio.panelExpanded {
         tabContent
-          .padding(.top, 10)
           .padding(.bottom, 6)
       }
       tabBar
-        .padding(.top, studio.panelExpanded ? 4 : 10)
+        .padding(.top, studio.panelExpanded ? 4 : 0)
         .padding(.bottom, 10)
     }
     .background {
@@ -48,6 +48,21 @@ struct BeautyPanel: View {
     case .background:
       BackgroundSection()
     }
+  }
+
+  private var collapseHandle: some View {
+    Button {
+      studio.panelExpanded.toggle()
+    } label: {
+      Capsule()
+        .fill(Color.white.opacity(0.45))
+        .frame(width: 36, height: 5)
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 8)
+        .contentShape(Rectangle())
+    }
+    .buttonStyle(.plain)
+    .accessibilityLabel(studio.t(studio.panelExpanded ? "panel.collapse" : "panel.expand"))
   }
 
   private var tabBar: some View {

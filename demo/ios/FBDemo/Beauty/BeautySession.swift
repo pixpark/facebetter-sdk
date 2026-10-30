@@ -37,15 +37,6 @@ class BeautySession: ObservableObject {
     UserDefaults.standard.set(next.rawValue, forKey: Self.localeKey)
   }
 
-  func syncLocaleFromDefaults() {
-    guard let saved = UserDefaults.standard.string(forKey: Self.localeKey),
-          let locale = AppLocale(rawValue: saved),
-          locale != self.locale else {
-      return
-    }
-    self.locale = locale
-  }
-
   func filterLabel(_ id: String) -> String {
     guard let row = filterLabels[id] else {
       return id.replacingOccurrences(of: "_", with: " ")

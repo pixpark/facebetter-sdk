@@ -1,11 +1,14 @@
-import CoreVideo
 import Foundation
 import UIKit
 
 final class BeautyEngine {
   private let lock = NSLock()
+  // Serializes parameter writes. Does not cover processImage, so intensity
+  // changes are not stuck behind the frame currently being drawn.
+  private let applyLock = NSLock()
   private var engine: FBBeautyEffectEngine?
   private var previous = BeautyParams()
+  private var appliedOnce = false
   private var resourceRoot: URL
   private var backgroundImageData: Data?
   private var presetCache: [String: Data] = [:]
@@ -24,76 +27,61 @@ final class BeautyEngine {
   }
 
   func apply(_ params: BeautyParams) {
+    applyLock.lock()
+    defer { applyLock.unlock() }
     lock.lock()
-    defer { lock.unlock() }
-    applyLocked(params)
+    let current = engine
+    let ready = isReady
+    lock.unlock()
+    guard let current, ready else { return }
+    applyLocked(params, engine: current)
   }
 
-  func process(_ pixelBuffer: CVPixelBuffer, asImage: Bool, bypass: Bool) -> CVPixelBuffer? {
-    lock.lock()
-    defer { lock.unlock() }
-    guard !bypass, let engine, isReady else { return nil }
-    return Self.processPixelBuffer(pixelBuffer, engine: engine, asImage: asImage)
-  }
-
+  /// Gallery stills. Always processed as an image, so the result is ready when this returns.
   func process(_ image: UIImage, bypass: Bool) -> UIImage? {
-    lock.lock()
-    defer { lock.unlock() }
-    guard !bypass, let engine, isReady else { return image }
+    guard !bypass else { return image }
     let normalized = image.fb_normalizedUp()
-    guard let input = FBImageFrame.create(with: normalized) else { return image }
-    input.type = .image
-    guard let output = engine.processImage(input),
-          let bgra = output.convert(.BGRA),
-          let pixelBuffer = Self.copyBGRAFrame(bgra) else {
+    guard let pixelBuffer = withEngine({ engine -> CVPixelBuffer? in
+      guard let input = FBImageFrame.create(with: normalized) else { return nil }
+      input.type = .image
+      guard let output = engine.processImage(input),
+            let bgra = output.convert(.BGRA) else {
+        return nil
+      }
+      return PixelBufferImages.copyBGRA(bgra)
+    }) else {
       return image
     }
     return UIImage(pixelBuffer: pixelBuffer) ?? image
   }
 
-  func snapshotImage(from pixelBuffer: CVPixelBuffer, bypass: Bool) -> UIImage? {
-    if let processed = process(pixelBuffer, asImage: true, bypass: bypass) {
-      return UIImage(pixelBuffer: processed)
-    }
-    return UIImage(pixelBuffer: pixelBuffer)
-  }
-
-  func processTexture(
-    _ texture: UInt32,
-    width: Int32,
-    height: Int32,
-    bypass: Bool
-  ) -> UInt32? {
+  func withEngine<T>(_ body: (FBBeautyEffectEngine) -> T?) -> T? {
     lock.lock()
     defer { lock.unlock() }
-    guard !bypass, let engine, isReady, texture != 0 else { return nil }
-    guard let input = FBImageFrame.create(
-      withTexture: texture,
-      width: width,
-      height: height,
-      stride: width * 4
-    ) else {
-      return nil
-    }
-    input.type = .video
-    guard let output = engine.processImage(input) else { return nil }
-    let out = output.texture()
-    return out == 0 ? nil : out
+    guard let engine, isReady else { return nil }
+    return body(engine)
   }
 
   func start() {
+    applyLock.lock()
     lock.lock()
-    defer { lock.unlock() }
+    defer {
+      lock.unlock()
+      applyLock.unlock()
+    }
     startLocked()
   }
 
   func shutdown() {
+    applyLock.lock()
     lock.lock()
     engine = nil
     isReady = false
     previous = BeautyParams()
+    appliedOnce = false
     statusKey = "status.initializing"
     lock.unlock()
+    applyLock.unlock()
   }
 
   private func startLocked() {
@@ -155,7 +143,7 @@ final class BeautyEngine {
 
     backgroundImageData = try? Data(contentsOf: resourceRoot.appendingPathComponent("background.jpg"))
     if created.responds(to: NSSelectorFromString("setSmoothing:")) {
-      applyLocked(BeautyParams())
+      applyLocked(BeautyParams(), engine: created)
     } else {
       isReady = false
       statusKey = "status.sdkMismatch"
@@ -163,16 +151,19 @@ final class BeautyEngine {
     }
   }
 
-  private func applyLocked(_ params: BeautyParams) {
-    guard let engine else { return }
+  private func applyLocked(_ params: BeautyParams, engine: FBBeautyEffectEngine) {
     guard engine.responds(to: NSSelectorFromString("setSmoothing:")) else { return }
     let prev = previous
+    let force = !appliedOnce
+    appliedOnce = true
     previous = params
 
     engine.setSmoothing(params.smoothing)
     engine.setSmoothingStyle(params.smoothingStyle)
     engine.setWhitening(params.whitening)
-    engine.setWhiteningStyle(params.whiteningStyle)
+    if force || prev.whiteningStyle != params.whiteningStyle {
+      engine.setWhiteningStyle(params.whiteningStyle)
+    }
     engine.setRosiness(params.rosiness)
     engine.setBlemish(params.blemish)
     engine.setClarity(params.clarity)
@@ -191,26 +182,52 @@ final class BeautyEngine {
     }
 
     engine.setLipstick(params.lipstick)
-    engine.setLipstickColor(params.lipstickColor)
+    if force || prev.lipstickColor != params.lipstickColor {
+      engine.setLipstickColor(params.lipstickColor)
+    }
     engine.setBlush(params.blush)
-    engine.setBlushStyle(params.blushStyle)
-    engine.setBlushColor(params.blushColor)
+    if force || prev.blushStyle != params.blushStyle {
+      engine.setBlushStyle(params.blushStyle)
+    }
+    if force || prev.blushColor != params.blushColor {
+      engine.setBlushColor(params.blushColor)
+    }
     engine.setContour(params.contour)
-    engine.setContourStyle(params.contourStyle)
+    if force || prev.contourStyle != params.contourStyle {
+      engine.setContourStyle(params.contourStyle)
+    }
     engine.setEyeShadow(params.eyeshadow)
-    engine.setEyeShadowStyle(params.eyeshadowStyle)
-    engine.setEyeShadowColor(params.eyeshadowColor)
+    if force || prev.eyeshadowStyle != params.eyeshadowStyle {
+      engine.setEyeShadowStyle(params.eyeshadowStyle)
+    }
+    if force || prev.eyeshadowColor != params.eyeshadowColor {
+      engine.setEyeShadowColor(params.eyeshadowColor)
+    }
     engine.setEyeLiner(params.eyeliner)
-    engine.setEyeLinerStyle(params.eyelinerStyle)
-    engine.setEyeLinerColor(params.eyelinerColor)
+    if force || prev.eyelinerStyle != params.eyelinerStyle {
+      engine.setEyeLinerStyle(params.eyelinerStyle)
+    }
+    if force || prev.eyelinerColor != params.eyelinerColor {
+      engine.setEyeLinerColor(params.eyelinerColor)
+    }
     engine.setEyebrow(params.eyebrow)
-    engine.setEyebrowStyle(params.eyebrowStyle)
-    engine.setEyebrowColor(params.eyebrowColor)
+    if force || prev.eyebrowStyle != params.eyebrowStyle {
+      engine.setEyebrowStyle(params.eyebrowStyle)
+    }
+    if force || prev.eyebrowColor != params.eyebrowColor {
+      engine.setEyebrowColor(params.eyebrowColor)
+    }
     engine.setEyelash(params.eyelash)
-    engine.setEyelashStyle(params.eyelashStyle)
-    engine.setEyelashColor(params.eyelashColor)
+    if force || prev.eyelashStyle != params.eyelashStyle {
+      engine.setEyelashStyle(params.eyelashStyle)
+    }
+    if force || prev.eyelashColor != params.eyelashColor {
+      engine.setEyelashColor(params.eyelashColor)
+    }
     engine.setPupil(params.pupil)
-    engine.setPupilColor(params.pupilColor)
+    if force || prev.pupilColor != params.pupilColor {
+      engine.setPupilColor(params.pupilColor)
+    }
     engine.setTeethWhiten(params.teethWhiten)
 
     if prev.filterID != params.filterID {
@@ -239,22 +256,20 @@ final class BeautyEngine {
       }
     }
 
-    if prev.chroma != params.chroma
-      || prev.chromaSimilarity != params.chromaSimilarity
-      || prev.chromaSmoothness != params.chromaSmoothness
-      || prev.chromaDesaturation != params.chromaDesaturation {
+    if force || prev.chroma != params.chroma {
       if let chroma = params.chroma {
         engine.setChromaKey(chroma)
-        engine.setChromaKeySimilarity(params.chromaSimilarity)
-        engine.setChromaKeySmoothness(params.chromaSmoothness)
-        engine.setChromaKeyDesaturation(params.chromaDesaturation)
       } else {
         engine.clearChromaKey()
       }
     }
+    if params.chroma != nil {
+      engine.setChromaKeySimilarity(params.chromaSimilarity)
+      engine.setChromaKeySmoothness(params.chromaSmoothness)
+      engine.setChromaKeyDesaturation(params.chromaDesaturation)
+    }
 
-    if prev.backgroundFill != params.backgroundFill || prev.bgBlur != params.bgBlur
-      || prev.bgPreset != params.bgPreset {
+    if force || prev.backgroundFill != params.backgroundFill || prev.bgPreset != params.bgPreset {
       switch params.backgroundFill {
       case .blur:
         engine.setVirtualBackgroundBlur(params.bgBlur)
@@ -268,6 +283,8 @@ final class BeautyEngine {
       case .off:
         engine.clearVirtualBackground()
       }
+    } else if params.backgroundFill == .blur && prev.bgBlur != params.bgBlur {
+      engine.setVirtualBackgroundBlur(params.bgBlur)
     }
     if prev.subjectOutline != params.subjectOutline {
       engine.setSubjectOutline(params.subjectOutline)
@@ -300,93 +317,5 @@ final class BeautyEngine {
       return [:]
     }
     return dictionary
-  }
-
-  private static func processPixelBuffer(
-    _ pixelBuffer: CVPixelBuffer,
-    engine: FBBeautyEffectEngine,
-    asImage: Bool
-  ) -> CVPixelBuffer? {
-    let format = CVPixelBufferGetPixelFormatType(pixelBuffer)
-    guard format == kCVPixelFormatType_32BGRA else { return nil }
-
-    CVPixelBufferLockBaseAddress(pixelBuffer, .readOnly)
-    defer { CVPixelBufferUnlockBaseAddress(pixelBuffer, .readOnly) }
-
-    let width = Int32(CVPixelBufferGetWidth(pixelBuffer))
-    let height = Int32(CVPixelBufferGetHeight(pixelBuffer))
-    let stride = Int32(CVPixelBufferGetBytesPerRow(pixelBuffer))
-    guard let base = CVPixelBufferGetBaseAddress(pixelBuffer) else { return nil }
-
-    let input = FBImageFrame.create(
-      withBGRA: base.assumingMemoryBound(to: UInt8.self),
-      width: width,
-      height: height,
-      stride: stride
-    )
-    input?.type = asImage ? .image : .video
-    guard let input,
-          let output = engine.processImage(input),
-          let bgra = output.convert(.BGRA) else {
-      return nil
-    }
-    return copyBGRAFrame(bgra)
-  }
-
-  private static func copyBGRAFrame(_ frame: FBImageFrame) -> CVPixelBuffer? {
-    let width = Int(frame.width)
-    let height = Int(frame.height)
-    let sourceStride = Int(frame.stride)
-    guard let source = frame.data(), width > 0, height > 0 else { return nil }
-
-    let attrs: [CFString: Any] = [
-      kCVPixelBufferIOSurfacePropertiesKey: [:] as CFDictionary,
-      kCVPixelBufferMetalCompatibilityKey: true,
-      kCVPixelBufferCGImageCompatibilityKey: true,
-      kCVPixelBufferCGBitmapContextCompatibilityKey: true,
-    ]
-    var output: CVPixelBuffer?
-    let status = CVPixelBufferCreate(
-      kCFAllocatorDefault,
-      width,
-      height,
-      kCVPixelFormatType_32BGRA,
-      attrs as CFDictionary,
-      &output
-    )
-    guard status == kCVReturnSuccess, let output else { return nil }
-
-    CVPixelBufferLockBaseAddress(output, [])
-    defer { CVPixelBufferUnlockBaseAddress(output, []) }
-    guard let destination = CVPixelBufferGetBaseAddress(output) else { return nil }
-    let destinationStride = CVPixelBufferGetBytesPerRow(output)
-    let rowBytes = min(sourceStride, destinationStride)
-    for row in 0..<height {
-      memcpy(
-        destination.advanced(by: row * destinationStride),
-        source.advanced(by: row * sourceStride),
-        rowBytes
-      )
-    }
-    return output
-  }
-}
-
-extension UIImage {
-  func fb_normalizedUp() -> UIImage {
-    guard imageOrientation != .up else { return self }
-    let format = UIGraphicsImageRendererFormat.default()
-    format.scale = scale
-    format.opaque = false
-    return UIGraphicsImageRenderer(size: size, format: format).image { _ in
-      draw(in: CGRect(origin: .zero, size: size))
-    }
-  }
-
-  convenience init?(pixelBuffer: CVPixelBuffer) {
-    let image = CIImage(cvPixelBuffer: pixelBuffer)
-    let context = CIContext(options: [.useSoftwareRenderer: false])
-    guard let cgImage = context.createCGImage(image, from: image.extent) else { return nil }
-    self.init(cgImage: cgImage)
   }
 }

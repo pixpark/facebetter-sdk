@@ -11,6 +11,7 @@ enum StudioSource {
 
 final class StudioModel: BeautySession {
   @Published var source: StudioSource = .camera
+  @Published var cameraInput: CameraInput = .cvPixelBuffer
   @Published var isComparing = false {
     didSet {
       stateLock.lock()
@@ -23,17 +24,23 @@ final class StudioModel: BeautySession {
   @Published var frameSize: CGSize = .zero
   @Published var fps: Double = 0
   @Published var processMs: Double = 0
+  let pixelPreview = PixelPreview(frame: .zero)
+  let cvPreview = CvPixelBufferPreview(frame: .zero)
+  let glPreview = GlTexturePreview(frame: .zero)
 
-  let preview = PreviewMTKView(frame: .zero)
+  var showsCvPreview: Bool { source == .camera && cameraInput == .cvPixelBuffer }
+  var showsGlPreview: Bool { source == .camera && cameraInput == .glTexture }
 
   private let engine = BeautyEngine()
   private let camera = CameraSession()
   private let stateLock = NSLock()
+  private var inputMode = CameraInput.cvPixelBuffer
   private var originalImage: UIImage?
   private var processedImage: UIImage?
   private var compareFlag = false
   private var captureFlag = false
   private var applying = false
+  private var glReady = false
   private var statusResetItem: DispatchWorkItem?
   private var lastFrameAt = CACurrentMediaTime()
   private var frameCount = 0
@@ -54,6 +61,25 @@ final class StudioModel: BeautySession {
         self?.flash(key)
       }
     }
+    glPreview.process = { [weak self] texture, width, height in
+      guard let self else { return texture }
+      self.stateLock.lock()
+      let bypass = self.compareFlag
+      self.stateLock.unlock()
+      let started = CACurrentMediaTime()
+      let rendered = GlTextureInput.process(
+        texture: texture,
+        width: width,
+        height: height,
+        engine: self.engine,
+        bypass: bypass
+      ) ?? texture
+      self.noteTiming(processMs: (CACurrentMediaTime() - started) * 1000)
+      return rendered
+    }
+    glPreview.onPresented = { [weak self] in
+      self?.noteFrame()
+    }
 
     applyParams()
     startCamera()
@@ -64,8 +90,8 @@ final class StudioModel: BeautySession {
     originalImage = nil
     processedImage = nil
     frameSize = .zero
+    cvPreview.reset()
     camera.start()
-    preview.recoverAfterCover()
     flash("status.cameraOn")
   }
 
@@ -74,9 +100,33 @@ final class StudioModel: BeautySession {
     camera.flip()
   }
 
+  func setCameraInput(_ mode: CameraInput) {
+    guard mode != cameraInput else { return }
+    camera.stop()
+    cvPreview.reset()
+    let leavingGL = inputMode == .glTexture
+    stateLock.lock()
+    inputMode = mode
+    stateLock.unlock()
+    cameraInput = mode
+    if mode == .glTexture {
+      useGlEngine()
+    } else if leavingGL {
+      useMetalEngine()
+    }
+    if source == .camera {
+      frameSize = .zero
+      camera.start()
+    } else {
+      reprocessStill()
+    }
+    flash(mode.statusKey)
+  }
+
   func loadImage(_ image: UIImage) {
     camera.stop()
     source = .image
+    cvPreview.reset()
     originalImage = image.fb_normalizedUp()
     isComparing = false
     if let originalImage {
@@ -84,41 +134,6 @@ final class StudioModel: BeautySession {
     }
     reprocessStill()
     flash("status.imageLoaded")
-  }
-
-  func reset() {
-    applying = true
-    params = BeautyParams()
-    applying = false
-    applyParams()
-    flash("status.reset")
-  }
-
-  func suspendForExternalTexture() {
-    camera.stop()
-    engine.shutdown()
-  }
-
-  func resumeAfterExternalTexture() {
-    syncLocaleFromDefaults()
-    engine.start()
-    applyParams()
-    if source == .camera {
-      startCamera()
-    } else {
-      reprocessStill()
-    }
-    preview.recoverAfterCover()
-    DispatchQueue.main.async { [weak self] in
-      self?.preview.recoverAfterCover()
-    }
-    DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) { [weak self] in
-      guard let self else { return }
-      if self.source == .camera {
-        self.camera.start()
-      }
-      self.preview.recoverAfterCover()
-    }
   }
 
   override func paramsDidChange() {
@@ -135,9 +150,30 @@ final class StudioModel: BeautySession {
     stateLock.unlock()
   }
 
+  private func useMetalEngine() {
+    glReady = false
+    glPreview.shutdown()
+    engine.shutdown()
+    engine.start()
+    engine.apply(params)
+  }
+
+  private func useGlEngine() {
+    glPreview.prepare()
+    engine.shutdown()
+    glPreview.runOnGLSync { [weak self] in
+      guard let self else { return }
+      self.engine.start()
+      self.engine.apply(self.params)
+    }
+    glReady = true
+  }
+
   private func applyParams() {
     guard !applying else { return }
-    engine.apply(params)
+    if inputMode != .glTexture || glReady {
+      engine.apply(params)
+    }
     reprocessStillIfNeeded()
   }
 
@@ -148,40 +184,98 @@ final class StudioModel: BeautySession {
 
   private func reprocessStill() {
     guard let originalImage else { return }
-    let output = engine.process(originalImage, bypass: isComparing) ?? originalImage
-    processedImage = output
-    updateFrameSize(output.size)
-    preview.display(image: output)
+    let comparing = isComparing
+    let publish: (UIImage) -> Void = { [weak self] output in
+      guard let self else { return }
+      self.processedImage = output
+      self.updateFrameSize(output.size)
+      self.pixelPreview.display(image: output)
+    }
+    if inputMode == .glTexture && glReady {
+      glPreview.runOnGL { [weak self] in
+        guard let self else { return }
+        let output = self.engine.process(originalImage, bypass: comparing) ?? originalImage
+        DispatchQueue.main.async {
+          publish(output)
+        }
+      }
+    } else {
+      publish(engine.process(originalImage, bypass: comparing) ?? originalImage)
+    }
   }
 
   private func handleCameraFrame(_ buffer: CVPixelBuffer) {
     stateLock.lock()
     let bypass = compareFlag
     let shouldCapture = captureFlag
+    let mode = inputMode
     if shouldCapture {
       captureFlag = false
     }
     stateLock.unlock()
 
+    switch mode {
+    case .cvPixelBuffer:
+      presentCv(buffer, bypass: bypass)
+    case .cpuPixels:
+      presentCpu(buffer, bypass: bypass)
+    case .glTexture:
+      glPreview.submit(buffer, bypass: bypass)
+      updateFrameSize(
+        CGSize(width: CVPixelBufferGetWidth(buffer), height: CVPixelBufferGetHeight(buffer))
+      )
+    }
+
+    guard shouldCapture else { return }
+    let photo: UIImage?
+    switch mode {
+    case .cvPixelBuffer:
+      photo = CvPixelBufferInput.image(from: buffer, engine: engine)
+    case .cpuPixels:
+      photo = CpuPixelInput.image(from: buffer, engine: engine)
+    case .glTexture:
+      photo = glPreview.captureStill(buffer, engine: engine)
+    }
+    DispatchQueue.main.async {
+      self.save(image: photo)
+    }
+  }
+
+  private func presentCv(_ buffer: CVPixelBuffer, bypass: Bool) {
     let started = CACurrentMediaTime()
-    let processed = engine.process(buffer, asImage: false, bypass: bypass)
-    let costMs = (CACurrentMediaTime() - started) * 1000
+    let processed = CvPixelBufferInput.process(
+      buffer,
+      engine: engine,
+      asImage: false,
+      bypass: bypass
+    )
+    noteTiming(processMs: (CACurrentMediaTime() - started) * 1000)
+    noteFrame()
+    updateFrameSize(
+      CGSize(width: CVPixelBufferGetWidth(buffer), height: CVPixelBufferGetHeight(buffer))
+    )
+    if let processed, !bypass {
+      cvPreview.present(camera: buffer, processed: processed)
+    } else {
+      cvPreview.show(buffer)
+    }
+  }
+
+  private func presentCpu(_ buffer: CVPixelBuffer, bypass: Bool) {
+    let started = CACurrentMediaTime()
+    let processed = CpuPixelInput.process(
+      buffer,
+      engine: engine,
+      asImage: false,
+      bypass: bypass
+    )
+    noteTiming(processMs: (CACurrentMediaTime() - started) * 1000)
+    noteFrame()
     let shown = processed ?? buffer
     updateFrameSize(
-      CGSize(
-        width: CVPixelBufferGetWidth(shown),
-        height: CVPixelBufferGetHeight(shown)
-      )
+      CGSize(width: CVPixelBufferGetWidth(shown), height: CVPixelBufferGetHeight(shown))
     )
-    preview.display(pixelBuffer: shown)
-    updateFPS(processMs: costMs)
-
-    if shouldCapture {
-      let photo = engine.snapshotImage(from: buffer, bypass: false)
-      DispatchQueue.main.async {
-        self.save(image: photo)
-      }
-    }
+    pixelPreview.display(pixelBuffer: shown)
   }
 
   private func updateFrameSize(_ size: CGSize) {
@@ -201,21 +295,30 @@ final class StudioModel: BeautySession {
     }
   }
 
-  private func updateFPS(processMs costMs: Double) {
-    frameCount += 1
+  private func noteTiming(processMs costMs: Double) {
+    stateLock.lock()
     processMsAccum += costMs
-    let now = CACurrentMediaTime()
-    let elapsed = now - lastFrameAt
-    if elapsed >= 1 {
-      let value = Double(frameCount) / elapsed
-      let avgMs = processMsAccum / Double(max(frameCount, 1))
+    stateLock.unlock()
+  }
+
+  private func noteFrame() {
+    stateLock.lock()
+    frameCount += 1
+    let elapsed = CACurrentMediaTime() - lastFrameAt
+    let count = frameCount
+    let avgMs = count > 0 ? processMsAccum / Double(count) : 0
+    let publish = elapsed >= 1
+    if publish {
       frameCount = 0
       processMsAccum = 0
-      lastFrameAt = now
-      DispatchQueue.main.async {
-        self.fps = value
-        self.processMs = avgMs
-      }
+      lastFrameAt = CACurrentMediaTime()
+    }
+    stateLock.unlock()
+    guard publish else { return }
+    let value = Double(count) / elapsed
+    DispatchQueue.main.async {
+      self.fps = value
+      self.processMs = avgMs
     }
   }
 
@@ -240,12 +343,20 @@ final class StudioModel: BeautySession {
   }
 
   private func flash(_ key: String) {
-    statusKey = key
-    statusResetItem?.cancel()
-    let work = DispatchWorkItem { [weak self] in
-      self?.statusKey = ""
+    let apply = { [weak self] in
+      guard let self else { return }
+      self.statusKey = key
+      self.statusResetItem?.cancel()
+      let work = DispatchWorkItem { [weak self] in
+        self?.statusKey = ""
+      }
+      self.statusResetItem = work
+      DispatchQueue.main.asyncAfter(deadline: .now() + 2.0, execute: work)
     }
-    statusResetItem = work
-    DispatchQueue.main.asyncAfter(deadline: .now() + 2.0, execute: work)
+    if Thread.isMainThread {
+      apply()
+    } else {
+      DispatchQueue.main.async(execute: apply)
+    }
   }
 }

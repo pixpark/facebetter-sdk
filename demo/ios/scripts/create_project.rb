@@ -76,9 +76,7 @@ fi
 if [ -f "${SRC}/resource_body.fbd" ]; then
   cp "${SRC}/resource_body.fbd" "${DEST}/resource_body.fbd"
 fi
-  if [ -f "${SRC}/assets/filters/filter_mapping.json" ]; then
-    cp "${SRC}/assets/filters/filter_mapping.json" "${DEST}/filter_mapping.json"
-  fi
+  cp "${SRC}/filter_mapping.json" "${DEST}/filter_mapping.json"
 SCRIPT
 
 copy_assets.always_out_of_date = "1"

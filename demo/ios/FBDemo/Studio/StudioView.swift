@@ -4,14 +4,14 @@ import SwiftUI
 struct StudioView: View {
   @EnvironmentObject private var studio: StudioModel
   @State private var pickerItem: PhotosPickerItem?
-  @State private var showTextureDemo = false
+  @State private var showInputSheet = false
 
   var body: some View {
     ZStack {
       Color.black.ignoresSafeArea()
-      PreviewView(preview: studio.preview)
+      preview
         .ignoresSafeArea()
-        .gesture(previewGesture)
+        .allowsHitTesting(false)
 
       // The watermark sits around 82%–88% of the frame. A gradient across the lower half would gray out the white mark.
       LinearGradient(
@@ -29,18 +29,27 @@ struct StudioView: View {
 
       VStack(spacing: 0) {
         topBar
-        fpsBadge
-        if !studio.isComparing {
-          holdHint
-            .padding(.top, 10)
+        if studio.source == .camera && studio.fps > 0 {
+          statusRow
         }
-        Spacer()
-          .allowsHitTesting(false)
+        ZStack(alignment: .top) {
+          Color.clear
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .contentShape(Rectangle())
+            .gesture(previewGesture)
+          if !studio.isComparing {
+            holdHint
+              .padding(.top, 10)
+              .allowsHitTesting(false)
+          }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         if !studio.statusKey.isEmpty {
           statusChip
             .padding(.bottom, 8)
         }
         BeautyPanel(studio: studio)
+          .contentShape(Rectangle())
       }
     }
     .onChange(of: pickerItem) { item in
@@ -54,12 +63,23 @@ struct StudioView: View {
         }
       }
     }
-    .fullScreenCover(isPresented: $showTextureDemo) {
-      TextureStudioView(locale: studio.locale) {
-        studio.resumeAfterExternalTexture()
-      }
-      .preferredColorScheme(.dark)
-      .statusBarHidden(true)
+    .sheet(isPresented: $showInputSheet) {
+      InputModeSheet()
+        .environmentObject(studio)
+        .presentationDetents([.medium])
+        .presentationDragIndicator(.visible)
+        .preferredColorScheme(.dark)
+    }
+  }
+
+  @ViewBuilder
+  private var preview: some View {
+    if studio.showsGlPreview {
+      GlTexturePreviewRepresentable(preview: studio.glPreview)
+    } else if studio.showsCvPreview {
+      CvPixelBufferPreviewRepresentable(preview: studio.cvPreview)
+    } else {
+      PixelPreviewRepresentable(preview: studio.pixelPreview)
     }
   }
 
@@ -96,22 +116,19 @@ struct StudioView: View {
       }
 
       Button {
-        studio.reset()
-      } label: {
-        TopIcon(symbol: "arrow.counterclockwise", title: studio.t("nav.reset"))
-      }
-
-      Button {
         studio.capture()
       } label: {
         TopIcon(symbol: "square.and.arrow.up", title: studio.t("nav.export"))
       }
 
       Button {
-        studio.suspendForExternalTexture()
-        showTextureDemo = true
+        showInputSheet = true
       } label: {
-        TopIcon(symbol: "square.stack.3d.up", title: studio.t("nav.texture"))
+        TopIcon(
+          symbol: "square.stack.3d.up",
+          title: studio.t(studio.cameraInput.shortKey),
+          active: true
+        )
       }
 
       Menu {
@@ -134,11 +151,9 @@ struct StudioView: View {
     .padding(.top, 8)
   }
 
-  @ViewBuilder
-  private var fpsBadge: some View {
-    if studio.source == .camera && studio.fps > 0 {
-      HStack {
-        Spacer()
+  private var statusRow: some View {
+    HStack(spacing: 8) {
+      Spacer(minLength: 0)
         VStack(alignment: .leading, spacing: 4) {
           HStack(spacing: 5) {
             Circle()
@@ -159,10 +174,9 @@ struct StudioView: View {
             }
           }
         }
-      }
-      .padding(.horizontal, 12)
-      .padding(.top, 6)
     }
+    .padding(.horizontal, 12)
+    .padding(.top, 6)
   }
 
   private func latencyColor(_ ms: Double) -> Color {
@@ -193,6 +207,55 @@ struct StudioView: View {
     .padding(.vertical, 7)
     .background(.black.opacity(0.55), in: Capsule())
     .overlay(Capsule().stroke(.white.opacity(0.12), lineWidth: 1))
+  }
+}
+
+private struct InputModeSheet: View {
+  @EnvironmentObject private var studio: StudioModel
+  @Environment(\.dismiss) private var dismiss
+
+  var body: some View {
+    VStack(alignment: .leading, spacing: 14) {
+      Text(studio.t("input.title"))
+        .font(.headline)
+        .foregroundStyle(.white)
+      Text(studio.t("input.subtitle"))
+        .font(.subheadline)
+        .foregroundStyle(.white.opacity(0.65))
+        .fixedSize(horizontal: false, vertical: true)
+
+      ForEach(CameraInput.allCases) { mode in
+        Button {
+          studio.setCameraInput(mode)
+          dismiss()
+        } label: {
+          HStack(alignment: .top, spacing: 10) {
+            Image(systemName: studio.cameraInput == mode ? "largecircle.fill.circle" : "circle")
+              .font(.body)
+              .foregroundStyle(studio.cameraInput == mode ? .white : .white.opacity(0.45))
+              .padding(.top, 2)
+            VStack(alignment: .leading, spacing: 4) {
+              Text(studio.t(mode.titleKey))
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(.white)
+              Text(studio.t(mode.detailKey))
+                .font(.caption)
+                .foregroundStyle(.white.opacity(0.6))
+                .multilineTextAlignment(.leading)
+                .fixedSize(horizontal: false, vertical: true)
+            }
+            Spacer(minLength: 0)
+          }
+          .padding(12)
+          .background(.white.opacity(studio.cameraInput == mode ? 0.12 : 0.06), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+        }
+        .buttonStyle(.plain)
+      }
+      Spacer(minLength: 0)
+    }
+    .padding(20)
+    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+    .background(Color.black.ignoresSafeArea())
   }
 }
 

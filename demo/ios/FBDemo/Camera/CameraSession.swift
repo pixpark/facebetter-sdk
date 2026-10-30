@@ -130,7 +130,8 @@ final class CameraSession: NSObject, AVCaptureVideoDataOutputSampleBufferDelegat
 
     videoOutput.alwaysDiscardsLateVideoFrames = true
     videoOutput.videoSettings = [
-      kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA
+      kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA,
+      kCVPixelBufferMetalCompatibilityKey as String: true,
     ]
     videoOutput.setSampleBufferDelegate(self, queue: outputQueue)
     guard session.canAddOutput(videoOutput) else {
