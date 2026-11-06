@@ -2,6 +2,7 @@ import Slider from "@react-native-community/slider";
 import { useEffect, useState } from "react";
 import {
   PermissionsAndroid,
+  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -33,6 +34,10 @@ export default function App() {
   });
 
   useEffect(() => {
+    if (Platform.OS !== "android") {
+      setGranted(true);
+      return;
+    }
     PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.CAMERA).then(
       (result) => {
         setGranted(result === PermissionsAndroid.RESULTS.GRANTED);
@@ -65,7 +70,7 @@ export default function App() {
         <Text style={styles.status}>{status}</Text>
         {ROWS.map((row) => (
           <View key={row.key} style={styles.row}>
-            <Text style={styles.label}>
+            <Text style={styles.rowLabel} numberOfLines={1}>
               {row.label} {skin[row.key].toFixed(2)}
             </Text>
             <Slider
@@ -79,7 +84,10 @@ export default function App() {
             />
           </View>
         ))}
-        <Pressable onPress={() => setSkinOnly((value) => !value)}>
+        <Pressable
+          style={styles.skinOnly}
+          onPress={() => setSkinOnly((value) => !value)}
+        >
           <Text style={styles.label}>Skin only {skinOnly ? "On" : "Off"}</Text>
         </Pressable>
       </View>
@@ -97,8 +105,18 @@ const styles = StyleSheet.create({
     paddingTop: 8,
     paddingBottom: 56,
   },
-  status: { color: "#aaa", fontSize: 12 },
-  row: { height: 36, justifyContent: "center" },
+  status: { color: "#aaa", fontSize: 12, marginBottom: 4 },
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
+    height: Platform.OS === "ios" ? 40 : 36,
+  },
+  rowLabel: { color: "#fff", fontSize: 13, width: 104 },
   label: { color: "#fff", fontSize: 13 },
-  slider: { height: 24, marginHorizontal: 28 },
+  slider: {
+    flex: 1,
+    height: Platform.OS === "ios" ? 40 : 36,
+    marginRight: 16,
+  },
+  skinOnly: { paddingVertical: 10 },
 });

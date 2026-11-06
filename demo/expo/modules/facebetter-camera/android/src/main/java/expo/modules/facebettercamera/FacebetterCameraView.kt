@@ -5,6 +5,8 @@ import android.content.Context
 import android.content.ContextWrapper
 import android.content.pm.PackageManager
 import android.graphics.Color
+import android.graphics.SurfaceTexture
+import android.hardware.camera2.CameraCharacteristics
 import android.os.Build
 import android.os.SystemClock
 import android.util.Log
@@ -17,6 +19,9 @@ import android.widget.FrameLayout
 import android.widget.TextView
 import java.util.Locale
 import java.util.concurrent.atomic.AtomicBoolean
+import androidx.annotation.OptIn
+import androidx.camera.camera2.interop.Camera2CameraInfo
+import androidx.camera.camera2.interop.ExperimentalCamera2Interop
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.Preview
 import androidx.camera.core.resolutionselector.ResolutionSelector
@@ -42,6 +47,16 @@ class FacebetterCameraView(context: Context, appContext: AppContext) : ExpoView(
     elevation = 8f * resources.displayMetrics.density
     visibility = INVISIBLE
   }
+  private val debugLabel = TextView(context).apply {
+    setTextColor(Color.WHITE)
+    textSize = 11f
+    setPadding(dp(8), dp(4), dp(8), dp(4))
+    setBackgroundColor(0x73000000)
+    elevation = 8f * resources.displayMetrics.density
+    visibility = INVISIBLE
+  }
+  private var cameraInfoText = ""
+  private var frameInfoText = ""
   private var cameraProvider: ProcessCameraProvider? = null
   private var cameraSurface: Surface? = null
   private var stopped = false
@@ -67,6 +82,7 @@ class FacebetterCameraView(context: Context, appContext: AppContext) : ExpoView(
       ),
     )
     addView(costLabel)
+    addView(debugLabel)
     preview.frontFacing = true
     preview.process = { texture, width, height ->
       val started = SystemClock.elapsedRealtimeNanos()
@@ -88,6 +104,11 @@ class FacebetterCameraView(context: Context, appContext: AppContext) : ExpoView(
     preview.onCameraSurfaceReady = { surface ->
       cameraSurface = surface
       bindCamera()
+    }
+    preview.onFrameInfo = { info ->
+      frameInfoText = info
+      Log.i(TAG, info)
+      showDebug()
     }
   }
 
@@ -115,6 +136,25 @@ class FacebetterCameraView(context: Context, appContext: AppContext) : ExpoView(
       width - margin,
       labelTop + labelHeight,
     )
+    val debugWidth = (width - labelWidth - margin * 3).coerceAtLeast(dp(120))
+    debugLabel.measure(
+      MeasureSpec.makeMeasureSpec(debugWidth, MeasureSpec.AT_MOST),
+      MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED),
+    )
+    debugLabel.layout(
+      margin,
+      labelTop,
+      margin + debugLabel.measuredWidth,
+      labelTop + debugLabel.measuredHeight,
+    )
+  }
+
+  private fun showDebug() {
+    debugLabel.text = listOf(cameraInfoText, frameInfoText)
+      .filter { it.isNotEmpty() }
+      .joinToString("\n")
+    debugLabel.visibility = if (debugLabel.text.isEmpty()) INVISIBLE else VISIBLE
+    requestLayout()
   }
 
   private fun showProcessTime(ms: Double) {
@@ -186,7 +226,21 @@ class FacebetterCameraView(context: Context, appContext: AppContext) : ExpoView(
         .build()
       useCase.setSurfaceProvider { request ->
         val size = request.resolution
-        Log.i(TAG, "camera buffer ${size.width}x${size.height}")
+        val low = maxOf(size.width, size.height) < 1000
+        cameraInfoText = buildString {
+          append(Build.MANUFACTURER)
+          append(' ')
+          append(Build.MODEL)
+          append(" cam ")
+          append(size.width)
+          append('x')
+          append(size.height)
+          if (low) {
+            append(" LOW")
+          }
+        }
+        Log.i(TAG, cameraInfoText)
+        showDebug()
         preview.setCameraBufferSize(size.width, size.height)
         emit("camera ${size.width}x${size.height}")
         request.provideSurface(surface, ContextCompat.getMainExecutor(context)) { }
@@ -198,12 +252,23 @@ class FacebetterCameraView(context: Context, appContext: AppContext) : ExpoView(
       }
       preview.frontFacing = selector == CameraSelector.DEFAULT_FRONT_CAMERA
       runCatching {
-        provider.bindToLifecycle(owner, selector, useCase)
+        val camera = provider.bindToLifecycle(owner, selector, useCase)
+        logPreviewSizes(camera)
       }.onFailure { error ->
         Log.e(TAG, "bindToLifecycle failed", error)
         emit("initFailed")
       }
     }, ContextCompat.getMainExecutor(context))
+  }
+
+  @OptIn(ExperimentalCamera2Interop::class)
+  private fun logPreviewSizes(camera: androidx.camera.core.Camera) {
+    val map = Camera2CameraInfo.from(camera.cameraInfo)
+      .getCameraCharacteristic(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
+    val sizes = map?.getOutputSizes(SurfaceTexture::class.java)
+      ?.joinToString(",") { "${it.width}x${it.height}" }
+      ?: "none"
+    Log.i(TAG, "preview sizes $sizes")
   }
 
   private fun findLifecycleOwner(): LifecycleOwner? {

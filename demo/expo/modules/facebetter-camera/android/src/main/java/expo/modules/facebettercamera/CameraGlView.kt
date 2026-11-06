@@ -33,6 +33,7 @@ class CameraGlView(context: Context) : TextureView(context), TextureView.Surface
   var onCameraSurfaceReady: ((Surface) -> Unit)? = null
   var onGlReady: (() -> Unit)? = null
   var onGlRelease: (() -> Unit)? = null
+  var onFrameInfo: ((String) -> Unit)? = null
 
   @Volatile
   var frontFacing: Boolean = true
@@ -75,6 +76,7 @@ class CameraGlView(context: Context) : TextureView(context), TextureView.Surface
   @Volatile
   private var cameraBufferHeight = 0
   private var glReady = false
+  private var frameInfoSent = false
 
   private val quadPositions = floatArrayOf(-1f, -1f, 1f, -1f, -1f, 1f, 1f, 1f)
   private val quadUvs = floatArrayOf(0f, 0f, 1f, 0f, 0f, 1f, 1f, 1f)
@@ -126,6 +128,7 @@ class CameraGlView(context: Context) : TextureView(context), TextureView.Surface
   }
 
   override fun onSurfaceTextureAvailable(surface: SurfaceTexture, width: Int, height: Int) {
+    surface.setDefaultBufferSize(width, height)
     glHandler.post {
       drawableWidth = width
       drawableHeight = height
@@ -139,11 +142,13 @@ class CameraGlView(context: Context) : TextureView(context), TextureView.Surface
   }
 
   override fun onSurfaceTextureSizeChanged(surface: SurfaceTexture, width: Int, height: Int) {
+    surface.setDefaultBufferSize(width, height)
     glHandler.post {
       drawableWidth = width
       drawableHeight = height
       blitWidth = 0
       blitHeight = 0
+      frameInfoSent = false
     }
   }
 
@@ -279,6 +284,16 @@ class CameraGlView(context: Context) : TextureView(context), TextureView.Surface
     val (procW, procH) = processingSize()
     if (procW <= 0 || procH <= 0) {
       return
+    }
+    if (!frameInfoSent && cameraBufferWidth > 0) {
+      frameInfoSent = true
+      val eglW = IntArray(1)
+      val eglH = IntArray(1)
+      EGL14.eglQuerySurface(eglDisplay, eglSurface, EGL14.EGL_WIDTH, eglW, 0)
+      EGL14.eglQuerySurface(eglDisplay, eglSurface, EGL14.EGL_HEIGHT, eglH, 0)
+      val info = "proc ${procW}x${procH} view ${drawableWidth}x${drawableHeight} egl ${eglW[0]}x${eglH[0]}"
+      Log.i(TAG, info)
+      mainHandler.post { onFrameInfo?.invoke(info) }
     }
     ensureBlitTexture(procW, procH)
     blitOesTo2d()
@@ -523,7 +538,7 @@ void main() {
 
     private const val OES_FRAGMENT = """#version 300 es
 #extension GL_OES_EGL_image_external_essl3 : require
-precision mediump float;
+precision highp float;
 in vec2 vUV;
 uniform samplerExternalOES uTex;
 out vec4 fragColor;
@@ -543,7 +558,7 @@ void main() {
 """
 
     private const val DRAW_FRAGMENT = """#version 300 es
-precision mediump float;
+precision highp float;
 in vec2 vUV;
 uniform sampler2D uTex;
 out vec4 fragColor;

@@ -17,7 +17,8 @@
   "scripts": {
     "start": "expo start",
     "android": "expo run:android",
-    "prebuild": "expo prebuild --platform android"
+    "ios": "expo run:ios",
+    "prebuild": "expo prebuild"
   },
   "private": true
 }

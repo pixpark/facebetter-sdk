@@ -6,6 +6,13 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
+    "ios": {
+      "bundleIdentifier": "com.pixpark.fbdemo",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Facebetter uses the camera to preview skin beauty."
+      },
+      "appleTeamId": "QFCE3TAQXQ"
+    },
     "android": {
       "package": "net.pixpark.fbexample",
       "permissions": [
@@ -31,7 +38,9 @@
           "android": {
             "minSdkVersion": 24,
             "packagingOptions": {
-              "pickFirst": ["**/libc++_shared.so"]
+              "pickFirst": [
+                "**/libc++_shared.so"
+              ]
             }
           }
         }

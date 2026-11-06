@@ -19,7 +19,7 @@ Sample apps for the **Facebetter SDK**. Clone this repository, then open the dem
 | Web | `demo/web/react` | `npm install` — npm `facebetter@2.2.1` |
 | macOS | `demo/macos` | `pod install` — CocoaPods `Facebetter` **2.2.1**. Open the `.xcworkspace` |
 | Desktop C++ | `demo/cpp` | Unzip the C++ SDK into `demo/cpp/sdk/`, then `cmake -B build`. See the [Windows](https://facebetter.net/docs/windows/quick-start) / [Linux](https://facebetter.net/docs/linux/quick-start) guides |
-| Expo (Android) | `demo/expo` | `npm install`, then `npx expo run:android`. Maven `net.pixpark:facebetter:2.2.1`. Does not run in Expo Go |
+| Expo | `demo/expo` | `npm install`, then `npx expo run:android` or `npx expo run:ios`. Does not run in Expo Go |
 
 ```bash
 # iOS
@@ -34,8 +34,9 @@ cd demo/web/react && npm install && npm run dev
 # macOS
 cd demo/macos && pod install
 
-# Expo Android — generates demo/expo/android, then installs a debug build
+# Expo — generates the native project, then installs a debug build
 cd demo/expo && npm install && npx expo run:android
+cd demo/expo && npx expo run:ios
 ```
 
 Replace the demo AppID / AppKey (or license token) with credentials from the [console](https://facebetter.net), and bind the sample’s bundle ID / package name. Details: [License & Auth](https://facebetter.net/docs/intro/license).
